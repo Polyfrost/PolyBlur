@@ -1,0 +1,118 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io/"
+        }
+        maven {
+            name = "forge"
+            url = "https://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.1"
+        classpath "com.github.asbyth:ForgeGradle:FG_2.1-SNAPSHOT"
+        classpath "com.github.jengelman.gradle.plugins:shadow:6.1.0"
+    }
+}
+
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "com.github.johnrengelman.shadow"
+
+version = "1.0-SNAPSHOT"
+group= "me.djtheredstoner"
+archivesBaseName = "MonkeyBlur"
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+sourceSets {
+    dummy
+    main {
+        output.resourcesDir = java.outputDir
+        compileClasspath += dummy.output
+    }
+}
+
+configurations {
+    shade
+    implementation.extendsFrom(shade)
+}
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+
+    mappings = "stable_22"
+
+    clientJvmArgs += "-Dfml.coreMods.load=me.djtheredstoner.monkeyblur.forge.MBTweaker"
+
+
+}
+
+repositories {
+    maven { url = "https://jitpack.io/" }
+    maven { url = "https://repo.sk1er.club/repository/maven-public/"}
+    maven { url = "https://repo.spongepowered.org/repository/maven-public/"}
+}
+
+dependencies {
+    shade("com.github.djtheredstoner:ASMDsl:master-SNAPSHOT") {
+        exclude module: "asm"
+        exclude module: "asm-tree"
+    }
+
+    shade "gg.essential:loader-launchwrapper:1.0.2"
+
+    implementation "gg.essential:Essential:1199-10809-SNAPSHOT"
+}
+
+jar {
+    enabled = false
+}
+
+shadowJar {
+    archiveClassifier = ""
+
+    configurations = [project.configurations.shade]
+
+    relocate "ofconfig.", ""
+
+    manifest.attributes(
+            "FMLCorePlugin": "me.djtheredstoner.monkeyblur.forge.MBTweaker",
+            "FMLCorePluginContainsFMLMod": "Ofcourse it does!",
+            "ModSide": "CLIENT",
+            "TweakClass": "gg.essential.loader.stage0.EssentialSetupTweaker"
+    )
+}
+
+reobf {
+    shadowJar {
+        mappingType = "SEARGE"
+    }
+}
+
+reobfJar.dependsOn shadowJar
+
+processResources
+{
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}

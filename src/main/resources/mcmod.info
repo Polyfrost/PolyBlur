@@ -1,0 +1,16 @@
+[
+{
+  "modid": "monkeyblur",
+  "name": "MonkeyBlur",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["DJtheRedstoner"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
