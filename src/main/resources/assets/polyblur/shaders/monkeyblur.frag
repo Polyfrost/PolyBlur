@@ -11,19 +11,12 @@ uniform mat4 previousModelView;
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
 
+uniform int strength;
+
 varying vec4 texcoord;
 
 float maxDepth(vec2 texcoord, sampler2D tex) {
     vec2 t = 1 / textureSize(tex, 0);
-
-//    float depth = texture2D(tex, texcoord.st).x;
-//    float depth1 = texture2D(tex, vec2(texcoord.s + t.s, texcoord.t)).x;
-//    float depth2 = texture2D(tex, vec2(texcoord.s - t.s, texcoord.t)).x;
-//    float depth3 = texture2D(tex, vec2(texcoord.s, texcoord.t + t.t)).x;
-//    float depth4 = texture2D(tex, vec2(texcoord.s, texcoord.t - t.t)).x;
-
-//    return max(depth, max(depth1, max(depth2, max(depth3, depth4))));
-//    return t.s;
 
     float depth = 1;
 
@@ -45,7 +38,7 @@ void main() {
     float depth = texture2D(depthtex, texcoord.st).x;
     float depth2 = maxDepth(texcoord.st, depthtex);
 
-    /*vec4 H = vec4(texcoord.st, depth, 1.0) * 2.0 - 1.0;
+    vec4 H = vec4(texcoord.st, depth, 1.0) * 2.0 - 1.0;
 
     vec4 worldpos = projectionInverse * H;
     worldpos = modelViewInverse * worldpos;
@@ -58,7 +51,8 @@ void main() {
     prevpos = previousProjection * prevpos;
     prevpos /= prevpos.w;
 
-    vec2 vel = (H - prevpos).st * 0.01;
+    vec2 vel = (H - prevpos).st;
+    vel = vel / (1.0 + length(vel)) * strength * 0.01;
     vec2 coord = texcoord.st + vel;
 
     int count = 1;
@@ -67,7 +61,7 @@ void main() {
         color += texture2D(texture, coord).xyz;
         ++count;
     }
-    color /= count;*/
+    color /= count;
 
-    gl_FragColor = vec4(color.rg, depth, 1);
+    gl_FragColor = vec4(color.rgb, 1);
 }

@@ -1,13 +1,13 @@
 [
 {
-  "modid": "monkeyblur",
-  "name": "MonkeyBlur",
+  "modid": "${id}",
+  "name": "${name}",
   "description": "",
   "version": "${version}",
-  "mcversion": "${mcversion}",
+  "mcversion": "${mcVersionStr}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["DJtheRedstoner"],
+  "authorList": ["Polyfrost", "DJtheRedstoner"],
   "credits": "",
   "logoFile": "",
   "screenshots": [],

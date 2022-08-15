@@ -1,4 +1,4 @@
-package me.djtheredstoner.monkeyblur.optifine;
+package cc.polyfrost.polyblur.optifine;
 
 import ofconfig.Config;
 

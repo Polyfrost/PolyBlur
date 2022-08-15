@@ -1,0 +1,14 @@
+{
+  "compatibilityLevel": "${java_level}",
+  "minVersion": "0.7",
+  "package": "cc.polyfrost.polyblur.mixin",
+  "refmap": "mixins.${id}.refmap.json",
+  "injectors": {
+    "maxShiftBy": 5
+  },
+  "verbose": true,
+  "client": [
+    "EntityRendererMixin",
+    "MinecraftMixin"
+  ]
+}

@@ -1,4 +1,4 @@
-package me.djtheredstoner.monkeyblur.shader;
+package cc.polyfrost.polyblur.shader;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
@@ -13,8 +13,8 @@ import java.io.InputStream;
 
 public class ShaderLoader {
 
-    private static final String DOMAIN = "monkeyblur";
-    private static final Logger LOGGER = LogManager.getLogger("MonkeyBlur ShaderLoader");
+    private static final String DOMAIN = "polyblur";
+    private static final Logger LOGGER = LogManager.getLogger("PolyBlur ShaderLoader");
 
     public static Shader loadShader(String shaderPath) {
         ResourceLocation locationVertex = new ResourceLocation(DOMAIN, "shaders/" + shaderPath + ".vert");

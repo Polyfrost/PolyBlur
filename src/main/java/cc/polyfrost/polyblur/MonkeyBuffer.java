@@ -1,4 +1,4 @@
-package me.djtheredstoner.monkeyblur;
+package cc.polyfrost.polyblur;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 
 public class MonkeyBuffer {
 
@@ -33,7 +32,7 @@ public class MonkeyBuffer {
 
         framebufferObject = OpenGlHelper.glGenFramebuffers();
         framebufferTexture = TextureUtil.glGenTextures();
-        depthTexture = TextureUtil.glGenTextures();;
+        depthTexture = TextureUtil.glGenTextures();
 
         setFramebufferFilter(9728);
 

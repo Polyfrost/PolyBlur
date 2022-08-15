@@ -1,52 +1,37 @@
-package me.djtheredstoner.monkeyblur;
+package cc.polyfrost.polyblur;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import me.djtheredstoner.monkeyblur.commands.MonkeyBlurCommand;
-import me.djtheredstoner.monkeyblur.config.MBConfig;
-import me.djtheredstoner.monkeyblur.optifine.OFConfig;
-import me.djtheredstoner.monkeyblur.shader.Shader;
-import me.djtheredstoner.monkeyblur.shader.ShaderLoader;
+import cc.polyfrost.oneconfig.utils.commands.CommandManager;
+import cc.polyfrost.polyblur.commands.PolyBlurCommand;
+import cc.polyfrost.polyblur.config.PolyBlurConfig;
+import cc.polyfrost.polyblur.optifine.OFConfig;
+import cc.polyfrost.polyblur.shader.Shader;
+import cc.polyfrost.polyblur.shader.ShaderLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.entity.Entity;
-import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.Arrays;
 
 @Mod(
-    modid = "monkeyblur"
+    modid = "@ID@"
 )
-public class MonkeyBlur {
+public class PolyBlur {
 
     @Mod.Instance
-    public static MonkeyBlur instance;
+    public static PolyBlur instance;
 
     private final Minecraft mc = Minecraft.getMinecraft();
 
-    private final Logger LOGGER = LogManager.getLogger("MonkeyBlur");
-    private final File configFile = new File("./config/monkeyblur.json");
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    public final MBConfig config = new MBConfig();
+    public final PolyBlurConfig config = new PolyBlurConfig();
 
     public MonkeyBuffer frameBuffer = null;
-    private Shader monkeyblurShader = null;
+    public Shader monkeyblurShader = null;
 
     private final FloatBuffer projection = BufferUtils.createFloatBuffer(16);
     private final FloatBuffer projectionInverse = BufferUtils.createFloatBuffer(16);
@@ -64,18 +49,30 @@ public class MonkeyBlur {
     private float previousCameraPosY;
     private float previousCameraPosZ;
 
-    private IntBuffer pixelBuffer;
-    private int[] pixelValues;
+    private boolean changedPerspective = false;
+    private int thirdPersonViewPrevious = 0;
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        config.preload();
+        config.initialize();
 
-        new MonkeyBlurCommand().register();
+        CommandManager.INSTANCE.registerCommand(PolyBlurCommand.class);
+    }
+
+    public void onResolutionChange() {
+        if (frameBuffer != null) {
+            frameBuffer = null;
+        }
+        if (monkeyblurShader != null) {
+            monkeyblurShader.delete();
+            monkeyblurShader = null;
+        }
 
     }
 
     public void startFrame() {
+        changedPerspective = thirdPersonViewPrevious != mc.gameSettings.thirdPersonView;
+        thirdPersonViewPrevious = mc.gameSettings.thirdPersonView;
         if (!isEnabled()) return;
 
         previousProjection.position(0);
@@ -95,6 +92,31 @@ public class MonkeyBlur {
     }
 
     public void endFrame() {
+        if (changedPerspective) {
+            final Entity viewEntity = mc.getRenderViewEntity();
+            previousProjection.position(0);
+            previousProjection.put(projection).position(0);
+            previousProjectionInverse.position(0);
+            previousProjectionInverse.put(projectionInverse).position(0);
+            previousModelView.position(0);
+            previousModelView.put(modelView).position(0);
+            previousModelViewInverse.position(0);
+            previousModelViewInverse.put(modelViewInverse).position(0);
+
+            cameraPosX = (float) (viewEntity.lastTickPosX + (viewEntity.posX - viewEntity.lastTickPosX));
+            cameraPosY = (float) (viewEntity.lastTickPosY + (viewEntity.posY - viewEntity.lastTickPosY));
+            cameraPosZ = (float) (viewEntity.lastTickPosZ + (viewEntity.posZ - viewEntity.lastTickPosZ));
+            projection.position(0);
+            GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projection);
+            invertMat4(projection, projectionInverse);
+            modelView.position(0);
+            GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelView);
+            invertMat4(modelView, modelViewInverse);
+
+            previousCameraPosX = cameraPosX;
+            previousCameraPosY = cameraPosY;
+            previousCameraPosZ = cameraPosZ;
+        }
         if (!isEnabled()) return;
 
         unbindFb();
@@ -109,6 +131,7 @@ public class MonkeyBlur {
         GlStateManager.bindTexture(frameBuffer.depthTexture);
         GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
 
+        monkeyblurShader.setUniform1i("strength", config.strength);
         monkeyblurShader.setUniform1i("texture", 0);
         monkeyblurShader.setUniform1i("depthtex", 1);
         monkeyblurShader.setUniformMat4("modelViewInverse", modelViewInverse);
@@ -209,48 +232,8 @@ public class MonkeyBlur {
         out.put(invOut).position(0);
     }
 
-    public void outputFb(MonkeyBuffer fb) {
-        try {
-            int width = fb.width;
-            int height = fb.height;
-
-            int i = width * height;
-
-            if (pixelBuffer == null || pixelBuffer.capacity() < i) {
-                pixelBuffer = BufferUtils.createIntBuffer(i);
-                pixelValues = new int[i];
-            }
-
-            GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
-            GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
-            pixelBuffer.clear();
-
-            GlStateManager.bindTexture(fb.framebufferTexture);
-            GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, (IntBuffer) pixelBuffer);
-
-            pixelBuffer.get(pixelValues);
-            TextureUtil.processPixelValues(pixelValues, width, height);
-            BufferedImage bufferedimage = null;
-
-            bufferedimage = new BufferedImage(width, height, 1);
-
-            for (int k = 0; k < height; ++k) {
-                for (int l = 0; l < width; ++l) {
-                    bufferedimage.setRGB(l, k, pixelValues[k * width + l]);
-                }
-            }
-
-            File file2 = new File("test.png");
-
-            ImageIO.write(bufferedimage, "png", (File) file2);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public boolean isEnabled() {
-
-        return config.enabled && !OFConfig.isShaders();
+        return config.enabled && !changedPerspective && !OFConfig.isShaders();
     }
 
 }

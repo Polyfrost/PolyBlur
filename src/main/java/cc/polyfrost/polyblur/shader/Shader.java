@@ -1,4 +1,4 @@
-package me.djtheredstoner.monkeyblur.shader;
+package cc.polyfrost.polyblur.shader;
 
 import org.lwjgl.opengl.GL20;
 
@@ -37,6 +37,7 @@ public class Shader {
         if (errored || programID <= 0) return -1;
         return uniformCache.computeIfAbsent(name, uniform -> GL20.glGetUniformLocation(programID, uniform));
     }
+
 
     public void setUniform1i(String name, int v1) {
         int location = getUniformLocation(name);
