@@ -1,6 +1,7 @@
 package cc.polyfrost.polyblur.mixin;
 
 import cc.polyfrost.polyblur.blurs.monkey.MonkeyBlur;
+import cc.polyfrost.polyblur.blurs.moulberry.MBBlur;
 import net.minecraft.client.renderer.EntityRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,5 +24,6 @@ public class EntityRendererMixin {
     @Inject(method = {"renderWorldPass"}, at = @At(value = "CONSTANT", args = "stringValue=hand"))
     private void onRenderWorldEnd(int pass, float partialTicks, long finishTimeNano, CallbackInfo ci) {
         MonkeyBlur.instance.endFrame();
+        MBBlur.instance.doBlur();
     }
 }

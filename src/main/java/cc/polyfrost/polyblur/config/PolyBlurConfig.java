@@ -13,7 +13,7 @@ import cc.polyfrost.polyblur.blurs.phosphor.PhosphorBlur;
 public class PolyBlurConfig extends Config {
 
     @Info(
-            text = "Phosphor blur will ONLY work if either Fast Render is disabled or Force Disable Fast Render is enabled.",
+            text = "Phosphor / Moulberry blur will ONLY work if either Fast Render is disabled or Force Disable Fast Render is enabled.",
             size = 2,
             type = InfoType.WARNING
     )
@@ -28,7 +28,8 @@ public class PolyBlurConfig extends Config {
             name = "Blur Mode",
             options = {
                     "Monkey Blur",
-                    "Phosphor Blur"
+                    "Phosphor Blur",
+                    "Moulberry Blur"
             }
     )
     public int blurMode = 0;
