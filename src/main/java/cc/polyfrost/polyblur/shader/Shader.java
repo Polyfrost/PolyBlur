@@ -38,6 +38,10 @@ public class Shader {
         return uniformCache.computeIfAbsent(name, uniform -> GL20.glGetUniformLocation(programID, uniform));
     }
 
+    public void setUniform1f(String name, float v1) {
+        int location = getUniformLocation(name);
+        if (location >= 0) GL20.glUniform1f(location, v1);
+    }
 
     public void setUniform1i(String name, int v1) {
         int location = getUniformLocation(name);

@@ -1,11 +1,37 @@
 package cc.polyfrost.polyblur.config;
 
 import cc.polyfrost.oneconfig.config.Config;
+import cc.polyfrost.oneconfig.config.annotations.Dropdown;
+import cc.polyfrost.oneconfig.config.annotations.Info;
 import cc.polyfrost.oneconfig.config.annotations.Slider;
+import cc.polyfrost.oneconfig.config.annotations.Switch;
+import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.polyblur.blurs.phosphor.PhosphorBlur;
 
 public class PolyBlurConfig extends Config {
+
+    @Info(
+            text = "Phosphor blur will ONLY work if either Fast Render is disabled or Force Disable Fast Render is enabled.",
+            size = 2,
+            type = InfoType.WARNING
+    )
+    private boolean agajsjg = false;
+
+    @Switch(
+            name = "Force Disable Fast Render"
+    )
+    public boolean forceDisableFastRender = true;
+
+    @Dropdown(
+            name = "Blur Mode",
+            options = {
+                    "Monkey Blur",
+                    "Phosphor Blur"
+            }
+    )
+    public int blurMode = 0;
 
     @Slider(
         name = "Blur Strength",
@@ -16,6 +42,12 @@ public class PolyBlurConfig extends Config {
 
     public PolyBlurConfig() {
         super(new Mod("PolyBlur", ModType.PVP), "polyblur.json");
+        addListener("strength", () -> {
+            if (blurMode == 1 && enabled) {
+                PhosphorBlur.reloadIntensity();
+            }
+        });
+        addListener("blurMode", PhosphorBlur::reloadBlur);
     }
 
 }

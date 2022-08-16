@@ -8,7 +8,11 @@
   },
   "verbose": true,
   "client": [
+    "BlurHandlerImplMixin",
+    "BlurModMixin",
     "EntityRendererMixin",
-    "MinecraftMixin"
+    "MinecraftMixin",
+    "OptifineConfigMixin",
+    "ShaderGroupAccessor"
   ]
 }

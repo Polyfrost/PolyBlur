@@ -16,34 +16,58 @@ public class ShaderLoader {
     private static final String DOMAIN = "polyblur";
     private static final Logger LOGGER = LogManager.getLogger("PolyBlur ShaderLoader");
 
-    public static Shader loadShader(String shaderPath) {
-        ResourceLocation locationVertex = new ResourceLocation(DOMAIN, "shaders/" + shaderPath + ".vert");
-        ResourceLocation locationFrag = new ResourceLocation(DOMAIN, "shaders/" + shaderPath + ".frag");
-
-        String sourceVertex;
-        String sourceFrag;
-        try {
-            sourceVertex = loadShaderSource(locationVertex);
-            sourceFrag = loadShaderSource(locationFrag);
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static Shader loadShader(String shaderPath, boolean vert, boolean frag) {
+        if (!vert && !frag) {
+            LOGGER.error("ShaderLoader: No shader type specified");
             return new Shader(-1, true);
+        }
+        String sourceVertex = null;
+        String sourceFrag = null;
+        if (vert) {
+            ResourceLocation locationVertex = new ResourceLocation(DOMAIN, "shaders/" + shaderPath + ".vert");
+            try {
+                sourceVertex = loadShaderSource(locationVertex);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new Shader(-1, true);
+            }
+        }
+        if (frag) {
+            ResourceLocation locationFrag = new ResourceLocation(DOMAIN, "shaders/" + shaderPath + ".frag");
+            try {
+                sourceFrag = loadShaderSource(locationFrag);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new Shader(-1, true);
+            }
         }
 
         int vertex = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
         int fragment = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
-        GL20.glShaderSource(vertex, sourceVertex);
-        GL20.glShaderSource(fragment, sourceFrag);
-        GL20.glCompileShader(vertex);
-        GL20.glCompileShader(fragment);
+        if (vert) {
+            GL20.glShaderSource(vertex, sourceVertex);
+            GL20.glCompileShader(vertex);
+        }
+        if (frag) {
+            GL20.glShaderSource(fragment, sourceFrag);
+            GL20.glCompileShader(fragment);
+        }
 
         int program = GL20.glCreateProgram();
-        GL20.glAttachShader(program, vertex);
-        GL20.glAttachShader(program, fragment);
+        if (vert) {
+            GL20.glAttachShader(program, vertex);
+        }
+        if (frag) {
+            GL20.glAttachShader(program, fragment);
+        }
         GL20.glLinkProgram(program);
 
-        GL20.glDeleteShader(vertex);
-        GL20.glDeleteShader(fragment);
+        if (vert) {
+            GL20.glDeleteShader(vertex);
+        }
+        if (frag) {
+            GL20.glDeleteShader(fragment);
+        }
 
         int status = GL20.glGetProgrami(program, GL20.GL_LINK_STATUS);
         if (status == GL11.GL_FALSE) {

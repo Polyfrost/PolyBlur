@@ -1,5 +1,6 @@
-package cc.polyfrost.polyblur;
+package cc.polyfrost.polyblur.blurs.monkey;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
@@ -75,6 +76,7 @@ public class MonkeyBuffer {
         bufferBuilder.pos(0, 0, 0).tex(0, 1).color(255, 255, 255, 255).endVertex();
         tessellator.draw();
         GlStateManager.bindTexture(0);
+        GlStateManager.enableAlpha();
         GlStateManager.enableDepth();
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
@@ -118,8 +120,7 @@ public class MonkeyBuffer {
 
     public void setFramebufferFilter(int filter)
     {
-        if (OpenGlHelper.isFramebufferEnabled())
-        {
+        if (OpenGlHelper.framebufferSupported && Minecraft.getMinecraft().gameSettings.fboEnable) {
             GlStateManager.bindTexture(framebufferTexture);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, filter);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, filter);

@@ -11,7 +11,7 @@ uniform mat4 previousModelView;
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
 
-uniform int strength;
+uniform float strength;
 
 varying vec4 texcoord;
 
