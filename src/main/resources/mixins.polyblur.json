@@ -11,6 +11,7 @@
     "BlurHandlerImplMixin",
     "BlurModMixin",
     "EntityRendererMixin",
+    "EntityRendererMixin_PhosphorBlur",
     "MinecraftMixin",
     "OptifineConfigMixin",
     "ShaderGroupAccessor"

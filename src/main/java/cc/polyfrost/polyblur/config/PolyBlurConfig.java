@@ -43,6 +43,7 @@ public class PolyBlurConfig extends Config {
 
     public PolyBlurConfig() {
         super(new Mod("PolyBlur", ModType.PVP), "polyblur.json");
+        initialize();
         addListener("strength", () -> {
             if (blurMode == 1 && enabled) {
                 PhosphorBlur.reloadIntensity();

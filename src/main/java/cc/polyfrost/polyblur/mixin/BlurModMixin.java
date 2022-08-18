@@ -1,6 +1,7 @@
 package cc.polyfrost.polyblur.mixin;
 
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
+import cc.polyfrost.polyblur.blurs.phosphor.EntityRendererHook;
 import net.minecraft.client.renderer.EntityRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,8 +24,7 @@ public class BlurModMixin {
                         //#else
                         //$$ true
                         //#endif
-                        && UMinecraft.getMinecraft().entityRenderer.getShaderGroup() != null
-                        && UMinecraft.getMinecraft().entityRenderer.getShaderGroup().getShaderGroupName().endsWith("phosphor_motion_blur.json")
+                        && ((EntityRendererHook) UMinecraft.getMinecraft().entityRenderer).getPhosphorShader() != null
         ) {
             return false;
         }
