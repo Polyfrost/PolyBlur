@@ -19,7 +19,7 @@ public class PolyBlur {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        CommandManager.INSTANCE.registerCommand(PolyBlurCommand.class);
+        CommandManager.INSTANCE.registerCommand(new PolyBlurCommand());
         EventManager.INSTANCE.register(new PhosphorBlur());
     }
 }

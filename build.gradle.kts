@@ -45,6 +45,12 @@ loom {
             mixinConfig("mixins.${mod_id}.json")
         }
     }
+    runConfigs.named("client") {
+        if (project.platform.isLegacyForge) {
+            vmArgs.remove("-XstartOnFirstThread")
+        }
+    }
+    
     mixin.defaultRefmapName.set("mixins.${mod_id}.refmap.json")
 }
 
