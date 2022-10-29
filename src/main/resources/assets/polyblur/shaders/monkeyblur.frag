@@ -1,4 +1,4 @@
-#version 130
+#version 120
 
 uniform sampler2D texture;
 uniform sampler2D depthtex;
@@ -15,8 +15,11 @@ uniform float strength;
 
 varying vec4 texcoord;
 
+uniform sampler2D textureName;
+uniform vec2 textureName_size;
+
 float maxDepth(vec2 texcoord, sampler2D tex) {
-    vec2 t = 1 / textureSize(tex, 0);
+    vec2 t = 1 / textureName_size;
 
     float depth = 1;
 
@@ -31,7 +34,7 @@ float maxDepth(vec2 texcoord, sampler2D tex) {
 }
 
 void main() {
-    vec2 texelSize = textureSize(depthtex, 0);
+    vec2 texelSize = textureName_size;
 
     vec3 color = texture2D(texture, texcoord.st).rgb;
 
