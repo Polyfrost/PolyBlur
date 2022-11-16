@@ -12,3 +12,5 @@ Changes
 - Fixed framebuffer not updating when resolution changed
 - Reset blur on perspective change
 - Renamed to "PolyBlur"
+
+And more (on changelogs)
