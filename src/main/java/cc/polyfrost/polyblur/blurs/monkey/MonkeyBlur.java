@@ -56,11 +56,6 @@ public class MonkeyBlur {
         if (frameBuffer != null) {
             frameBuffer = null;
         }
-        if (monkeyblurShader != null) {
-            monkeyblurShader.delete();
-            monkeyblurShader = null;
-        }
-
     }
 
     public void startFrame() {
