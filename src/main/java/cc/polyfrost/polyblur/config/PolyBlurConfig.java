@@ -42,7 +42,7 @@ public class PolyBlurConfig extends Config {
     public int strength = 3;
 
     public PolyBlurConfig() {
-        super(new Mod("PolyBlur", ModType.PVP), "polyblur.json");
+        super(new Mod("PolyBlur", ModType.PVP, "/polyblur_dark.svg"), "polyblur.json");
         initialize();
         addListener("strength", () -> {
             if (blurMode == 1 && enabled) {
@@ -51,5 +51,4 @@ public class PolyBlurConfig extends Config {
         });
         addListener("blurMode", PhosphorBlur::reloadBlur);
     }
-
 }
