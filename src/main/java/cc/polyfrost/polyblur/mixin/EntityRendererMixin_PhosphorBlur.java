@@ -26,7 +26,7 @@ public class EntityRendererMixin_PhosphorBlur implements EntityRendererHook {
 
     @Inject(method = "getShaderGroup", at = @At("HEAD"), cancellable = true)
     private void onGetShaderGroup(CallbackInfoReturnable<ShaderGroup> cir) {
-        if (phosphorShader != null && OpenGlHelper.shadersSupported && theShaderGroup == null) {
+        if (phosphorShader != null && OpenGlHelper.shadersSupported && this.theShaderGroup == null) {
             cir.setReturnValue(phosphorShader);
         }
     }
