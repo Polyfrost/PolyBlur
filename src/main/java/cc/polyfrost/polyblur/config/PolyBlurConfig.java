@@ -32,7 +32,7 @@ public class PolyBlurConfig extends Config {
                     "Moulberry Blur"
             }
     )
-    public int blurMode = 0;
+    public int blurMode = 1;
 
     @Slider(
         name = "Blur Strength",
