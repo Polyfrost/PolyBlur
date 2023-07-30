@@ -24,6 +24,10 @@ public class EntityRendererMixin {
     @Inject(method = {"renderWorldPass"}, at = @At(value = "CONSTANT", args = "stringValue=hand"))
     private void onRenderWorldEnd(int pass, float partialTicks, long finishTimeNano, CallbackInfo ci) {
         MonkeyBlur.instance.endFrame();
+    }
+
+    @Inject(method = {"renderWorldPass"}, at = @At("TAIL"))
+    private void onRenderWorldEndMB(int pass, float partialTicks, long finishTimeNano, CallbackInfo ci) {
         MBBlur.instance.doBlur();
     }
 }
