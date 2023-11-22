@@ -1,10 +1,10 @@
-package cc.polyfrost.polyblur;
+package org.polyfrost.polyblur;
 
 import cc.polyfrost.oneconfig.events.EventManager;
 import cc.polyfrost.oneconfig.utils.commands.CommandManager;
-import cc.polyfrost.polyblur.blurs.phosphor.PhosphorBlur;
-import cc.polyfrost.polyblur.commands.PolyBlurCommand;
-import cc.polyfrost.polyblur.config.PolyBlurConfig;
+import org.polyfrost.polyblur.blurs.phosphor.PhosphorBlur;
+import org.polyfrost.polyblur.commands.PolyBlurCommand;
+import org.polyfrost.polyblur.config.PolyBlurConfig;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 

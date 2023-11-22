@@ -1,4 +1,4 @@
-package cc.polyfrost.polyblur.config;
+package org.polyfrost.polyblur.config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.Dropdown;
@@ -8,7 +8,7 @@ import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
-import cc.polyfrost.polyblur.blurs.phosphor.PhosphorBlur;
+import org.polyfrost.polyblur.blurs.phosphor.PhosphorBlur;
 
 public class PolyBlurConfig extends Config {
 

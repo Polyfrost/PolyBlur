@@ -1,4 +1,4 @@
-package cc.polyfrost.polyblur.blurs.phosphor;
+package org.polyfrost.polyblur.blurs.phosphor;
 
 import net.minecraft.client.shader.ShaderGroup;
 

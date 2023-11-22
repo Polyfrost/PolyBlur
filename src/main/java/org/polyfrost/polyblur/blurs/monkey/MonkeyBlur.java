@@ -1,9 +1,9 @@
-package cc.polyfrost.polyblur.blurs.monkey;
+package org.polyfrost.polyblur.blurs.monkey;
 
-import cc.polyfrost.polyblur.PolyBlur;
-import cc.polyfrost.polyblur.optifine.OFConfig;
-import cc.polyfrost.polyblur.shader.Shader;
-import cc.polyfrost.polyblur.shader.ShaderLoader;
+import org.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.optifine.OFConfig;
+import org.polyfrost.polyblur.shader.Shader;
+import org.polyfrost.polyblur.shader.ShaderLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

@@ -1,4 +1,4 @@
-package cc.polyfrost.polyblur.optifine;
+package org.polyfrost.polyblur.optifine;
 
 import ofconfig.Config;
 

@@ -1,4 +1,4 @@
-package cc.polyfrost.polyblur.shader;
+package org.polyfrost.polyblur.shader;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;

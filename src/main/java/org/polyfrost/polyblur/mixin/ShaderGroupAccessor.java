@@ -1,4 +1,4 @@
-package cc.polyfrost.polyblur.mixin;
+package org.polyfrost.polyblur.mixin;
 
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;

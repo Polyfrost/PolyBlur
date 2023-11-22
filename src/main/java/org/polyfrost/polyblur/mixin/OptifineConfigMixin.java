@@ -1,6 +1,6 @@
-package cc.polyfrost.polyblur.mixin;
+package org.polyfrost.polyblur.mixin;
 
-import cc.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.PolyBlur;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;

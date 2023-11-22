@@ -1,12 +1,12 @@
-package cc.polyfrost.polyblur.blurs.phosphor;
+package org.polyfrost.polyblur.blurs.phosphor;
 
 import cc.polyfrost.oneconfig.events.event.RenderEvent;
 import cc.polyfrost.oneconfig.events.event.Stage;
 import cc.polyfrost.oneconfig.libs.eventbus.Subscribe;
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
 import cc.polyfrost.oneconfig.libs.universal.UResolution;
-import cc.polyfrost.polyblur.PolyBlur;
-import cc.polyfrost.polyblur.mixin.ShaderGroupAccessor;
+import org.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.mixin.ShaderGroupAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;

@@ -1,6 +1,6 @@
-package cc.polyfrost.polyblur.mixin;
+package org.polyfrost.polyblur.mixin;
 
-import cc.polyfrost.polyblur.blurs.phosphor.EntityRendererHook;
+import org.polyfrost.polyblur.blurs.phosphor.EntityRendererHook;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

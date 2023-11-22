@@ -1,7 +1,7 @@
-package cc.polyfrost.polyblur.mixin;
+package org.polyfrost.polyblur.mixin;
 
 import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
-import cc.polyfrost.polyblur.blurs.phosphor.EntityRendererHook;
+import org.polyfrost.polyblur.blurs.phosphor.EntityRendererHook;
 import net.minecraft.client.renderer.EntityRenderer;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;

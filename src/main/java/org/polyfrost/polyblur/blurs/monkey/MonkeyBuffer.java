@@ -1,4 +1,4 @@
-package cc.polyfrost.polyblur.blurs.monkey;
+package org.polyfrost.polyblur.blurs.monkey;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

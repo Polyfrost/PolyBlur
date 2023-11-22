@@ -1,8 +1,8 @@
-package cc.polyfrost.polyblur.commands;
+package org.polyfrost.polyblur.commands;
 
 import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
 import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
-import cc.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.PolyBlur;
 
 @Command("polyblur")
 public class PolyBlurCommand {

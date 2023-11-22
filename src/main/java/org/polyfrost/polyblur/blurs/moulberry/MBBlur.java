@@ -1,6 +1,6 @@
-package cc.polyfrost.polyblur.blurs.moulberry;
+package org.polyfrost.polyblur.blurs.moulberry;
 
-import cc.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.PolyBlur;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;

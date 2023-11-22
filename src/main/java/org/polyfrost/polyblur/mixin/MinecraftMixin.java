@@ -1,6 +1,6 @@
-package cc.polyfrost.polyblur.mixin;
+package org.polyfrost.polyblur.mixin;
 
-import cc.polyfrost.polyblur.blurs.monkey.MonkeyBlur;
+import org.polyfrost.polyblur.blurs.monkey.MonkeyBlur;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

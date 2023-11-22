@@ -1,4 +1,4 @@
-package cc.polyfrost.polyblur.shader;
+package org.polyfrost.polyblur.shader;
 
 import org.lwjgl.opengl.GL20;
 
