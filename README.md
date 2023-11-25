@@ -1,5 +1,7 @@
 # PolyBlur
 
+![Compact Powered by OneConfig](https://polyfrost.org/img/compact_vector.svg)
+
 A fork of [MonkeyBlur](https://github.com/DJTheRedstoner/MonkeyBlur) with various improvements and bugfixes.
 
 Changes
