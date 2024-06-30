@@ -14,6 +14,9 @@
     "EntityRendererMixin_PhosphorBlur",
     "MinecraftMixin",
     "OptifineConfigMixin",
-    "ShaderGroupAccessor"
+    "RenderGlobalMixin",
+    "SBAEntityOutlineRendererMixin",
+    "ShaderGroupAccessor",
+    "SkyHanniEntityOutlineRendererMixin"
   ]
 }

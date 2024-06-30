@@ -25,7 +25,7 @@ float maxDepth(vec2 texcoord, sampler2D tex) {
 
     for (int x = -2; x < 3; x++) {
         for (int y = -2; y < 3; y++) {
-            float d = texture2D(tex, texcoord + t * vec2(x, y)).x;
+            float d = texture2D(tex, texcoord + t * vec2(float(x), float(y))).x;
             depth = max(depth, d);
         }
     }
@@ -58,11 +58,11 @@ void main() {
     vel = vel / (1.0 + length(vel)) * strength * 0.01;
     vec2 coord = texcoord.st + vel;
 
-    int count = 1;
+    float count = 1;
     for (int i = 0; i < 30; ++i, coord += vel) {
         if (coord.s > 1.0 || coord.t > 1.0 || coord.s < 0.0 || coord.t < 0.0) break;
         color += texture2D(texture, coord).xyz;
-        ++count;
+        count += 1;
     }
     color /= count;
 

@@ -12,7 +12,7 @@ plugins {
     id("org.polyfrost.defaults.java")
     id("org.polyfrost.defaults.loom")
     id("com.github.johnrengelman.shadow")
-    id("net.kyori.blossom") version "1.3.1"
+    id("net.kyori.blossom") version "1.3.2"
     id("signing")
     java
 }
@@ -22,11 +22,6 @@ val mod_name: String by project
 val mod_version: String by project
 val mod_id: String by project
 val mod_archives_name: String by project
-
-// Sets up the variables for when we preprocess to other Minecraft versions.
-preprocess {
-    vars.put("MODERN", if (project.platform.mcMinor >= 16) 1 else 0)
-}
 
 // Replaces the variables in `ExampleMod.java` to the ones specified in `gradle.properties`.
 blossom {
@@ -94,14 +89,14 @@ repositories {
 // Configures the libraries/dependencies for your mod.
 dependencies {
     // Adds the OneConfig library, so we can develop with it.
-    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.1-alpha+")
+    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-${if (platform.isFabric) "fabric" else if (platform.isLegacyForge) "forge-legacy" else "forge-latest"}:1.1.2")
 
     // If we are building for legacy forge, includes the launch wrapper with `shade` as we configured earlier.
     if (platform.isLegacyForge) {
         compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
-        shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+")
+        shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta17")
     }
 }
 
@@ -168,7 +163,7 @@ tasks {
     // Configures our shadow/shade configuration, so we can
     // include some dependencies within our mod jar file.
     named<ShadowJar>("shadowJar") {
-        archiveClassifier.set("dev") // TODO: machete gets confused by the `dev` prefix.
+        archiveClassifier.set("dev")
         configurations = listOf(shade)
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         relocate("ofconfig.", "")

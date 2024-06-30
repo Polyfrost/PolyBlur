@@ -77,6 +77,7 @@ public class MonkeyBlur {
         previousCameraPosZ = cameraPosZ;
 
         bindFb();
+        clearFb();
     }
 
     public void endFrame() {
@@ -106,6 +107,8 @@ public class MonkeyBlur {
             previousCameraPosZ = cameraPosZ;
         }
         if (!isEnabled()) return;
+
+        //mc.renderGlobal.renderEntityOutlineFramebuffer();
 
         unbindFb();
 
@@ -143,7 +146,14 @@ public class MonkeyBlur {
             frameBuffer = new MonkeyBuffer(mc.displayWidth, mc.displayHeight);
         }
         OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, frameBuffer.framebufferObject);
-        frameBuffer.clear();
+    }
+
+    public void clearFb() {
+        if (!isEnabled()) return;
+
+        if (frameBuffer != null) {
+            frameBuffer.clear();
+        }
     }
 
     public void unbindFb() {
@@ -225,7 +235,7 @@ public class MonkeyBlur {
     }
 
     public boolean isEnabled() {
-        return OpenGlHelper.framebufferSupported && PolyBlur.instance.config.enabled && PolyBlur.instance.config.blurMode == 0 && !changedPerspective && !OFConfig.isShaders();
+        return OpenGlHelper.framebufferSupported && PolyBlur.instance != null && PolyBlur.instance.config.enabled && PolyBlur.instance.config.blurMode == 0 && !changedPerspective && !OFConfig.isShaders();
     }
 
     public void outputFb(int width, int height, int texture) {
