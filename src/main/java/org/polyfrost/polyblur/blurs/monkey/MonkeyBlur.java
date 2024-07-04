@@ -27,6 +27,7 @@ public class MonkeyBlur {
     private final Minecraft mc = Minecraft.getMinecraft();
 
     public MonkeyBuffer frameBuffer = null;
+    public boolean drawingBuffer = false;
     public Shader monkeyblurShader = null;
 
     private final FloatBuffer projection = BufferUtils.createFloatBuffer(16);
@@ -78,6 +79,7 @@ public class MonkeyBlur {
 
         bindFb();
         clearFb();
+        drawingBuffer = true;
     }
 
     public void endFrame() {
@@ -106,9 +108,8 @@ public class MonkeyBlur {
             previousCameraPosY = cameraPosY;
             previousCameraPosZ = cameraPosZ;
         }
+        drawingBuffer = false;
         if (!isEnabled()) return;
-
-        //mc.renderGlobal.renderEntityOutlineFramebuffer();
 
         unbindFb();
 

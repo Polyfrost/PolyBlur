@@ -12,11 +12,9 @@
     "BlurModMixin",
     "EntityRendererMixin",
     "EntityRendererMixin_PhosphorBlur",
+    "FramebufferMixin",
     "MinecraftMixin",
     "OptifineConfigMixin",
-    "RenderGlobalMixin",
-    "SBAEntityOutlineRendererMixin",
-    "ShaderGroupAccessor",
-    "SkyHanniEntityOutlineRendererMixin"
+    "ShaderGroupAccessor"
   ]
 }
