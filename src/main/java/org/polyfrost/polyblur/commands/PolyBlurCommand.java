@@ -1,14 +1,14 @@
 package org.polyfrost.polyblur.commands;
 
-import cc.polyfrost.oneconfig.utils.commands.annotations.Command;
-import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
+import org.polyfrost.oneconfig.api.commands.v1.factories.annotated.Command;
 import org.polyfrost.polyblur.PolyBlur;
 
 @Command("polyblur")
 public class PolyBlurCommand {
 
-    @Main
+    @Command
     public static void handle() {
-        PolyBlur.instance.config.openGui();
+        // TODO: Implement openGui
+        // PolyBlur.instance.config.openGui();
     }
 }

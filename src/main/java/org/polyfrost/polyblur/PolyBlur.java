@@ -1,7 +1,7 @@
 package org.polyfrost.polyblur;
 
-import cc.polyfrost.oneconfig.events.EventManager;
-import cc.polyfrost.oneconfig.utils.commands.CommandManager;
+import org.polyfrost.oneconfig.api.commands.v1.CommandManager;
+import org.polyfrost.oneconfig.api.event.v1.EventManager;
 import org.polyfrost.polyblur.blurs.phosphor.PhosphorBlur;
 import org.polyfrost.polyblur.commands.PolyBlurCommand;
 import org.polyfrost.polyblur.config.PolyBlurConfig;
@@ -19,7 +19,7 @@ public class PolyBlur {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        CommandManager.INSTANCE.registerCommand(new PolyBlurCommand());
+        CommandManager.registerCommand(new PolyBlurCommand());
         EventManager.INSTANCE.register(new PhosphorBlur());
     }
 }

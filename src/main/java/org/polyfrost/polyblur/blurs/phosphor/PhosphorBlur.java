@@ -1,10 +1,7 @@
 package org.polyfrost.polyblur.blurs.phosphor;
 
-import cc.polyfrost.oneconfig.events.event.RenderEvent;
-import cc.polyfrost.oneconfig.events.event.Stage;
-import cc.polyfrost.oneconfig.libs.eventbus.Subscribe;
-import cc.polyfrost.oneconfig.libs.universal.UMinecraft;
-import cc.polyfrost.oneconfig.libs.universal.UResolution;
+import org.polyfrost.oneconfig.api.event.v1.events.RenderEvent;
+import org.polyfrost.oneconfig.api.event.v1.invoke.impl.Subscribe;
 import org.polyfrost.polyblur.PolyBlur;
 import org.polyfrost.polyblur.mixin.ShaderGroupAccessor;
 import net.minecraft.client.Minecraft;
@@ -12,6 +9,8 @@ import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.client.shader.ShaderUniform;
 import net.minecraft.util.ResourceLocation;
+import org.polyfrost.universal.UMinecraft;
+import org.polyfrost.universal.UResolution;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,11 +21,7 @@ public class PhosphorBlur {
     private static final ResourceLocation phosphorBlur = new ResourceLocation("shaders/post/phosphor_motion_blur.json");
 
     @Subscribe
-    private void onRenderTick(RenderEvent event) {
-        if (event.stage != Stage.END) {
-            return;
-        }
-
+    private void onRenderTick(RenderEvent.End event) {
         // Only update the shader if one is active
         if (!isShaderActive() || lastEnabled != PolyBlur.instance.config.enabled) {
             lastEnabled = PolyBlur.instance.config.enabled;
