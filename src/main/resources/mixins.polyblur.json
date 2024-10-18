@@ -1,8 +1,8 @@
 {
-  "compatibilityLevel": "${java_level}",
+  "compatibilityLevel": "${java_version}",
   "minVersion": "0.7",
   "package": "org.polyfrost.polyblur.mixin",
-  "refmap": "mixins.${id}.refmap.json",
+  "refmap": "mixins.${mod_id}.refmap.json",
   "injectors": {
     "maxShiftBy": 5
   },
