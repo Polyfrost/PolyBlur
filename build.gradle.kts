@@ -34,7 +34,6 @@ toolkitLoomHelper {
 
     // Adds the tweak class if we are building legacy version of forge as per the documentation (https://docs.polyfrost.org)
     if (mcData.isLegacyForge) {
-        useCoreMod("org.polyfrost.craftycrashes.plugin.LegacyCraftyCrashesLoadingPlugin")
         useTweaker("org.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker", GameSide.CLIENT)
         useForgeMixin(modData.id) // Configures the mixins if we are building for forge, useful for when we are dealing with cross-platform projects.
     }
