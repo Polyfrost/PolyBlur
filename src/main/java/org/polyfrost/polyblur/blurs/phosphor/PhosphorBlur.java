@@ -3,6 +3,7 @@ package org.polyfrost.polyblur.blurs.phosphor;
 import org.polyfrost.oneconfig.api.event.v1.events.RenderEvent;
 import org.polyfrost.oneconfig.api.event.v1.invoke.impl.Subscribe;
 import org.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.PolyBlurConfig;
 import org.polyfrost.polyblur.mixin.ShaderGroupAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.shader.Shader;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class PhosphorBlur {
+
     private static boolean lastEnabled = false;
 
     private static final ResourceLocation phosphorBlur = new ResourceLocation("shaders/post/phosphor_motion_blur.json");
@@ -23,9 +25,9 @@ public class PhosphorBlur {
     @Subscribe
     private void onRenderTick(RenderEvent.End event) {
         // Only update the shader if one is active
-        if (!isShaderActive() || lastEnabled != PolyBlur.instance.config.enabled) {
-            lastEnabled = PolyBlur.instance.config.enabled;
-            if (PolyBlur.instance.config.blurMode == 1) {
+        if (!isShaderActive() || lastEnabled != PolyBlurConfig.INSTANCE.getEnabled()) {
+            lastEnabled = PolyBlurConfig.INSTANCE.getEnabled();
+            if (PolyBlurConfig.INSTANCE.getMode() == 1) {
                 reloadBlur();
             }
         }
@@ -36,7 +38,7 @@ public class PhosphorBlur {
             return;
         }
 
-        if (!isShaderActive() && PolyBlur.instance.config.enabled && PolyBlur.instance.config.blurMode == 1) {
+        if (!isShaderActive() && PolyBlurConfig.INSTANCE.getEnabled() && PolyBlurConfig.INSTANCE.getMode() == 1) {
             try {
                 final ShaderGroup phosphorBlurShader = new ShaderGroup(Minecraft.getMinecraft().getTextureManager(), Minecraft.getMinecraft().getResourceManager(), Minecraft.getMinecraft().getFramebuffer(), phosphorBlur);
                 phosphorBlurShader.createBindFramebuffers(UResolution.getWindowWidth(), UResolution.getWindowHeight());
@@ -45,7 +47,7 @@ public class PhosphorBlur {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (isShaderActive() && (!PolyBlur.instance.config.enabled || PolyBlur.instance.config.blurMode != 1)) {
+        } else if (isShaderActive() && (!PolyBlurConfig.INSTANCE.getEnabled() || PolyBlurConfig.INSTANCE.getMode() != 1)) {
             final EntityRendererHook entityRenderer = (EntityRendererHook) UMinecraft.getMinecraft().entityRenderer;
             if (entityRenderer.getPhosphorShader() != null) {
                 entityRenderer.getPhosphorShader().deleteShaderGroup();
@@ -70,7 +72,7 @@ public class PhosphorBlur {
                     continue;
                 }
 
-                su.set(Math.max(Math.min(1 - ((float) PolyBlur.instance.config.strength / 10) + 0.1F, 1.0F), 0.1F));
+                su.set(Math.max(Math.min(1 - ((float) PolyBlurConfig.INSTANCE.getStrength() / 10) + 0.1F, 1.0F), 0.1F));
             }
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
@@ -84,4 +86,5 @@ public class PhosphorBlur {
                 //#endif
                 ;
     }
+
 }

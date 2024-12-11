@@ -1,6 +1,7 @@
 package org.polyfrost.polyblur.mixin;
 
 import org.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.PolyBlurConfig;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -18,7 +19,7 @@ public class OptifineConfigMixin {
     @Dynamic("OptiFine")
     @Inject(method = "isFastRender", at = @At("HEAD"), cancellable = true)
     private static void cancelFastRender(CallbackInfoReturnable<Boolean> cir) {
-        if (PolyBlur.instance != null && PolyBlur.instance.config.enabled && PolyBlur.instance.config.forceDisableFastRender) {
+        if (PolyBlurConfig.INSTANCE.getEnabled() && PolyBlurConfig.INSTANCE.getForceDisableFastRender()) {
             cir.setReturnValue(false);
         }
     }

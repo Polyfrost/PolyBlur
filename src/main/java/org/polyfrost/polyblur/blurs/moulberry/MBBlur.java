@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.Framebuffer;
 import org.lwjgl.opengl.GL11;
+import org.polyfrost.polyblur.PolyBlurConfig;
 
 /**
  * @author Moulberry
@@ -19,9 +20,12 @@ public class MBBlur {
     private Framebuffer blurBufferInto = null;
 
     public void doBlur() {
-        if (!OpenGlHelper.isFramebufferEnabled() || PolyBlur.instance.config.blurMode != 2 || !PolyBlur.instance.config.enabled) {
+        if (!OpenGlHelper.isFramebufferEnabled() || PolyBlurConfig.INSTANCE.getMode() != 2 || !PolyBlurConfig.INSTANCE.getEnabled()) {
             return;
         }
+
+        float strength = PolyBlurConfig.INSTANCE.getStrength();
+
         int width = Minecraft.getMinecraft().getFramebuffer().framebufferWidth;
         int height = Minecraft.getMinecraft().getFramebuffer().framebufferHeight;
         GlStateManager.matrixMode(5889);
@@ -43,11 +47,11 @@ public class MBBlur {
         drawTexturedRectNoBlend(0.0f, 0.0f, width, height, 0.0f, 1.0f, 0.0f, 1.0f, 9728);
         GlStateManager.enableBlend();
         this.blurBufferMain.bindFramebufferTexture();
-        GlStateManager.color(1.0f, 1.0f, 1.0f, Math.min(0.1f + (PolyBlur.instance.config.strength * 0.1f), 0.9F));
+        GlStateManager.color(1.0f, 1.0f, 1.0f, Math.min(0.1f + (strength * 0.1f), 0.9F));
         drawTexturedRectNoBlend(0.0f, 0.0f, width, height, 0.0f, 1.0f, 1.0f, 0.0f, 9728);
         Minecraft.getMinecraft().getFramebuffer().bindFramebuffer(true);
         this.blurBufferInto.bindFramebufferTexture();
-        GlStateManager.color(1.0f, 1.0f, 1.0f, Math.min(0.1f + (PolyBlur.instance.config.strength * 0.1f), 0.9F) + 1.0F);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, Math.min(0.1f + (strength * 0.1f), 0.9F) + 1.0F);
         GlStateManager.enableBlend();
         OpenGlHelper.glBlendFunc(770, 771, 1, 771);
         drawTexturedRectNoBlend(0.0f, 0.0f, width, height, 0.0f, 1.0f, 0.0f, 1.0f, 9728);
@@ -83,4 +87,5 @@ public class MBBlur {
         GL11.glTexParameteri(3553, 10241, 9728);
         GL11.glTexParameteri(3553, 10240, 9728);
     }
+
 }

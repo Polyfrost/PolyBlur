@@ -1,6 +1,7 @@
 package org.polyfrost.polyblur.blurs.monkey;
 
 import org.polyfrost.polyblur.PolyBlur;
+import org.polyfrost.polyblur.PolyBlurConfig;
 import org.polyfrost.polyblur.optifine.OFConfig;
 import org.polyfrost.polyblur.shader.Shader;
 import org.polyfrost.polyblur.shader.ShaderLoader;
@@ -123,7 +124,7 @@ public class MonkeyBlur {
         GlStateManager.bindTexture(frameBuffer.depthTexture);
         GlStateManager.setActiveTexture(GL13.GL_TEXTURE0);
 
-        monkeyblurShader.setUniform1f("strength", (float) PolyBlur.instance.config.strength / 2);
+        monkeyblurShader.setUniform1f("strength", PolyBlurConfig.INSTANCE.getStrength() / 2);
         monkeyblurShader.setUniform1i("texture", 0);
         monkeyblurShader.setUniform1i("depthtex", 1);
         monkeyblurShader.setUniformMat4("modelViewInverse", modelViewInverse);
@@ -236,7 +237,7 @@ public class MonkeyBlur {
     }
 
     public boolean isEnabled() {
-        return OpenGlHelper.framebufferSupported && PolyBlur.instance != null && PolyBlur.instance.config.enabled && PolyBlur.instance.config.blurMode == 0 && !changedPerspective && !OFConfig.isShaders();
+        return OpenGlHelper.framebufferSupported && PolyBlurConfig.INSTANCE.getEnabled() && PolyBlurConfig.INSTANCE.getMode() == 0 && !changedPerspective && !OFConfig.isShaders();
     }
 
     public void outputFb(int width, int height, int texture) {
