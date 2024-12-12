@@ -20,7 +20,7 @@ preprocess {
 
 toolkitLoomHelper {
     // Adds OneConfig to our project
-    useOneConfig(mcData, "commands", "config-impl", "events", "hud", "internal", "ui")
+    useOneConfig("1.1.0-alpha.34", "1.0.0-alpha.43", mcData, "commands", "config-impl", "events", "hud", "internal", "ui")
     useDevAuth()
 
     // Removes the server configs from IntelliJ IDEA, leaving only client runs.
@@ -59,5 +59,7 @@ dependencies {
     // If we are building for legacy forge, includes the launch wrapper with `shade` as we configured earlier.
     if (mcData.isLegacyForge) {
         compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
+    } else if (mcData.isFabric) {
+        modImplementation("net.fabricmc:fabric-language-kotlin:${mcData.dependencies.fabric.fabricLanguageKotlinVersion}")
     }
 }
