@@ -25,7 +25,7 @@ object PolyBlur
     const val VERSION = "@MOD_VERSION@"
 
     fun initialize() {
-        CommandManager.registerCommand(PolyBlurCommand())
+        CommandManager.register(PolyBlurCommand())
         EventManager.INSTANCE.register(PhosphorBlur())
     }
 
