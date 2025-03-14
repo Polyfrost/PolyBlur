@@ -1,8 +1,8 @@
 package org.polyfrost.polyblur.mixin;
 
 import cc.polyfrost.oneconfig.internal.gui.impl.BlurHandlerImpl;
+import dev.deftu.omnicore.client.OmniClient;
 import org.polyfrost.polyblur.blurs.phosphor.EntityRendererHook;
-import org.polyfrost.universal.UMinecraft;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -28,7 +28,7 @@ public abstract class BlurHandlerImplMixin {
                         //#else
                         //$$ true
                         //#endif
-                        && ((EntityRendererHook) UMinecraft.getMinecraft().entityRenderer).getPhosphorShader() != null
+                        && ((EntityRendererHook) OmniClient.getInstance().entityRenderer).getPhosphorShader() != null
         ) {
             return false;
         }

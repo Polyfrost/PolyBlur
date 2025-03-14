@@ -1,8 +1,9 @@
 package org.polyfrost.polyblur.blurs.phosphor;
 
+import dev.deftu.omnicore.client.OmniClient;
+import dev.deftu.omnicore.client.render.OmniResolution;
 import org.polyfrost.oneconfig.api.event.v1.events.RenderEvent;
 import org.polyfrost.oneconfig.api.event.v1.invoke.impl.Subscribe;
-import org.polyfrost.polyblur.PolyBlur;
 import org.polyfrost.polyblur.PolyBlurConfig;
 import org.polyfrost.polyblur.mixin.ShaderGroupAccessor;
 import net.minecraft.client.Minecraft;
@@ -10,8 +11,6 @@ import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.client.shader.ShaderUniform;
 import net.minecraft.util.ResourceLocation;
-import org.polyfrost.universal.UMinecraft;
-import org.polyfrost.universal.UResolution;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,7 +22,7 @@ public class PhosphorBlur {
     private static final ResourceLocation phosphorBlur = new ResourceLocation("shaders/post/phosphor_motion_blur.json");
 
     @Subscribe
-    private void onRenderTick(RenderEvent.End event) {
+    private void onRenderTick(RenderEvent.Post event) {
         // Only update the shader if one is active
         if (!isShaderActive() || lastEnabled != PolyBlurConfig.INSTANCE.getEnabled()) {
             lastEnabled = PolyBlurConfig.INSTANCE.getEnabled();
@@ -34,21 +33,21 @@ public class PhosphorBlur {
     }
 
     public static void reloadBlur() {
-        if (UMinecraft.getWorld() == null) {
+        if (!OmniClient.getHasWorld()) {
             return;
         }
 
         if (!isShaderActive() && PolyBlurConfig.INSTANCE.getEnabled() && PolyBlurConfig.INSTANCE.getMode() == 1) {
             try {
                 final ShaderGroup phosphorBlurShader = new ShaderGroup(Minecraft.getMinecraft().getTextureManager(), Minecraft.getMinecraft().getResourceManager(), Minecraft.getMinecraft().getFramebuffer(), phosphorBlur);
-                phosphorBlurShader.createBindFramebuffers(UResolution.getWindowWidth(), UResolution.getWindowHeight());
+                phosphorBlurShader.createBindFramebuffers(OmniResolution.getScreenWidth(), OmniResolution.getScreenHeight());
                 ((EntityRendererHook) Minecraft.getMinecraft().entityRenderer).setPhosphorShader(phosphorBlurShader);
                 reloadIntensity();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else if (isShaderActive() && (!PolyBlurConfig.INSTANCE.getEnabled() || PolyBlurConfig.INSTANCE.getMode() != 1)) {
-            final EntityRendererHook entityRenderer = (EntityRendererHook) UMinecraft.getMinecraft().entityRenderer;
+            final EntityRendererHook entityRenderer = (EntityRendererHook) OmniClient.getInstance().entityRenderer;
             if (entityRenderer.getPhosphorShader() != null) {
                 entityRenderer.getPhosphorShader().deleteShaderGroup();
             }
@@ -59,7 +58,7 @@ public class PhosphorBlur {
 
     public static void reloadIntensity() {
         try {
-            final List<Shader> listShaders = ((ShaderGroupAccessor) ((EntityRendererHook) UMinecraft.getMinecraft().entityRenderer).getPhosphorShader()).getListShaders();
+            final List<Shader> listShaders = ((ShaderGroupAccessor) ((EntityRendererHook) OmniClient.getInstance().entityRenderer).getPhosphorShader()).getListShaders();
 
             if (listShaders == null) {
                 return;
@@ -80,7 +79,7 @@ public class PhosphorBlur {
     }
 
     private static boolean isShaderActive() {
-        return ((EntityRendererHook) UMinecraft.getMinecraft().entityRenderer).getPhosphorShader() != null
+        return ((EntityRendererHook) OmniClient.getInstance().entityRenderer).getPhosphorShader() != null
                 //#if MC<=11202
                 && net.minecraft.client.renderer.OpenGlHelper.shadersSupported
                 //#endif
