@@ -1,20 +1,18 @@
 {
-  "compatibilityLevel": "${java_version}",
-  "minVersion": "0.7",
-  "package": "org.polyfrost.polyblur.mixin",
-  "refmap": "mixins.${mod_id}.refmap.json",
-  "injectors": {
-    "maxShiftBy": 5
-  },
-  "verbose": true,
-  "client": [
-    "BlurHandlerImplMixin",
-    "BlurModMixin",
-    "EntityRendererMixin",
-    "EntityRendererMixin_PhosphorBlur",
-    "FramebufferMixin",
-    "MinecraftMixin",
-    "OptifineConfigMixin",
-    "ShaderGroupAccessor"
-  ]
+    "compatibilityLevel": "${java_version}",
+    "minVersion": "0.7",
+    "package": "org.polyfrost.polyblur.mixin",
+    "refmap": "mixins.${mod_id}.refmap.json",
+    "injectors": {
+        "maxShiftBy": 5
+    },
+    "verbose": true,
+    "client": [
+        "client.compat.Mixin_Blur_OverridePhosphurBlurInBlurMod",
+        "client.compat.Mixin_BlurHandlerImpl_OverridePhosphorBlurInOneConfigV0",
+        "client.compat.Mixin_Config_DisableOptiFineFastRender",
+
+        "client.Mixin_EntityRenderer_PhosphorBlur",
+        "client.Mixin_ShaderGroup_ShaderListAccessor"
+    ]
 }
