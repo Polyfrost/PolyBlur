@@ -1,5 +1,6 @@
 package org.polyfrost.polyblur.mixin.client.compat;
 
+//#if MC < 1.21.2
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
@@ -25,3 +26,4 @@ public class Mixin_Blur_OverridePhosphurBlurInBlurMod {
         return er.currentEffect();
     }
 }
+//#endif

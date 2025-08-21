@@ -17,7 +17,7 @@
             "uniforms": [
                 {
                     "name": "BlendFactor",
-                    "values": [ 0.4 ]
+                    "values": [ 0.3 ]
                 }
             ]
         },

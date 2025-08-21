@@ -21,6 +21,7 @@ object PolyBlurConfig : KtConfig(
     var strength by slider(min = 1f, max = 10f, def = 3f, name = "Blur Strength")
 
     init {
+        //#if MC < 1.21.2
         addCallback("isEnabled") {
             if (!isEnabled) {
                 PhosphorBlur.destroy()
@@ -32,8 +33,7 @@ object PolyBlurConfig : KtConfig(
         addCallback("strength") {
             PhosphorBlur.maybeUpdateBlendFactor()
         }
-
-//        addCallback("mode", PhosphorBlur::setupWeight)
+        //#endif
     }
 
 }

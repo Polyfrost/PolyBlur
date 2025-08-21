@@ -1,0 +1,47 @@
+{
+    "targets": {
+        "swap": {},
+        "previous": {}
+    },
+    "passes": [
+        {
+            "program": "minecraft:post/blit",
+            "inputs": [
+                { "sampler_name": "In", "target": "minecraft:main" }
+            ],
+            "uniforms": [
+                {
+                    "name": "ColorModulate",
+                    "type": "vec4",
+                    "values": [ 1.0,  1.0,  1.0,  1.0 ]
+                }
+            ],
+            "output": "previous"
+        },
+        {
+            "program": "polyblur:post/phosphor_motion_blur",
+            "inputs": [
+                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                { "sampler_name": "Prev",    "target": "previous" }
+            ],
+            "output": "swap",
+            "uniforms": [
+                { "name": "BlendFactor", "values": [ 0.9 ] }
+            ]
+        },
+        {
+            "program": "minecraft:post/blit",
+            "inputs": [
+                { "sampler_name": "In", "target": "swap" }
+            ],
+            "uniforms": [
+                {
+                    "name": "ColorModulate",
+                    "type": "vec4",
+                    "values": [ 1.0,  1.0,  1.0,  1.0 ]
+                }
+            ],
+            "output": "minecraft:main"
+        }
+    ]
+}

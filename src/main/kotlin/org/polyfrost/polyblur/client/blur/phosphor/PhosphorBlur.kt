@@ -3,6 +3,7 @@ package org.polyfrost.polyblur.client.blur.phosphor
 import dev.deftu.omnicore.client.OmniClient
 import dev.deftu.omnicore.client.render.OmniRenderEnv
 import dev.deftu.omnicore.common.OmniIdentifier
+import net.minecraft.client.shader.Framebuffer
 import net.minecraft.client.shader.ShaderGroup
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.PolyBlurConfig
@@ -57,14 +58,12 @@ object PhosphorBlur {
             //#else
             shader?.deleteShaderGroup()
             //#endif
-        } catch (_: Throwable) {
-        }
+        } catch (_: Throwable) {  }
 
         try {
             LOGGER.info("Building Phosphor shader group with dimensions: {}x{}", width, height)
-            val newGroup = ShaderGroup(client.textureManager, client.resourceManager, mainTarget, LOCATION)
-            newGroup.createBindFramebuffers(width, height)
-            shader = newGroup
+            shader = buildShader(target = mainTarget, width = width, height = height)
+            LOGGER.info("Phosphor shader group built successfully: $shader")
             prevWidth = width
             prevHeight = height
             forceUpdateBlendFactor()
@@ -89,6 +88,17 @@ object PhosphorBlur {
         val blendFactor = currentBlendFactor
         if (blendFactor != lastBlendFactor) {
             forceUpdateBlendFactor(blendFactor)
+        }
+    }
+
+    private fun buildShader(
+        target: Framebuffer,
+        width: Int,
+        height: Int,
+    ): ShaderGroup {
+        val client = OmniClient.getInstance()
+        return ShaderGroup(client.textureManager, client.resourceManager, target, LOCATION).also { group ->
+            group.createBindFramebuffers(width, height)
         }
     }
 
@@ -129,7 +139,7 @@ object PhosphorBlur {
             //#else
             shader?.deleteShaderGroup()
             //#endif
-        } catch (_: Throwable) {}
+        } catch (_: Throwable) {  }
 
         shader = null
         prevWidth = 0
