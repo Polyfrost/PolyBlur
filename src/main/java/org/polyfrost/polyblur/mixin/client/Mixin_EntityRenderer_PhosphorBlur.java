@@ -1,6 +1,7 @@
 package org.polyfrost.polyblur.mixin.client;
 
-import dev.deftu.omnicore.common.OmniProfiler;
+import dev.deftu.omnicore.api.client.OmniClient;
+import dev.deftu.omnicore.api.client.OmniClientProfiler;
 import net.minecraft.client.renderer.EntityRenderer;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
@@ -8,16 +9,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //#if MC >= 1.21.2
 //$$ import com.mojang.blaze3d.systems.RenderSystem;
-//$$ import dev.deftu.omnicore.client.OmniClient;
+//$$ import dev.deftu.omnicore.api.client.OmniClient;
 //$$ import net.minecraft.client.MinecraftClient;
 //$$ import net.minecraft.client.util.Pool;
 //$$ import org.spongepowered.asm.mixin.Final;
 //$$ import org.spongepowered.asm.mixin.Shadow;
 //#else
-import dev.deftu.omnicore.client.render.OmniGameRendering;
+import dev.deftu.omnicore.api.client.render.OmniRenderTicks;
 //#endif
 
 //#if MC >= 1.21.1
@@ -31,6 +33,17 @@ public class Mixin_EntityRenderer_PhosphorBlur {
     //$$ @Shadow @Final private Pool pool;
     //#endif
 
+    //#if MC < 1.16.5
+    @Inject(method = "isShaderActive", at = @At("HEAD"), cancellable = true)
+    private void polyblur$cancelShaderActive(CallbackInfoReturnable<Boolean> cir) {
+        if (!PhosphorBlur.isActive()) {
+            return;
+        }
+
+        cir.setReturnValue(true);
+    }
+    //#endif
+
     @Inject(
             //#if MC >= 1.16.5
             //$$ method = "render",
@@ -38,7 +51,13 @@ public class Mixin_EntityRenderer_PhosphorBlur {
             method = "updateCameraAndRender",
             //#endif
 
-            //#if MC >= 1.21.2
+            //#if MC >= 1.21.6
+            //$$ at = @At(
+            //$$     value = "INVOKE",
+            //$$     target = "Lnet/minecraft/client/gui/render/GuiRenderer;incrementFrameNumber()V",
+            //$$     shift = At.Shift.AFTER
+            //$$ )
+            //#elseif MC >= 1.21.2
             //$$ at = @At(
             //$$     value = "INVOKE",
             //$$     target = "Lnet/minecraft/client/gui/DrawContext;draw()V",
@@ -65,18 +84,18 @@ public class Mixin_EntityRenderer_PhosphorBlur {
         }
 
         //#if MC >= 1.21.2
-        //$$ if (!OmniClient.getInstance().isFinishedLoading() || !OmniClient.hasWorld()) {
+        //$$ if (!OmniClient.get().isFinishedLoading() || OmniClient.getWorld() == null) {
         //$$     return;
         //$$ }
         //#endif
 
-        OmniProfiler.withProfiler("polyblur_phosphor_blur", () -> {
+        OmniClientProfiler.withProfiler(OmniClient.get(), "polyblur_phosphor_blur", () -> {
             //#if MC >= 1.21.2
             //$$ RenderSystem.resetTextureMatrix();
             //$$ PhosphorBlur.render(this.client.getFramebuffer(), this.pool);
             //#else
             PhosphorBlur.update();
-            float trueTickDelta = OmniGameRendering.getTickDelta(true);
+            float trueTickDelta = OmniRenderTicks.get();
             PhosphorBlur.render(trueTickDelta);
             //#endif
         });

@@ -1,8 +1,8 @@
 package org.polyfrost.polyblur.client
 
-import dev.deftu.omnicore.client.OmniClientCommands
-import dev.deftu.omnicore.client.OmniClientCommands.command
-import dev.deftu.omnicore.client.OmniClientCommands.does
+import com.mojang.brigadier.Command
+import dev.deftu.omnicore.api.client.commands.OmniClientCommands
+import dev.deftu.omnicore.api.client.commands.command
 import org.polyfrost.oneconfig.utils.v1.dsl.openUI
 import org.polyfrost.polyblur.PolyBlurConstants
 
@@ -11,9 +11,9 @@ object PolyBlurClient {
         PolyBlurConfig.preload()
 
         OmniClientCommands.command(PolyBlurConstants.ID) {
-            does {
+            runs {
                 PolyBlurConfig.openUI()
-                1
+                Command.SINGLE_SUCCESS
             }
         }
     }

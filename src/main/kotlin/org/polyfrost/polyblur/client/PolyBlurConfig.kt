@@ -8,7 +8,7 @@ object PolyBlurConfig : KtConfig(
     id = "${PolyBlurConstants.ID}.json",
     title = PolyBlurConstants.NAME,
     category = Category.COMBAT,
-    icon = "/polyblur/polyblur_dark.svg"
+    icon = "/assets/polyblur/polyblur_dark.svg"
 ) {
 
     var forceDisableFastRender by switch(def = true, name = "Force Disable Fast Render", description = "Forces OptiFine's Fast Render option to be disabled.")

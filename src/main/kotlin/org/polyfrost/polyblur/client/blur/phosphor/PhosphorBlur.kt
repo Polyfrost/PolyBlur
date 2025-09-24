@@ -1,8 +1,9 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
-import dev.deftu.omnicore.client.OmniClient
-import dev.deftu.omnicore.client.render.OmniRenderEnv
-import dev.deftu.omnicore.common.OmniIdentifier
+import dev.deftu.omnicore.api.DEFAULT_NAMESPACE
+import dev.deftu.omnicore.api.client.client
+import dev.deftu.omnicore.api.client.render.GlCapabilities
+import dev.deftu.omnicore.api.identifierOrThrow
 import net.minecraft.client.shader.Framebuffer
 import net.minecraft.client.shader.ShaderGroup
 import org.apache.logging.log4j.LogManager
@@ -14,7 +15,7 @@ import kotlin.math.min
 object PhosphorBlur {
     private val LOGGER = LogManager.getLogger(PhosphorBlur::class.java)
 
-    private val LOCATION by lazy { OmniIdentifier.create(OmniIdentifier.MINECRAFT_NAMESPACE, "shaders/post/phosphor_motion_blur.json") }
+    private val LOCATION by lazy { identifierOrThrow(DEFAULT_NAMESPACE, "shaders/post/phosphor_motion_blur.json") }
 
     private val currentBlendFactor: Float
         get() {
@@ -30,15 +31,14 @@ object PhosphorBlur {
 
     @JvmStatic
     val isActive: Boolean
-        get() = OmniRenderEnv.isShaderSupported && shader != null
+        get() = GlCapabilities.isShaderSupported && shader != null
 
     @JvmStatic
     fun update() {
-        if (!OmniRenderEnv.isShaderSupported) {
+        if (!GlCapabilities.isShaderSupported) {
             return
         }
 
-        val client = OmniClient.getInstance()
         val mainTarget = client.framebuffer ?: return
         val width = mainTarget.framebufferWidth
         val height = mainTarget.framebufferHeight
@@ -96,7 +96,6 @@ object PhosphorBlur {
         width: Int,
         height: Int,
     ): ShaderGroup {
-        val client = OmniClient.getInstance()
         return ShaderGroup(client.textureManager, client.resourceManager, target, LOCATION).also { group ->
             group.createBindFramebuffers(width, height)
         }
