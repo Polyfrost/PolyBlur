@@ -15,14 +15,15 @@ object RenderTargetTracker {
         .withLocation("phosphor_previous_frame_tracker")
         .withVertexShader("core/blit_screen")
         .withFragmentShader("core/blit_screen")
-        .withSampler("InSampler")
+        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
         .withDepthWrite(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withColorWrite(true, true)
-        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+        .withSampler("InSampler")
         .build()
 
-    private var framebufferFactory: RenderTargetDescriptor? = null
+    var framebufferFactory: RenderTargetDescriptor? = null
+        private set
     private var prevWidth = -1
     private var prevHeight = -1
 
@@ -68,7 +69,7 @@ object RenderTargetTracker {
         prevHeight = -1
     }
 
-    private fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
+    fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
         RenderSystem.assertOnRenderThread()
 
         val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
