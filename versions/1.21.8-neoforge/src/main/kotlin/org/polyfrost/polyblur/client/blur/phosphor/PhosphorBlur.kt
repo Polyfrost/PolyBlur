@@ -50,11 +50,11 @@ object PhosphorBlur {
 
         val builder = FrameGraphBuilder()
         val prevNode = builder.importExternal("previous", prevTarget)
-        val temp = builder.importExternal("phosphor_temp", tempTarget)
+        val tempNode = builder.importExternal("phosphor_temp", tempTarget)
 
-        val firstPass = builder.addPass("PolyBlur/Phosphor").apply {
+        builder.addPass("PolyBlur/Phosphor").apply {
             reads(prevNode)
-            readsAndWrites(temp)
+            readsAndWrites(tempNode)
 
             executes {
                 val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
