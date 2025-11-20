@@ -1,12 +1,12 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
 import com.mojang.blaze3d.pipeline.RenderPipeline
+import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.platform.DepthTestFunction
+import com.mojang.blaze3d.resource.RenderTargetDescriptor
 import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
-import net.minecraft.client.gl.Framebuffer
-import net.minecraft.client.gl.SimpleFramebufferFactory
-import net.minecraft.client.render.VertexFormats
 import java.util.OptionalInt
 
 object RenderTargetTracker {
@@ -18,22 +18,22 @@ object RenderTargetTracker {
         .withDepthWrite(false)
         .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
         .withColorWrite(true, true)
-        .withVertexFormat(VertexFormats.POSITION, VertexFormat.DrawMode.QUADS)
+        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
         .build()
 
-    private var framebufferFactory: SimpleFramebufferFactory? = null
+    private var framebufferFactory: RenderTargetDescriptor? = null
     private var prevWidth = -1
     private var prevHeight = -1
 
-    private var internalPrevTarget: Framebuffer? = null
+    private var internalPrevTarget: RenderTarget? = null
 
-    val prevTarget: Framebuffer?
-        get() = internalPrevTarget?.takeIf { it.viewportWidth == prevWidth && it.viewportHeight == prevHeight }
+    val prevTarget: RenderTarget?
+        get() = internalPrevTarget?.takeIf { it.viewWidth == prevWidth && it.viewHeight == prevHeight }
 
-    fun captureIntoPrevious(sourceTarget: Framebuffer) {
+    fun captureIntoPrevious(sourceTarget: RenderTarget) {
         RenderSystem.assertOnRenderThread()
 
-        updateSize(sourceTarget.viewportWidth, sourceTarget.viewportHeight)
+        updateSize(sourceTarget.viewWidth, sourceTarget.viewHeight)
         val currentTarget = prevTarget ?: return
         blit(sourceTarget, currentTarget)
     }
@@ -47,12 +47,12 @@ object RenderTargetTracker {
             return
         }
 
-        if (framebufferFactory == null || framebufferFactory?.comp_2978 != width || framebufferFactory?.comp_2979 != height) {
-            framebufferFactory = SimpleFramebufferFactory(width, height, false, 0)
+        if (framebufferFactory == null || framebufferFactory?.width != width || framebufferFactory?.height != height) {
+            framebufferFactory = RenderTargetDescriptor(width, height, false, 0)
         }
 
         free()
-        internalPrevTarget = framebufferFactory?.create()
+        internalPrevTarget = framebufferFactory?.allocate()
         prevWidth = width
         prevHeight = height
 
@@ -60,28 +60,28 @@ object RenderTargetTracker {
     }
 
     fun free() {
-        internalPrevTarget?.let { framebufferFactory?.close(it) }
+        internalPrevTarget?.let { framebufferFactory?.free(it) }
         internalPrevTarget = null
 
         prevWidth = -1
         prevHeight = -1
     }
 
-    private fun blit(srcTarget: Framebuffer, dstTarget: Framebuffer) {
+    private fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
         RenderSystem.assertOnRenderThread()
 
-        val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.DrawMode.QUADS)
-        val indexBuffer = autoStorageIndexBuffer.getIndexBuffer(6)
+        val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
+        val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
         val vertexBuffer = RenderSystem.getQuadVertexBuffer()
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-            dstTarget.colorAttachment,
+            dstTarget.colorTexture,
             OptionalInt.empty()
         ).use { renderPass ->
             renderPass.setPipeline(PIPELINE)
             renderPass.setVertexBuffer(0, vertexBuffer)
-            renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.indexType)
-            renderPass.bindSampler("InSampler", srcTarget.colorAttachment)
+            renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
+            renderPass.bindSampler("InSampler", srcTarget.colorTexture)
             renderPass.drawIndexed(0, 6)
         }
     }

@@ -2,7 +2,7 @@ package org.polyfrost.polyblur.client.blur.phosphor
 
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.resource.ResourceHandle
-import dev.deftu.omnicore.api.identifierOrThrow
+import dev.deftu.omnicore.api.locationOrThrow
 import net.minecraft.client.renderer.LevelTargetBundle
 import net.minecraft.client.renderer.PostChain
 import net.minecraft.resources.ResourceLocation
@@ -15,7 +15,7 @@ class BlurFramebufferSet(
 ) : PostChain.TargetBundle {
     companion object {
         val MAIN_LOCATION = PostChain.MAIN_TARGET_ID
-        val PREVIOUS_LOCATION = identifierOrThrow(PolyBlurConstants.ID, "previous")
+        val PREVIOUS_LOCATION = locationOrThrow(PolyBlurConstants.ID, "previous")
 
         val TARGETS = LevelTargetBundle.MAIN_TARGETS + listOf(PREVIOUS_LOCATION)
     }

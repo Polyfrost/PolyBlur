@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //#if MC >= 1.21.2
+//$$ import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 //$$ import com.mojang.blaze3d.systems.RenderSystem;
 //$$ import dev.deftu.omnicore.api.client.OmniClient;
-//$$ import net.minecraft.client.MinecraftClient;
-//$$ import net.minecraft.client.util.Pool;
+//$$ import net.minecraft.client.Minecraft;
 //$$ import org.spongepowered.asm.mixin.Final;
 //$$ import org.spongepowered.asm.mixin.Shadow;
 //#else
@@ -27,10 +27,10 @@ import dev.deftu.omnicore.api.client.render.OmniRenderTicks;
 //#endif
 
 @Mixin(EntityRenderer.class)
-public class Mixin_EntityRenderer_PhosphorBlur {
+public class Mixin_ApplyPhosphorBlur {
     //#if MC >= 1.21.2
-    //$$ @Shadow private MinecraftClient client;
-    //$$ @Shadow @Final private Pool pool;
+    //$$ @Shadow private Minecraft minecraft;
+    //$$ @Shadow @Final private CrossFrameResourcePool resourcePool;
     //#endif
 
     //#if MC < 1.16.5
@@ -84,7 +84,7 @@ public class Mixin_EntityRenderer_PhosphorBlur {
         }
 
         //#if MC >= 1.21.2
-        //$$ if (!OmniClient.get().isFinishedLoading() || OmniClient.getWorld() == null) {
+        //$$ if (!OmniClient.get().isGameLoadFinished() || OmniClient.getWorld() == null) {
         //$$     return;
         //$$ }
         //#endif
@@ -92,7 +92,7 @@ public class Mixin_EntityRenderer_PhosphorBlur {
         OmniClientProfiler.withProfiler(OmniClient.get(), "polyblur_phosphor_blur", () -> {
             //#if MC >= 1.21.2
             //$$ RenderSystem.resetTextureMatrix();
-            //$$ PhosphorBlur.render(this.client.getFramebuffer(), this.pool);
+            //$$ PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
             //#else
             PhosphorBlur.update();
             float trueTickDelta = OmniRenderTicks.get();

@@ -3,7 +3,7 @@ package org.polyfrost.polyblur.client.blur.phosphor
 import dev.deftu.omnicore.api.DEFAULT_NAMESPACE
 import dev.deftu.omnicore.api.client.client
 import dev.deftu.omnicore.api.client.render.GlCapabilities
-import dev.deftu.omnicore.api.identifierOrThrow
+import dev.deftu.omnicore.api.locationOrThrow
 import net.minecraft.client.shader.Framebuffer
 import net.minecraft.client.shader.ShaderGroup
 import org.apache.logging.log4j.LogManager
@@ -15,7 +15,7 @@ import kotlin.math.min
 object PhosphorBlur {
     private val LOGGER = LogManager.getLogger(PhosphorBlur::class.java)
 
-    private val LOCATION by lazy { identifierOrThrow(DEFAULT_NAMESPACE, "shaders/post/phosphor_motion_blur.json") }
+    private val LOCATION by lazy { locationOrThrow(DEFAULT_NAMESPACE, "shaders/post/phosphor_motion_blur.json") }
 
     private val currentBlendFactor: Float
         get() {

@@ -9,7 +9,7 @@ import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
-import dev.deftu.omnicore.api.identifierOrThrow
+import dev.deftu.omnicore.api.locationOrThrow
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import java.util.OptionalInt
@@ -17,9 +17,9 @@ import java.util.OptionalInt
 object PhosphorBlur {
     private val pipeline by lazy {
         RenderPipeline.builder()
-            .withLocation(identifierOrThrow(PolyBlurConstants.ID, "phosphor_motion_blur_pipeline"))
+            .withLocation(locationOrThrow(PolyBlurConstants.ID, "phosphor_motion_blur_pipeline"))
             .withVertexShader("core/blit_screen")
-            .withFragmentShader(identifierOrThrow(PolyBlurConstants.ID, "post/phosphor_motion_blur"))
+            .withFragmentShader(locationOrThrow(PolyBlurConstants.ID, "post/phosphor_motion_blur"))
             .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
             .withDepthWrite(false)
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)

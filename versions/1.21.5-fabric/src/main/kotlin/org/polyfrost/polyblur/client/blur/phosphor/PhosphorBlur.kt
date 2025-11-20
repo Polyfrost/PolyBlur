@@ -1,11 +1,11 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
 import com.google.gson.JsonSyntaxException
+import com.mojang.blaze3d.framegraph.FrameGraphBuilder
+import com.mojang.blaze3d.pipeline.RenderTarget
+import com.mojang.blaze3d.resource.CrossFrameResourcePool
 import dev.deftu.omnicore.api.client.client
-import dev.deftu.omnicore.api.identifierOrThrow
-import net.minecraft.client.gl.Framebuffer
-import net.minecraft.client.render.FrameGraphBuilder
-import net.minecraft.client.util.Pool
+import dev.deftu.omnicore.api.locationOrThrow
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
@@ -13,16 +13,16 @@ import org.polyfrost.polyblur.client.PolyBlurConfig
 object PhosphorBlur {
     private val LOGGER = LogManager.getLogger(PhosphorBlur::class.java)
 
-    private val LOCATION by lazy { identifierOrThrow(PolyBlurConstants.ID, "phosphor_motion_blur") }
+    private val LOCATION by lazy { locationOrThrow(PolyBlurConstants.ID, "phosphor_motion_blur") }
 
     @JvmStatic
     val currentBlendFactor: Float
         get() = ((PolyBlurConfig.strength / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
 
     @JvmStatic
-    fun render(renderTarget: Framebuffer, resourcePool: Pool) {
+    fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
         val shader = try {
-            client.shaderLoader.loadPostEffect(LOCATION, BlurTargetBundle.TARGETS)
+            client.shaderManager.getPostChain(LOCATION, BlurTargetBundle.TARGETS)
         } catch (e: JsonSyntaxException) {
             LOGGER.error("Could not load motion blur: ", e)
             null
@@ -36,19 +36,19 @@ object PhosphorBlur {
 
         val builder = FrameGraphBuilder()
         val targetBundle = BlurTargetBundle(
-            builder.createObjectNode("main", renderTarget),
-            builder.createObjectNode("previous", prevTarget)
+            builder.importExternal("main", renderTarget),
+            builder.importExternal("previous", prevTarget)
         )
 
-        shader?.render(
+        shader?.addToFrame(
             builder,
-            renderTarget.viewportWidth, renderTarget.viewportHeight,
+            renderTarget.viewWidth, renderTarget.viewHeight,
             targetBundle
         ) { renderPass ->
             renderPass.setUniform("Strength", currentBlendFactor)
         }
 
-        builder.run(resourcePool)
+        builder.execute(resourcePool)
 
         // Capture frame so that we can compare next frame
         RenderTargetTracker.captureIntoPrevious(renderTarget)

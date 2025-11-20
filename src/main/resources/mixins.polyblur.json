@@ -11,8 +11,7 @@
         "client.compat.Mixin_Blur_OverridePhosphurBlurInBlurMod",
         "client.compat.Mixin_BlurHandlerImpl_OverridePhosphorBlurInOneConfigV0",
         "client.compat.Mixin_Config_DisableOptiFineFastRender",
-
-        "client.Mixin_EntityRenderer_PhosphorBlur",
+        "client.Mixin_ApplyPhosphorBlur",
         "client.Mixin_ShaderGroup_ShaderListAccessor"
     ]
 }

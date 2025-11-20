@@ -6,7 +6,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
 import com.mojang.blaze3d.resource.CrossFrameResourcePool
 import dev.deftu.omnicore.api.client.client
-import dev.deftu.omnicore.api.identifierOrThrow
+import dev.deftu.omnicore.api.locationOrThrow
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
@@ -16,7 +16,7 @@ import kotlin.math.min
 object PhosphorBlur {
     private val LOGGER = LogManager.getLogger(PhosphorBlur::class.java)
 
-    private val LOCATION by lazy { identifierOrThrow(PolyBlurConstants.ID, "phosphor_motion_blur") }
+    private val LOCATION by lazy { locationOrThrow(PolyBlurConstants.ID, "phosphor_motion_blur") }
 
     private val currentBlendFactor: Float
         get() {
