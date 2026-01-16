@@ -4,8 +4,6 @@ import org.polyfrost.oneconfig.api.config.v1.KtConfig
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur
 
-//? if 1.21.1
-
 object PolyBlurConfig : KtConfig(
     id = "${PolyBlurConstants.ID}.json",
     title = PolyBlurConstants.NAME,
@@ -24,7 +22,7 @@ object PolyBlurConfig : KtConfig(
 
     init {
         //? if 1.21.1 {
-        addCallback("isEnabled") {
+        /*addCallback("isEnabled") {
             if (!isEnabled) {
                 PhosphorBlur.destroy()
             } else {
@@ -35,7 +33,7 @@ object PolyBlurConfig : KtConfig(
         addCallback("strength") {
             PhosphorBlur.maybeUpdateBlendFactor()
         }
-        //?}
+        *///?}
     }
 
 }

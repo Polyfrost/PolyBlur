@@ -53,6 +53,8 @@ dependencies {
     modImplementation("org.polyfrost.oneconfig:utils:1.0.0-alpha.181")
     modImplementation("org.polyfrost.oneconfig:hud:1.0.0-alpha.181")
 
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}+${property("minecraft_version")}")
+
     implementation("dev.deftu:commons-suncalc:0.1.0")!!
 }
 
