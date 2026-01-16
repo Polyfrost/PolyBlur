@@ -11,7 +11,7 @@ object PolyBlurConfig : KtConfig(
     icon = "/assets/polyblur/polyblur_dark.svg"
 ) {
 
-    var forceDisableFastRender by switch(def = true, name = "Force Disable Fast Render", description = "Forces OptiFine's Fast Render option to be disabled.")
+//    var forceDisableFastRender by switch(def = true, name = "Force Disable Fast Render", description = "Forces OptiFine's Fast Render option to be disabled.")
 
     var isEnabled by switch(def = true, name = "Enabled")
 
@@ -21,8 +21,8 @@ object PolyBlurConfig : KtConfig(
     var strength by slider(min = 1f, max = 10f, def = 3f, name = "Blur Strength")
 
     init {
-        //#if MC < 1.21.2
-        addCallback("isEnabled") {
+        //? if 1.21.1 {
+        /*addCallback("isEnabled") {
             if (!isEnabled) {
                 PhosphorBlur.destroy()
             } else {
@@ -33,7 +33,7 @@ object PolyBlurConfig : KtConfig(
         addCallback("strength") {
             PhosphorBlur.maybeUpdateBlendFactor()
         }
-        //#endif
+        *///?}
     }
 
 }

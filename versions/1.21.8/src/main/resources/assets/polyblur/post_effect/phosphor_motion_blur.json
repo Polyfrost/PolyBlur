@@ -1,0 +1,24 @@
+{
+  "targets": {
+  },
+  "passes": [
+    {
+      "vertex_shader": "minecraft:post/sobel",
+      "fragment_shader": "polyblur:post/phosphor_motion_blur",
+      "inputs": [
+        { "sampler_name": "Diffuse",  "target": "minecraft:main"    },
+        { "sampler_name": "Prev",     "target": "polyblur:previous" }
+      ],
+      "uniforms": {
+        "BlurConfig": [
+          {
+            "name": "Strength",
+            "type": "float",
+            "value": 0.4
+          }
+        ]
+      },
+      "output": "minecraft:main"
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 package org.polyfrost.polyblur.mixin.client;
 
-import net.minecraft.client.shader.Shader;
-import net.minecraft.client.shader.ShaderGroup;
+import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.PostPass;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 
-@Mixin(ShaderGroup.class)
+@Mixin(PostChain.class)
 public interface Mixin_ShaderGroup_ShaderListAccessor {
-    @Accessor("listShaders") List<Shader> getListShaders();
+    @Accessor("passes") List<PostPass> getPasses();
 }

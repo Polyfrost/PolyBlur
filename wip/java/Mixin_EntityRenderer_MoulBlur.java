@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityRenderer.class)
 public class Mixin_EntityRenderer_MoulBlur {
-    @Inject(method = {"renderWorldPass"}, at = @At("TAIL"))
+    @Inject(method = "renderWorldPass", at = @At("TAIL"))
     private void onRenderWorldEndMB(int pass, float partialTicks, long finishTimeNano, CallbackInfo ci) {
         MoulBlur.render();
     }
