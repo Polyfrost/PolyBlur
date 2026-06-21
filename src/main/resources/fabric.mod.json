@@ -1,0 +1,32 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "name": "${mod_name}",
+    "description": "Motion blur",
+    "authors": [
+        "Polyfrost"
+    ],
+    "contact": {
+        "issues": "https://github.com/Polyfrost/${mod_name}/issues",
+        "sources": "https://github.com/Polyfrost/${mod_name}"
+    },
+    "license": "GPL-3.0-or-later",
+    "environment": "client",
+    "entrypoints": {
+        "client": [
+            {
+                "adapter": "kotlin",
+                "value": "org.polyfrost.polyblur.PolyBlurEntrypoint"
+            }
+        ]
+    },
+    "mixins": [
+        "mixins.${mod_id}.json"
+    ],
+    "depends": {
+        "minecraft": "${minecraft_version_range}",
+        "fabricloader": ">=${loader_version}",
+        "fabric-language-kotlin": "*"
+    }
+}

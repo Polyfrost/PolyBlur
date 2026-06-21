@@ -1,192 +1,319 @@
-@file:Suppress("UnstableApiUsage", "PropertyName")
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-import org.polyfrost.gradle.util.noServerRunConfigs
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
-// Adds support for kotlin, and adds the Polyfrost Gradle Toolkit
-// which we use to prepare the environment.
 plugins {
-    kotlin("jvm")
-    id("org.polyfrost.multi-version")
-    id("org.polyfrost.defaults.repo")
-    id("org.polyfrost.defaults.java")
-    id("org.polyfrost.defaults.loom")
-    id("com.github.johnrengelman.shadow")
-    id("net.kyori.blossom") version "1.3.2"
-    id("signing")
-    java
+    id("dev.kikugie.loom-back-compat")
+    id("org.jetbrains.kotlin.jvm") version "2.3.0"
+    id("dev.deftu.gradle.bloom") version "0.2.0"
+    id("me.modmuss50.mod-publish-plugin") version "1.1.0"
 }
 
-// Gets the mod name, version and id from the `gradle.properties` file.
-val mod_name: String by project
-val mod_version: String by project
-val mod_id: String by project
-val mod_archives_name: String by project
+val oneConfigVersion = "1.0.0-beta.4"
 
-// Replaces the variables in `ExampleMod.java` to the ones specified in `gradle.properties`.
-blossom {
-    replaceToken("@VER@", mod_version)
-    replaceToken("@NAME@", mod_name)
-    replaceToken("@ID@", mod_id)
-}
+val modid = property("mod.id") as String
+val modname = property("mod.name") as String
+val modversion = property("mod.version") as String
+val mcversion = property("minecraft_version") as String
+val versionrange = property("minecraft_version_range")
+val loaderversion = property("loader_version")
 
-// Sets the mod version to the one specified in `gradle.properties`. Make sure to change this following semver!
-version = mod_version
-// Sets the group, make sure to change this to your own. It can be a website you own backwards or your GitHub username.
-// e.g. com.github.<your username> or com.<your domain>
-group = "org.polyfrost"
-
-// Sets the name of the output jar (the one you put in your mods folder and send to other people)
-// It outputs all versions of the mod into the `build` directory.
 base {
-    archivesName.set("$mod_archives_name-$platform")
+    archivesName.set("$modid-$modversion+$mcversion")
 }
 
-// Configures the Polyfrost Loom, our plugin fork to easily set up the programming environment.
-loom {
-    // Removes the server configs from IntelliJ IDEA, leaving only client runs.
-    // If you're developing a server-side mod, you can remove this line.
-    noServerRunConfigs()
-
-    // Adds the tweak class if we are building legacy version of forge as per the documentation (https://docs.polyfrost.org)
-    if (project.platform.isLegacyForge) {
-        runConfigs {
-            "client" {
-                programArgs("--tweakClass", "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker")
-                property("mixin.debug.export", "true")
-            }
-        }
-    }
-    // Configures the mixins if we are building for forge, useful for when we are dealing with cross-platform projects.
-    if (project.platform.isForge) {
-        forge {
-            mixinConfig("mixins.${mod_id}.json")
-        }
-    }
-    // Configures the name of the mixin "refmap" using an experimental loom api.
-    mixin.defaultRefmapName.set("mixins.${mod_id}.refmap.json")
-}
-
-// Creates the shade/shadow configuration, so we can include libraries inside our mod, rather than having to add them separately.
-val shade: Configuration by configurations.creating {
-    configurations.implementation.get().extendsFrom(this)
-}
-
-// Configures the output directory for when building from the `src/resources` directory.
-sourceSets {
-    val dummy by creating
-    main {
-        compileClasspath += dummy.output
-        output.setResourcesDir(java.classesDirectory)
-    }
-}
-
-// Adds the Polyfrost maven repository so that we can get the libraries necessary to develop the mod.
 repositories {
+    mavenCentral()
+    gradlePluginPortal()
+    google()
+
+    maven("https://maven.parchmentmc.org")
     maven("https://repo.polyfrost.org/releases")
+    maven("https://repo.polyfrost.org/snapshots")
+    maven("https://maven.gegy.dev/releases")
+
+    maven("https://central.sonatype.com/repository/maven-snapshots")
+    maven("https://maven.logix.dev/snapshots") {
+        content { excludeGroup("net.kyori") }
+    }
+    maven("https://nexus.prsm.wtf/repository/maven-public/maven-repo/releases/")
+    maven("https://repo.hypixel.net/repository/Hypixel/")
+    maven("https://maven.deftu.dev/releases")
+
+    maven("https://maven.fabricmc.net/releases")
+    maven("https://jitpack.io") {
+        content { includeGroupAndSubgroups("com.github") }
+    }
+    maven("https://maven.bawnorton.com/releases") {
+        content { includeGroup("com.github.bawnorton.mixinsquared") }
+    }
+    maven("https://maven.azureaaron.net/releases") {
+        content { includeGroup("net.azureaaron") }
+    }
+    maven("https://redirector.kotlinlang.org/maven/compose-dev")
 }
 
-// Configures the libraries/dependencies for your mod.
+loom {
+    runConfigs.all {
+        ideConfigGenerated(stonecutter.current.isActive)
+        runDir = "../../run"
+    }
+
+    runConfigs.remove(runConfigs["server"])
+}
+
 dependencies {
-    // Adds the OneConfig library, so we can develop with it.
-    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
+    minecraft("com.mojang:minecraft:${property("minecraft_version")}")
 
-    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (platform.isFabric) "fabric" else if (platform.isLegacyForge) "forge-legacy" else "forge-latest"}:1.1.2")
+    val hasOfficialMappings = findProperty("has_official_mappings")?.toString()?.toBoolean() ?: true
+    if (hasOfficialMappings) {
+        @Suppress("UnstableApiUsage")
+        mappings(loom.layered {
+            officialMojangMappings()
+            optionalProp("${property("parchment_version")}") {
+                parchment("org.parchmentmc.data:parchment-${property("minecraft_version")}:$it@zip")
+            }
+            optionalProp("${property("yalmm_version")}") {
+                mappings("dev.lambdaurora:yalmm-mojbackward:${property("minecraft_version")}+build.$it")
+            }
+        })
+    } else {
+        findProperty("mappings_version")?.toString()?.takeUnless { it.isBlank() }?.let {
+            mappings(it)
+        }
+    }
 
-    // If we are building for legacy forge, includes the launch wrapper with `shade` as we configured earlier.
-    if (platform.isLegacyForge) {
-        compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
-        shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta17")
+    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
+    modImplementation("org.polyfrost.oneconfig:${property("minecraft_version")}-fabric:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:commands:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:config:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:config-impl:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:events:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:internal:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:ui:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:utils:$oneConfigVersion")
+    implementation("org.polyfrost.oneconfig:hud:$oneConfigVersion")
+}
+
+bloom {
+    replacement("@MOD_ID@", modid)
+    replacement("@MOD_NAME@", modname)
+    replacement("@MOD_VERSION@", modversion)
+}
+
+tasks.processResources {
+    val postEffectJson = when {
+        mcversion == "1.21.4" -> """
+            {
+                "targets": {},
+                "passes": [
+                    {
+                        "program": "polyblur:post/phosphor_motion_blur_legacy",
+                        "inputs": [
+                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                            { "sampler_name": "Prev", "target": "polyblur:previous" }
+                        ],
+                        "uniforms": [
+                            { "name": "Strength", "values": [ 0.4 ] }
+                        ],
+                        "output": "minecraft:main"
+                    }
+                ]
+            }
+        """.trimIndent()
+        mcversion == "1.21.5" -> """
+            {
+                "targets": {},
+                "passes": [
+                    {
+                        "vertex_shader": "minecraft:post/blit",
+                        "fragment_shader": "polyblur:post/phosphor_motion_blur_legacy",
+                        "inputs": [
+                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                            { "sampler_name": "Prev", "target": "polyblur:previous" }
+                        ],
+                        "uniforms": [
+                            { "name": "Strength", "type": "float", "values": [ 0.4 ] }
+                        ],
+                        "output": "minecraft:main"
+                    }
+                ]
+            }
+        """.trimIndent()
+        mcversion == "1.21.8" -> """
+            {
+                "targets": {},
+                "passes": [
+                    {
+                        "vertex_shader": "minecraft:post/blit",
+                        "fragment_shader": "polyblur:post/phosphor_motion_blur",
+                        "inputs": [
+                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                            { "sampler_name": "Prev", "target": "polyblur:previous" }
+                        ],
+                        "uniforms": {
+                            "BlurConfig": [
+                                {
+                                    "name": "Strength",
+                                    "type": "float",
+                                    "value": 0.4
+                                }
+                            ]
+                        },
+                        "output": "minecraft:main"
+                    }
+                ]
+            }
+        """.trimIndent()
+        else -> """
+            {
+                "targets": {},
+                "passes": [
+                    {
+                        "vertex_shader": "minecraft:core/screenquad",
+                        "fragment_shader": "polyblur:post/phosphor_motion_blur",
+                        "inputs": [
+                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                            { "sampler_name": "Prev", "target": "polyblur:previous" }
+                        ],
+                        "uniforms": {
+                            "BlurConfig": [
+                                {
+                                    "name": "Strength",
+                                    "type": "float",
+                                    "value": 0.4
+                                }
+                            ]
+                        },
+                        "output": "minecraft:main"
+                    }
+                ]
+            }
+        """.trimIndent()
+    }
+
+    val props = mapOf(
+        "mod_id" to modid,
+        "mod_name" to modname,
+        "mod_version" to modversion,
+        "minecraft_version_range" to versionrange,
+        "loader_version" to loaderversion,
+        "java_version" to "JAVA_${findProperty("java_version")?.toString() ?: "21"}"
+    )
+
+    inputs.properties(props)
+    inputs.property("postEffectJson", postEffectJson)
+
+    filesMatching(listOf("fabric.mod.json", "mixins.$modid.json")) {
+        expand(props)
+    }
+
+    exclude("assets/polyblur/post_effect/phosphor_motion_blur.json")
+
+    if (mcversion != "1.21.1") {
+        exclude(
+            "assets/minecraft/shaders/post/phosphor_motion_blur.json",
+            "assets/minecraft/shaders/program/phosphor_motion_blur.json",
+            "assets/minecraft/shaders/program/phosphor_motion_blur.fsh"
+        )
+    }
+
+    if (mcversion != "1.21.4") {
+        exclude("assets/polyblur/shaders/post/phosphor_motion_blur_legacy.json")
+    }
+
+    doLast {
+        val output = destinationDir.resolve("assets/polyblur/post_effect/phosphor_motion_blur.json")
+        output.parentFile.mkdirs()
+        output.writeText("$postEffectJson\n")
     }
 }
 
-tasks {
-    // Processes the `src/resources/mcmod.info or fabric.mod.json` and replaces
-    // the mod id, name and version with the ones in `gradle.properties`
-    processResources {
-        inputs.property("id", mod_id)
-        inputs.property("name", mod_name)
-        val java = if (project.platform.mcMinor >= 18) {
-            17 // If we are playing on version 1.18, set the java version to 17
-        } else {
-            // Else if we are playing on version 1.17, use java 16.
-            if (project.platform.mcMinor == 17)
-                16
-            else
-                8 // For all previous versions, we **need** java 8 (for Forge support).
-        }
-        val compatLevel = "JAVA_${java}"
-        inputs.property("java", java)
-        inputs.property("java_level", compatLevel)
-        inputs.property("version", mod_version)
-        inputs.property("mcVersionStr", project.platform.mcVersionStr)
-        filesMatching(listOf("mcmod.info", "mixins.${mod_id}.json", "mods.toml")) {
-            expand(
-                mapOf(
-                    "id" to mod_id,
-                    "name" to mod_name,
-                    "java" to java,
-                    "java_level" to compatLevel,
-                    "version" to mod_version,
-                    "mcVersionStr" to project.platform.mcVersionStr
-                )
-            )
-        }
-        filesMatching("fabric.mod.json") {
-            expand(
-                mapOf(
-                    "id" to mod_id,
-                    "name" to mod_name,
-                    "java" to java,
-                    "java_level" to compatLevel,
-                    "version" to mod_version,
-                    "mcVersionStr" to project.platform.mcVersionStr.substringBeforeLast(".") + ".x"
-                )
-            )
-        }
-    }
+val javaVersionStr = findProperty("java_version")?.toString() ?: "21"
+val javaVersionInt = javaVersionStr.toInt()
 
-    // Configures the resources to include if we are building for forge or fabric.
-    withType(Jar::class.java) {
-        if (project.platform.isFabric) {
-            exclude("mcmod.info", "mods.toml")
-        } else {
-            exclude("fabric.mod.json")
-            if (project.platform.isLegacyForge) {
-                exclude("mods.toml")
-            } else {
-                exclude("mcmod.info")
-            }
+val kotlinJvmTarget = when (javaVersionInt) {
+    21 -> JvmTarget.JVM_21
+    22 -> JvmTarget.JVM_22
+    23 -> JvmTarget.JVM_23
+    24 -> JvmTarget.JVM_24
+    25 -> JvmTarget.JVM_25
+    else -> JvmTarget.JVM_21
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(javaVersionInt)
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions.jvmTarget.set(kotlinJvmTarget)
+}
+
+java {
+    withSourcesJar()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(javaVersionInt))
+    }
+}
+
+tasks.jar {
+    inputs.property("archivesName", base.archivesName)
+
+    from("LICENSE") {
+        rename { "${it}_${inputs.properties["archivesName"]}" }
+    }
+}
+
+fun <T> optionalProp(property: String, block: (String) -> T?): T? =
+    findProperty(property)?.toString()?.takeUnless { it.isBlank() }?.let(block)
+
+val modrinthMinecraftVersionOverride = mapOf(
+    "1.21.8" to listOf("1.21.7", "1.21.8"),
+    "1.21.10" to listOf("1.21.9", "1.21.10"),
+    "26.1" to listOf("26.1", "26.1.1", "26.1.2")
+)
+
+val modrinthId = listOf("oneconfig.publish.modrinth", "publish.modrinth").firstNotNullOfOrNull { findProperty(it) }?.toString()?.takeIf { it.isNotBlank() }
+val modrinthToken = listOf("oneconfig.publish.modrinth.token", "publish.modrinth.token", "modrinth.token").firstNotNullOfOrNull { findProperty(it) }?.toString()?.takeIf { it.isNotBlank() }
+val minecraftVersion = modrinthMinecraftVersionOverride[mcversion] ?: listOf(mcversion)
+val publishJarTaskName = if ("remapJar" in tasks.names) "remapJar" else "jar"
+val changelogs = rootProject.file("CHANGELOG.md").takeIf { it.exists() }?.readText() ?: "No changelog provided."
+
+val validateChangelog by tasks.registering {
+    description = "Validates that the changelog is written for the current version."
+    if (!changelogs.contains(modversion)) {
+        throw GradleException("Changelog for version $modversion not found.")
+    }
+}
+
+tasks.publishMods.configure {
+    dependsOn(validateChangelog)
+}
+tasks.matching { it.name == "publishModrinth" }.configureEach {
+    dependsOn(validateChangelog)
+}
+
+publishMods {
+    file = tasks.named<AbstractArchiveTask>(publishJarTaskName).flatMap { it.archiveFile }
+
+    displayName = modversion
+    version = "v$modversion"
+    changelog = changelogs
+    type = BETA
+
+    modLoaders.add("fabric")
+
+    dryRun = modrinthId == null || modrinthToken == null
+
+    if (modrinthId != null) {
+        modrinth {
+            projectId = modrinthId
+            accessToken = modrinthToken.orEmpty()
+
+            minecraftVersions.addAll(minecraftVersion)
+
+            requires("oneconfig")
+            requires("fabric-language-kotlin")
         }
-    }
-
-    // Configures our shadow/shade configuration, so we can
-    // include some dependencies within our mod jar file.
-    named<ShadowJar>("shadowJar") {
-        archiveClassifier.set("dev")
-        configurations = listOf(shade)
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        relocate("ofconfig.", "")
-    }
-
-    remapJar {
-        inputFile.set(shadowJar.get().archiveFile)
-        archiveClassifier.set("")
-    }
-
-    jar {
-        // Sets the jar manifest attributes.
-        if (platform.isLegacyForge) {
-            manifest.attributes += mapOf(
-                "ModSide" to "CLIENT", // We aren't developing a server-side mod, so this is fine.
-                "ForceLoadAsMod" to true, // We want to load this jar as a mod, so we force Forge to do so.
-                "TweakOrder" to "0", // Makes sure that the OneConfig launch wrapper is loaded as soon as possible.
-                "MixinConfigs" to "mixins.${mod_id}.json", // We want to use our mixin configuration, so we specify it here.
-                "TweakClass" to "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker" // Loads the OneConfig launch wrapper.
-            )
-        }
-        dependsOn(shadowJar)
-        archiveClassifier.set("")
-        enabled = false
     }
 }

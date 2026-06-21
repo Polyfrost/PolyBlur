@@ -1,0 +1,87 @@
+//? if =1.21.4 {
+/*{
+    "targets": {},
+    "passes": [
+        {
+            "program": "polyblur:post/phosphor_motion_blur_legacy",
+            "inputs": [
+                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                { "sampler_name": "Prev", "target": "polyblur:previous" }
+            ],
+            "uniforms": [
+                { "name": "Strength", "values": [ 0.4 ] }
+            ],
+            "output": "minecraft:main"
+        }
+    ]
+}
+*///?}
+//? if =1.21.5 {
+/*{
+    "targets": {},
+    "passes": [
+        {
+            "vertex_shader": "minecraft:post/blit",
+            "fragment_shader": "polyblur:post/phosphor_motion_blur_legacy",
+            "inputs": [
+                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                { "sampler_name": "Prev", "target": "polyblur:previous" }
+            ],
+            "uniforms": [
+                { "name": "Strength", "type": "float", "values": [ 0.4 ] }
+            ],
+            "output": "minecraft:main"
+        }
+    ]
+}
+*///?}
+//? if >1.21.5 && <1.21.10 {
+/*{
+    "targets": {},
+    "passes": [
+        {
+            "vertex_shader": "minecraft:post/blit",
+            "fragment_shader": "polyblur:post/phosphor_motion_blur",
+            "inputs": [
+                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                { "sampler_name": "Prev", "target": "polyblur:previous" }
+            ],
+            "uniforms": {
+                "BlurConfig": [
+                    {
+                        "name": "Strength",
+                        "type": "float",
+                        "value": 0.4
+                    }
+                ]
+            },
+            "output": "minecraft:main"
+        }
+    ]
+}
+*///?}
+//? if >=1.21.10 {
+{
+    "targets": {},
+    "passes": [
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "polyblur:post/phosphor_motion_blur",
+            "inputs": [
+                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                { "sampler_name": "Prev", "target": "polyblur:previous" }
+            ],
+            "uniforms": {
+                "BlurConfig": [
+                    {
+                        "name": "Strength",
+                        "type": "float",
+                        "value": 0.4
+                    }
+                ]
+            },
+            "output": "minecraft:main"
+        }
+    ]
+}
+//?}
