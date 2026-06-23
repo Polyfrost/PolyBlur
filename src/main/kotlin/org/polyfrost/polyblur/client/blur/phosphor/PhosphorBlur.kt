@@ -309,7 +309,7 @@ object PhosphorBlur {
 
                     renderPass.setUniform("BlurConfig", PhosphorBlurUniforms.buffer)
                     //? if >=26.2 {
-                    /*renderPass.drawIndexed(0, 0, 6, 1, 0)*/
+                    /*renderPass.drawIndexed(6, 1, 0, 0, 0)*/
                     //?}
                     //? if <26.2 {
                     renderPass.drawIndexed(0, 0, 6, 1)
