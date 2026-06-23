@@ -1,6 +1,6 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
-//? if >1.21.5 {
+//? if >=1.21.5 {
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.resource.RenderTargetDescriptor
 //? if >=26.2

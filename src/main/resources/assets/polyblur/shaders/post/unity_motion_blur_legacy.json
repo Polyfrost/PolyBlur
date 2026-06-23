@@ -1,0 +1,16 @@
+{
+    "vertex": "minecraft:post/blit",
+    "fragment": "polyblur:post/unity_motion_blur_legacy",
+    "samplers": [
+        { "name": "DiffuseSampler" }
+    ],
+    "uniforms": [
+        { "name": "ProjMat",  "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+        { "name": "InSize",   "type": "float",     "count": 2,  "values": [ 1.0, 1.0 ] },
+        { "name": "OutSize",  "type": "float",     "count": 2,  "values": [ 1.0, 1.0 ] },
+        { "name": "VelocityX", "type": "float",    "count": 1,  "values": [ 0.0 ] },
+        { "name": "VelocityY", "type": "float",    "count": 1,  "values": [ 0.0 ] },
+        { "name": "Samples",  "type": "float",     "count": 1,  "values": [ 4.0 ] },
+        { "name": "Jitter",   "type": "float",     "count": 1,  "values": [ 1.0 ] }
+    ]
+}

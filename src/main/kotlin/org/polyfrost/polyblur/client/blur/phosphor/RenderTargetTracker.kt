@@ -60,7 +60,7 @@ object RenderTargetTracker {
         prevHeight = -1
     }
 
-    private fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
+    fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
         RenderSystem.assertOnRenderThread()
 
         val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)

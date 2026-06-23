@@ -56,6 +56,9 @@ loom {
     runConfigs.all {
         ideConfigGenerated(stonecutter.current.isActive)
         runDir = "../../run"
+        if (project.hasProperty("autoWorld")) {
+            programArgs("--quickPlaySingleplayer", project.property("autoWorld").toString())
+        }
     }
 
     runConfigs.remove(runConfigs["server"])
@@ -192,6 +195,51 @@ tasks.processResources {
         """.trimIndent()
     }
 
+    val motionEffectJson = when {
+        mcversion == "1.21.4" -> """
+            {
+                "targets": {},
+                "passes": [
+                    {
+                        "program": "polyblur:post/unity_motion_blur_legacy",
+                        "inputs": [
+                            { "sampler_name": "Diffuse", "target": "minecraft:main" }
+                        ],
+                        "uniforms": [
+                            { "name": "VelocityX", "values": [ 0.0 ] },
+                            { "name": "VelocityY", "values": [ 0.0 ] },
+                            { "name": "Samples", "values": [ 4.0 ] },
+                            { "name": "Jitter", "values": [ 1.0 ] }
+                        ],
+                        "output": "minecraft:main"
+                    }
+                ]
+            }
+        """.trimIndent()
+        mcversion == "1.21.5" -> """
+            {
+                "targets": {},
+                "passes": [
+                    {
+                        "vertex_shader": "minecraft:post/blit",
+                        "fragment_shader": "polyblur:post/unity_motion_blur_legacy",
+                        "inputs": [
+                            { "sampler_name": "Diffuse", "target": "minecraft:main" }
+                        ],
+                        "uniforms": [
+                            { "name": "VelocityX", "type": "float", "values": [ 0.0 ] },
+                            { "name": "VelocityY", "type": "float", "values": [ 0.0 ] },
+                            { "name": "Samples", "type": "float", "values": [ 4.0 ] },
+                            { "name": "Jitter", "type": "float", "values": [ 1.0 ] }
+                        ],
+                        "output": "minecraft:main"
+                    }
+                ]
+            }
+        """.trimIndent()
+        else -> ""
+    }
+
     val props = mapOf(
         "mod_id" to modid,
         "mod_name" to modname,
@@ -203,29 +251,43 @@ tasks.processResources {
 
     inputs.properties(props)
     inputs.property("postEffectJson", postEffectJson)
+    inputs.property("motionEffectJson", motionEffectJson)
 
     filesMatching(listOf("fabric.mod.json", "mixins.$modid.json")) {
         expand(props)
     }
 
     exclude("assets/polyblur/post_effect/phosphor_motion_blur.json")
+    exclude("assets/polyblur/post_effect/unity_motion_blur.json")
 
     if (mcversion != "1.21.1") {
         exclude(
             "assets/minecraft/shaders/post/phosphor_motion_blur.json",
             "assets/minecraft/shaders/program/phosphor_motion_blur.json",
-            "assets/minecraft/shaders/program/phosphor_motion_blur.fsh"
+            "assets/minecraft/shaders/program/phosphor_motion_blur.fsh",
+            "assets/minecraft/shaders/post/unity_motion_blur.json",
+            "assets/minecraft/shaders/program/unity_motion_blur.json",
+            "assets/minecraft/shaders/program/unity_motion_blur.fsh"
         )
     }
 
     if (mcversion != "1.21.4") {
-        exclude("assets/polyblur/shaders/post/phosphor_motion_blur_legacy.json")
+        exclude(
+            "assets/polyblur/shaders/post/phosphor_motion_blur_legacy.json",
+            "assets/polyblur/shaders/post/unity_motion_blur_legacy.json"
+        )
     }
 
     doLast {
         val output = destinationDir.resolve("assets/polyblur/post_effect/phosphor_motion_blur.json")
         output.parentFile.mkdirs()
         output.writeText("$postEffectJson\n")
+
+        if (motionEffectJson.isNotEmpty()) {
+            val motionOutput = destinationDir.resolve("assets/polyblur/post_effect/unity_motion_blur.json")
+            motionOutput.parentFile.mkdirs()
+            motionOutput.writeText("$motionEffectJson\n")
+        }
     }
 }
 
@@ -281,8 +343,10 @@ val changelogs = rootProject.file("CHANGELOG.md").takeIf { it.exists() }?.readTe
 
 val validateChangelog by tasks.registering {
     description = "Validates that the changelog is written for the current version."
-    if (!changelogs.contains(modversion)) {
-        throw GradleException("Changelog for version $modversion not found.")
+    doLast {
+        if (!changelogs.contains(modversion)) {
+            throw GradleException("Changelog for version $modversion not found.")
+        }
     }
 }
 

@@ -1,0 +1,35 @@
+{
+    "targets": [
+        "swap"
+    ],
+    "passes": [
+        {
+            "name": "unity_motion_blur",
+            "intarget": "minecraft:main",
+            "outtarget": "swap",
+            "uniforms": [
+                {
+                    "name": "VelocityX",
+                    "values": [ 0.0 ]
+                },
+                {
+                    "name": "VelocityY",
+                    "values": [ 0.0 ]
+                },
+                {
+                    "name": "Samples",
+                    "values": [ 4.0 ]
+                },
+                {
+                    "name": "Jitter",
+                    "values": [ 1.0 ]
+                }
+            ]
+        },
+        {
+            "name": "blit",
+            "intarget": "swap",
+            "outtarget": "minecraft:main"
+        }
+    ]
+}

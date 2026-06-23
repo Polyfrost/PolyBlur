@@ -6,6 +6,7 @@
         "maxShiftBy": 5
     },
     "client": [
-        "client.Mixin_ApplyPhosphorBlur"
+        "client.Mixin_ApplyPhosphorBlur",
+        "client.Mixin_CaptureWorldMatrices"
     ]
 }
