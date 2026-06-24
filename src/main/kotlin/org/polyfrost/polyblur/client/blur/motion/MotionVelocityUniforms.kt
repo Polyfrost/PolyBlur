@@ -16,7 +16,7 @@ object MotionVelocityUniforms {
             { "MotionVelocity_UBO" },
             GpuBuffer.USAGE_UNIFORM or GpuBuffer.USAGE_MAP_WRITE,
             //? if >=1.21.11
-            /*SIZE.toLong()*/
+            //SIZE.toLong()
             //? if <1.21.11
             SIZE
         )

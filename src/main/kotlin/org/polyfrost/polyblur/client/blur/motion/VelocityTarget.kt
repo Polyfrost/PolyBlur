@@ -4,7 +4,7 @@ package org.polyfrost.polyblur.client.blur.motion
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
 //? if >=26.2
-/*import com.mojang.blaze3d.GpuFormat*/
+//import com.mojang.blaze3d.GpuFormat
 
 object VelocityTarget {
     private var target: TextureTarget? = null
@@ -16,8 +16,8 @@ object VelocityTarget {
             target?.destroyBuffers()
             target =
                 //? if >=26.2 {
-                /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)*/
-                //?} else {
+                /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
+                *///?} else {
                 TextureTarget("PolyBlur Velocity", width, height, false)
                 //?}
             w = width

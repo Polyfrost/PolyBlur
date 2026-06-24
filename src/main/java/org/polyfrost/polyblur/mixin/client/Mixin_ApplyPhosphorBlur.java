@@ -27,13 +27,23 @@ public class Mixin_ApplyPhosphorBlur {
     //? if >1.21.1
     @Shadow @Final private CrossFrameResourcePool resourcePool;
     //? if >=26.2
-    /*@Shadow @Final private RenderTarget mainRenderTarget;*/
+    //@Shadow @Final private RenderTarget mainRenderTarget;
 
     @Inject(
             method = "render",
             //? if =1.21.1 {
-            /*at = @At("TAIL")
-            *///?} elif >=1.21.4 && <1.21.8 {
+            /*at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V",
+                    shift = At.Shift.AFTER
+            )
+            *///?} elif =1.21.4 {
+            /*at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V",
+                    shift = At.Shift.AFTER
+            )
+            *///?} elif >=1.21.5 && <1.21.8 {
             /*at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/GuiGraphics;flush()V",
@@ -66,14 +76,10 @@ public class Mixin_ApplyPhosphorBlur {
         /*if (useMotion) MotionBlur.render(this.minecraft.getMainRenderTarget());
         else PhosphorBlur.render(this.minecraft.getMainRenderTarget());
         *///?} elif >=26.2 {
-        /*
-        if (!useMotion) PhosphorBlur.render(this.mainRenderTarget, this.resourcePool);
-        *///?} elif >1.21.5 && <26.2 {
-        if (!useMotion) PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
+        //?} elif >1.21.5 && <26.2 {
         //?} elif =1.21.5 {
-        
+
         /*if (useMotion && !PolyBlurConfig.INSTANCE.getVelocityBuffer()) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
-        else if (!useMotion) PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         *///?} else {
         /*if (useMotion) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         else PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
@@ -93,13 +99,20 @@ public class Mixin_ApplyPhosphorBlur {
         if (!PolyBlurConfig.INSTANCE.isEnabled() || this.minecraft.level == null || this.minecraft.getConnection() == null) {
             return;
         }
-        if (PolyBlurConfig.INSTANCE.getBlurType() != 1) return;
-        if (!PolyBlurConfig.INSTANCE.getBlurHand()) return;
+        int blurType = PolyBlurConfig.INSTANCE.getBlurType();
         //? if >=26.2 {
-        /*RenderTarget target = this.mainRenderTarget;*/
-        //?} else {
+        /*RenderTarget target = this.mainRenderTarget;
+        *///?} else {
         RenderTarget target = this.minecraft.getMainRenderTarget();
         //?}
+        if (blurType == 0) {
+            if (PolyBlurConfig.INSTANCE.getBlurHand()) {
+                PhosphorBlur.render(target, this.resourcePool);
+            }
+            return;
+        }
+        if (blurType != 1) return;
+        if (!PolyBlurConfig.INSTANCE.getBlurHand()) return;
         if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
             MotionBlurReproject.render(target);
         }
@@ -114,8 +127,8 @@ public class Mixin_ApplyPhosphorBlur {
     private void polyblur$stashResourcePool(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
         org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setPool(this.resourcePool);
         //? if >=26.2 {
-        /*org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setMainTarget(this.mainRenderTarget);*/
-        //?} else {
+        /*org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setMainTarget(this.mainRenderTarget);
+        *///?} else {
         org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setMainTarget(this.minecraft.getMainRenderTarget());
         //?}
     }

@@ -4,7 +4,7 @@ package org.polyfrost.polyblur.client.blur.phosphor
 import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
 //? if >=26.2
-/*import com.mojang.blaze3d.PrimitiveTopology*/
+//import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.ByteBufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
@@ -16,7 +16,7 @@ object FullscreenQuad {
         val builder = BufferBuilder(
             storage,
             //? if >=26.2
-            /*PrimitiveTopology.QUADS,*/
+            //PrimitiveTopology.QUADS,
             //? if <26.2
             VertexFormat.Mode.QUADS,
             DefaultVertexFormat.POSITION

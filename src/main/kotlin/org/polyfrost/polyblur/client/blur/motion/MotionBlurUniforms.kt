@@ -15,7 +15,7 @@ object MotionBlurUniforms {
             { "MotionBlur_UBO" },
             GpuBuffer.USAGE_UNIFORM or GpuBuffer.USAGE_MAP_WRITE,
             //? if >=1.21.11
-            /*blockSize.toLong()*/
+            //blockSize.toLong()
             //? if <1.21.11
             blockSize
         )

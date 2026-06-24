@@ -85,15 +85,15 @@ object RenderTargetTracker {
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.pipeline.RenderTarget
 //? if >=26.2
-/*import com.mojang.blaze3d.PrimitiveTopology*/
+//import com.mojang.blaze3d.PrimitiveTopology
 //? if >=26.1
-/*import com.mojang.blaze3d.pipeline.ColorTargetState*/
+//import com.mojang.blaze3d.pipeline.ColorTargetState
 //? if >=26.2
-/*import com.mojang.blaze3d.pipeline.BindGroupLayout*/
+//import com.mojang.blaze3d.pipeline.BindGroupLayout
 //? if >=26.1
-/*import com.mojang.blaze3d.pipeline.DepthStencilState*/
+//import com.mojang.blaze3d.pipeline.DepthStencilState
 //? if >=26.1
-/*import com.mojang.blaze3d.platform.CompareOp*/
+//import com.mojang.blaze3d.platform.CompareOp
 //? if <26.1
 import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.resource.RenderTargetDescriptor
@@ -101,7 +101,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
 //? if >=26.2
-/*import java.util.Optional*/
+//import java.util.Optional
 //? if <26.2
 import java.util.OptionalInt
 
@@ -180,8 +180,8 @@ object RenderTargetTracker {
         RenderSystem.assertOnRenderThread()
 
         //? if >=26.2 {
-        /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)*/
-        //?}
+        /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
+        *///?}
         //? if <26.2 {
         val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
         //?}
@@ -192,29 +192,29 @@ object RenderTargetTracker {
             { "PolyBlur/Previous Frame Tracker Blit" },
             dstTarget.getColorTextureView()!!,
             //? if >=26.2 {
-            /*Optional.empty()*/
-            //?}
+            /*Optional.empty()
+            *///?}
             //? if <26.2 {
             OptionalInt.empty()
             //?}
         ).use { renderPass ->
             renderPass.setPipeline(pipeline)
             //? if >=26.2 {
-            /*renderPass.setVertexBuffer(0, vertexBuffer.slice())*/
-            //?}
+            /*renderPass.setVertexBuffer(0, vertexBuffer.slice())
+            *///?}
             //? if <26.2 {
             renderPass.setVertexBuffer(0, vertexBuffer)
             //?}
             renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
             //? if >=1.21.11 {
-            /*renderPass.bindTexture("InSampler", srcTarget.getColorTextureView()!!, BlurSampler.linearClamp)*/
-            //?}
+            /*renderPass.bindTexture("InSampler", srcTarget.getColorTextureView()!!, BlurSampler.linearClamp)
+            *///?}
             //? if <1.21.11 {
             renderPass.bindSampler("InSampler", srcTarget.getColorTextureView()!!)
             //?}
             //? if >=26.2 {
-            /*renderPass.drawIndexed(6, 1, 0, 0, 0)*/
-            //?}
+            /*renderPass.drawIndexed(6, 1, 0, 0, 0)
+            *///?}
             //? if <26.2 {
             renderPass.drawIndexed(0, 0, 6, 1)
             //?}

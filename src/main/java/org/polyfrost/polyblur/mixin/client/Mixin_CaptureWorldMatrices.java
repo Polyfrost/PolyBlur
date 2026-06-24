@@ -17,6 +17,7 @@ import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
 import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
 import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
+import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -36,14 +37,16 @@ import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
 import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
 import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
+import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 *///?}
 //? if >=26.1 && <26.2
-/*import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;*/
+//import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
 //? if =1.21.5 {
-/*import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+/*import com.mojang.blaze3d.resource.CrossFrameResourcePool;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -52,7 +55,9 @@ import org.joml.Matrix4f;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
 import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
+import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
+import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -74,7 +79,20 @@ public class Mixin_CaptureWorldMatrices {
             CallbackInfo ci
     ) {
         WorldCamera.INSTANCE.capture(frustumMatrix, projectionMatrix, camera.getPosition());
-        if (!PolyBlurConfig.INSTANCE.isEnabled() || PolyBlurConfig.INSTANCE.getBlurType() != 1) {
+        if (!PolyBlurConfig.INSTANCE.isEnabled()) {
+            return;
+        }
+        int blurType = PolyBlurConfig.INSTANCE.getBlurType();
+        if (blurType == 0) {
+            if (!PolyBlurConfig.INSTANCE.getBlurHand()) {
+                CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
+                if (pool != null) {
+                    PhosphorBlur.render(Minecraft.getInstance().getMainRenderTarget(), pool);
+                }
+            }
+            return;
+        }
+        if (blurType != 1) {
             return;
         }
         if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
@@ -125,8 +143,8 @@ public class Mixin_CaptureWorldMatrices {
     //?}
 
     //? if >=26.1 && <26.2 {
-    /*
-    @Inject(method = "renderLevel", at = @At("RETURN"))
+    
+    /*@Inject(method = "renderLevel", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices(
             GraphicsResourceAllocator allocator,
             DeltaTracker deltaTracker,
@@ -144,8 +162,8 @@ public class Mixin_CaptureWorldMatrices {
     *///?}
 
     //? if >=26.2 {
-    /*
-    @Inject(method = "render", at = @At("RETURN"))
+    
+    /*@Inject(method = "render", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices(
             GraphicsResourceAllocator allocator,
             DeltaTracker deltaTracker,
@@ -165,13 +183,29 @@ public class Mixin_CaptureWorldMatrices {
     private void polyblur$runMotion(Matrix4f view, Matrix4f projection, Camera camera) {
         WorldCamera.INSTANCE.capture(view, projection,
                 //? if >=1.21.11 {
-                /*camera.position()*/
-                //?} else {
+                /*camera.position()
+                *///?} else {
                 camera.getPosition()
                 //?}
         );
 
-        if (!PolyBlurConfig.INSTANCE.isEnabled() || PolyBlurConfig.INSTANCE.getBlurType() != 1) {
+        if (!PolyBlurConfig.INSTANCE.isEnabled()) {
+            return;
+        }
+
+        int blurType = PolyBlurConfig.INSTANCE.getBlurType();
+
+        if (blurType == 0) {
+            if (!PolyBlurConfig.INSTANCE.getBlurHand()) {
+                CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
+                if (pool != null) {
+                    PhosphorBlur.render(Minecraft.getInstance().getMainRenderTarget(), pool);
+                }
+            }
+            return;
+        }
+
+        if (blurType != 1) {
             return;
         }
 
@@ -196,12 +230,28 @@ public class Mixin_CaptureWorldMatrices {
     /*private void polyblur$runMotion(CameraRenderState camera) {
         WorldCamera.INSTANCE.capture(camera.viewRotationMatrix, camera.projectionMatrix, camera.pos);
 
-        if (!PolyBlurConfig.INSTANCE.isEnabled() || PolyBlurConfig.INSTANCE.getBlurType() != 1) {
+        if (!PolyBlurConfig.INSTANCE.isEnabled()) {
             return;
         }
 
         RenderTarget mainTarget = ResourcePoolHolder.INSTANCE.getMainTarget();
         if (mainTarget == null) {
+            return;
+        }
+
+        int blurType = PolyBlurConfig.INSTANCE.getBlurType();
+
+        if (blurType == 0) {
+            if (!PolyBlurConfig.INSTANCE.getBlurHand()) {
+                CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
+                if (pool != null) {
+                    PhosphorBlur.render(mainTarget, pool);
+                }
+            }
+            return;
+        }
+
+        if (blurType != 1) {
             return;
         }
 
