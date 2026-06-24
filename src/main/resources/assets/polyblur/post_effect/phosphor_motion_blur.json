@@ -9,7 +9,8 @@
                 { "sampler_name": "Prev", "target": "polyblur:previous" }
             ],
             "uniforms": [
-                { "name": "Strength", "values": [ 0.4 ] }
+                { "name": "Strength", "values": [ 0.4 ] },
+                { "name": "Mode", "values": [ 1.0 ] }
             ],
             "output": "minecraft:main"
         }
@@ -28,7 +29,8 @@
                 { "sampler_name": "Prev", "target": "polyblur:previous" }
             ],
             "uniforms": [
-                { "name": "Strength", "type": "float", "values": [ 0.4 ] }
+                { "name": "Strength", "type": "float", "values": [ 0.4 ] },
+                { "name": "Mode", "type": "float", "values": [ 1.0 ] }
             ],
             "output": "minecraft:main"
         }
@@ -52,6 +54,11 @@
                         "name": "Strength",
                         "type": "float",
                         "value": 0.4
+                    },
+                    {
+                        "name": "Mode",
+                        "type": "float",
+                        "value": 1.0
                     }
                 ]
             },
@@ -77,6 +84,11 @@
                         "name": "Strength",
                         "type": "float",
                         "value": 0.4
+                    },
+                    {
+                        "name": "Mode",
+                        "type": "float",
+                        "value": 1.0
                     }
                 ]
             },

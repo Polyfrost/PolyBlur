@@ -29,8 +29,8 @@ object FullscreenQuad {
 
         builder.buildOrThrow().use { mesh ->
             //? if =1.21.5 {
-            /*DefaultVertexFormat.POSITION.uploadImmediateVertexBuffer(mesh.vertexBuffer())*/
-            //?} else {
+            /*DefaultVertexFormat.POSITION.uploadImmediateVertexBuffer(mesh.vertexBuffer())
+            *///?} else {
             RenderSystem.getDevice().createBuffer({ "PolyBlur fullscreen quad" }, GpuBuffer.USAGE_VERTEX, mesh.vertexBuffer())
             //?}
         }

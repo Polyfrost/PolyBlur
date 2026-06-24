@@ -71,8 +71,8 @@ public class Mixin_ApplyPhosphorBlur {
         *///?} elif >1.21.5 && <26.2 {
         if (!useMotion) PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         //?} elif =1.21.5 {
-        /*
-        if (useMotion && !PolyBlurConfig.INSTANCE.getVelocityBuffer()) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
+        
+        /*if (useMotion && !PolyBlurConfig.INSTANCE.getVelocityBuffer()) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         else if (!useMotion) PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         *///?} else {
         /*if (useMotion) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);

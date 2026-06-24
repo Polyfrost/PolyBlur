@@ -18,6 +18,10 @@
                 {
                     "name": "BlendFactor",
                     "values": [ 0.3 ]
+                },
+                {
+                    "name": "Mode",
+                    "values": [ 1.0 ]
                 }
             ]
         },

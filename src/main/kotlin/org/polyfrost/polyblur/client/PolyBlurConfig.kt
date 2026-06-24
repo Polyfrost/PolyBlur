@@ -11,6 +11,11 @@ object PolyBlurConfig : KtConfig(
 ) {
     var isEnabled by switch(def = true, name = "Enabled")
     var blurType by dropdown(options = arrayOf("Phosphor", "Unity"), def = 1, name = "Blur Type")
+    var phosphorMode by dropdown(
+        options = arrayOf("Weighted Max", "Linear Mix", "Alpha Decay"),
+        def = 1,
+        name = "Phosphor Mode"
+    )
     var strength by slider(min = 1f, max = 10f, def = 3f, name = "Blur Strength")
     var motionBlurSamples by slider(min = 4f, max = 32f, def = 12f, name = "Motion Blur Samples")
 
@@ -19,4 +24,8 @@ object PolyBlurConfig : KtConfig(
     var translationParallax by switch(def = true, name = "Translation Parallax")
     var blurHand by switch(def = true, name = "Blur Hand")
     //?}
+
+    init {
+        hideIf(::phosphorMode) { blurType != 0 }
+    }
 }

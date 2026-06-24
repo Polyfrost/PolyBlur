@@ -6,7 +6,7 @@ import com.mojang.blaze3d.buffers.Std140SizeCalculator
 import com.mojang.blaze3d.systems.RenderSystem
 
 object PhosphorBlurUniforms {
-    private val blockSize = Std140SizeCalculator().putFloat().get()
+    private val blockSize = Std140SizeCalculator().putFloat().putFloat().get()
     private val device get() = RenderSystem.getDevice()
 
     val buffer: GpuBuffer by lazy {
@@ -20,14 +20,14 @@ object PhosphorBlurUniforms {
         )
     }
 
-    fun upload(blendFactor: Float) {
+    fun upload(strength: Float, mode: Float) {
         //? if >=26.2 {
         /*buffer.map(false, true).use { mapped ->
-            mapped.data().putFloat(blendFactor)
+            mapped.data().putFloat(strength).putFloat(mode)
         }
         *///?} else {
         device.createCommandEncoder().mapBuffer(buffer, false, true).use { mapped ->
-            mapped.data().putFloat(blendFactor)
+            mapped.data().putFloat(strength).putFloat(mode)
         }
         //?}
     }

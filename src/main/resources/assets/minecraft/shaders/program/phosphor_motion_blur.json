@@ -41,6 +41,12 @@
             "type": "float",
             "count": 1,
             "values": [ 0.3 ]
+        },
+        {
+            "name": "Mode",
+            "type": "float",
+            "count": 1,
+            "values": [ 1.0 ]
         }
     ]
 }

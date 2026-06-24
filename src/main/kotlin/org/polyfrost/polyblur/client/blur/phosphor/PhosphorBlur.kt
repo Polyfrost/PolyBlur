@@ -18,13 +18,28 @@ object PhosphorBlur {
     private var prevHeight = -1
 
     @JvmStatic
-    val currentBlendFactor: Float
-        get() = ((PolyBlurConfig.strength / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+    val phosphorMode: Int
+        get() = PolyBlurConfig.phosphorMode
+
+    @JvmStatic
+    val currentStrength: Float
+        get() {
+            val s = PolyBlurConfig.strength
+            return when (phosphorMode) {
+                // Weighted Max: decay factor applied to the previous frame.
+                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
+                // Alpha Decay: raw feedback strength.
+                2 -> (s / 10f).coerceIn(0f, 1f)
+                // Linear Mix: blend towards the previous frame.
+                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+            }
+        }
 
     @JvmStatic
     fun render(renderTarget: RenderTarget) {
         val shader = getPostChain(renderTarget) ?: return
-        shader.setUniform("BlendFactor", currentBlendFactor)
+        shader.setUniform("BlendFactor", currentStrength)
+        shader.setUniform("Mode", phosphorMode.toFloat())
         shader.process(0f)
     }
 
@@ -73,8 +88,22 @@ object PhosphorBlur {
     private var prevFramebuffer: RenderTarget? = null
 
     @JvmStatic
-    val currentBlendFactor: Float
-        get() = ((PolyBlurConfig.strength / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+    val phosphorMode: Int
+        get() = PolyBlurConfig.phosphorMode
+
+    @JvmStatic
+    val currentStrength: Float
+        get() {
+            val s = PolyBlurConfig.strength
+            return when (phosphorMode) {
+                // Weighted Max: decay factor applied to the previous frame.
+                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
+                // Alpha Decay: raw feedback strength.
+                2 -> (s / 10f).coerceIn(0f, 1f)
+                // Linear Mix: blend towards the previous frame.
+                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+            }
+        }
 
     @JvmStatic
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
@@ -91,7 +120,8 @@ object PhosphorBlur {
         }
 
         val prevFramebuffer = prevFramebuffer ?: return
-        shader?.setUniform("Strength", currentBlendFactor)
+        shader?.setUniform("Strength", currentStrength)
+        shader?.setUniform("Mode", phosphorMode.toFloat())
 
         val builder = FrameGraphBuilder()
         val framebufferSet = BlurFramebufferSet(
@@ -135,8 +165,22 @@ object PhosphorBlur {
     private val shaderLocation by lazy { location(PolyBlurConstants.ID, "phosphor_motion_blur") }
 
     @JvmStatic
-    val currentBlendFactor: Float
-        get() = ((PolyBlurConfig.strength / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+    val phosphorMode: Int
+        get() = PolyBlurConfig.phosphorMode
+
+    @JvmStatic
+    val currentStrength: Float
+        get() {
+            val s = PolyBlurConfig.strength
+            return when (phosphorMode) {
+                // Weighted Max: decay factor applied to the previous frame.
+                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
+                // Alpha Decay: raw feedback strength.
+                2 -> (s / 10f).coerceIn(0f, 1f)
+                // Linear Mix: blend towards the previous frame.
+                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+            }
+        }
 
     @JvmStatic
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
@@ -165,7 +209,8 @@ object PhosphorBlur {
             renderTarget.viewHeight,
             targetBundle
         ) { renderPass ->
-            renderPass.setUniform("Strength", currentBlendFactor)
+            renderPass.setUniform("Strength", currentStrength)
+            renderPass.setUniform("Mode", phosphorMode.toFloat())
         }
 
         builder.execute(resourcePool)
@@ -242,8 +287,22 @@ object PhosphorBlur {
     }
 
     @JvmStatic
-    val currentBlendFactor: Float
-        get() = ((PolyBlurConfig.strength / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+    val phosphorMode: Int
+        get() = PolyBlurConfig.phosphorMode
+
+    @JvmStatic
+    val currentStrength: Float
+        get() {
+            val s = PolyBlurConfig.strength
+            return when (phosphorMode) {
+                // Weighted Max: decay factor applied to the previous frame.
+                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
+                // Alpha Decay: raw feedback strength.
+                2 -> (s / 10f).coerceIn(0f, 1f)
+                // Linear Mix: blend towards the previous frame.
+                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+            }
+        }
 
     @JvmStatic
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
@@ -255,7 +314,7 @@ object PhosphorBlur {
             return
         }
 
-        PhosphorBlurUniforms.upload(currentBlendFactor)
+        PhosphorBlurUniforms.upload(currentStrength, phosphorMode.toFloat())
 
         val tempTarget = InternalTargetTracker.target ?: return
 
