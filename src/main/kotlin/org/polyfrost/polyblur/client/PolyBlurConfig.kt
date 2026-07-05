@@ -17,7 +17,7 @@ object PolyBlurConfig : KtConfig(
         name = "Phosphor Mode"
     )
     var strength by slider(min = 1f, max = 10f, def = 3f, name = "Blur Strength")
-    var motionBlurSamples by slider(min = 4f, max = 32f, def = 12f, name = "Motion Blur Samples")
+    var motionBlurSamples by slider(min = 4f, max = 32f, def = 16f, name = "Motion Blur Samples")
 
     //? if >=1.21.5 {
     var velocityBuffer by switch(def = true, name = "Velocity Buffer")
