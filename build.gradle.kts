@@ -8,7 +8,7 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version "1.1.0"
 }
 
-val oneConfigVersion = "1.0.0-beta.4"
+val oneConfigVersion = "1.0.0-beta.6"
 
 val modid = property("mod.id") as String
 val modname = property("mod.name") as String
@@ -33,13 +33,19 @@ repositories {
 
     maven("https://central.sonatype.com/repository/maven-snapshots")
     maven("https://maven.logix.dev/snapshots") {
-        content { excludeGroup("net.kyori") }
+        content {
+            excludeGroup("net.kyori")
+            excludeGroup("com.terraformersmc")
+        }
     }
     maven("https://nexus.prsm.wtf/repository/maven-public/maven-repo/releases/")
     maven("https://repo.hypixel.net/repository/Hypixel/")
     maven("https://maven.deftu.dev/releases")
 
     maven("https://maven.fabricmc.net/releases")
+    maven("https://maven.terraformersmc.com/releases") {
+        content { includeGroup("com.terraformersmc") }
+    }
     maven("https://jitpack.io") {
         content { includeGroupAndSubgroups("com.github") }
     }

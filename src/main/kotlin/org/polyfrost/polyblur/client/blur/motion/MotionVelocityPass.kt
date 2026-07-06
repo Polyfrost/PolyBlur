@@ -52,7 +52,7 @@ object MotionVelocityPass {
             //? if >=26.2 {
             /*.withVertexBinding(0, DefaultVertexFormat.POSITION)
             .withPrimitiveTopology(PrimitiveTopology.QUADS)
-            .withDepthStencilState(DepthStencilState(CompareOp.ALWAYS_PASS, false))
+            .withDepthStencilState(Optional.empty())
             .withColorTargetState(ColorTargetState.DEFAULT)
             .withBindGroupLayout(
                 BindGroupLayout.builder()
@@ -99,7 +99,13 @@ object MotionVelocityPass {
         } else {
             dVec.set(0f, 0f, 0f, 0f)
         }
-        MotionVelocityUniforms.upload(reproj, invRow3, dVec, MAX_VEL)
+        //? if >=26.2 {
+        /*val zZeroToOne = if (RenderSystem.getDevice().deviceInfo.isZZeroToOne) 1f else 0f
+        *///?}
+        //? if <26.2 {
+        val zZeroToOne = 0f
+        //?}
+        MotionVelocityUniforms.upload(reproj, invRow3, dVec, MAX_VEL, org.polyfrost.polyblur.client.blur.FrameClock.timeScale, zZeroToOne)
 
         //? if >=26.2 {
         /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)

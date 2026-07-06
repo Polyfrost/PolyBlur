@@ -7,7 +7,7 @@ import org.joml.Matrix4f
 import org.joml.Vector4f
 
 object MotionVelocityUniforms {
-    // mat4 (0..63) + vec4 (64..79) + vec4 (80..95) + float (96) -> 112
+    // mat4 (0..63) + vec4 (64..79) + vec4 (80..95) + float MaxVel (96) + float TimeScale (100) + float ZZeroToOne (104) -> 112
     private const val SIZE = 112
     private val device get() = RenderSystem.getDevice()
 
@@ -22,7 +22,7 @@ object MotionVelocityUniforms {
         )
     }
 
-    fun upload(reproj: Matrix4f, invRow3: Vector4f, d: Vector4f, maxVel: Float) {
+    fun upload(reproj: Matrix4f, invRow3: Vector4f, d: Vector4f, maxVel: Float, timeScale: Float, zZeroToOne: Float) {
         //? if >=26.2 {
         /*buffer.map(false, true).use { mapped ->
             val bb = mapped.data()
@@ -30,6 +30,8 @@ object MotionVelocityUniforms {
             invRow3.get(64, bb)
             d.get(80, bb)
             bb.putFloat(96, maxVel)
+            bb.putFloat(100, timeScale)
+            bb.putFloat(104, zZeroToOne)
         }
         *///?} else {
         device.createCommandEncoder().mapBuffer(buffer, false, true).use { mapped ->
@@ -38,6 +40,8 @@ object MotionVelocityUniforms {
             invRow3.get(64, bb)
             d.get(80, bb)
             bb.putFloat(96, maxVel)
+            bb.putFloat(100, timeScale)
+            bb.putFloat(104, zZeroToOne)
         }
         //?}
     }

@@ -11,7 +11,10 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 //? if <1.21.11
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
+import org.polyfrost.polyblur.client.blur.FrameClock;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
+//? if >1.21.5
+import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
 //? if >=1.21.5
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
@@ -28,6 +31,11 @@ public class Mixin_ApplyPhosphorBlur {
     @Shadow @Final private CrossFrameResourcePool resourcePool;
     //? if >=26.2
     //@Shadow @Final private RenderTarget mainRenderTarget;
+
+    @Inject(method = "render", at = @At("HEAD"))
+    private void polyblur$tickFrameClock(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+        FrameClock.tick();
+    }
 
     @Inject(
             method = "render",
@@ -111,6 +119,12 @@ public class Mixin_ApplyPhosphorBlur {
             }
             return;
         }
+        //? if >1.21.5 {
+        if (blurType == 2) {
+            HybridHandPhosphor.render(target, this.resourcePool);
+            return;
+        }
+        //?}
         if (blurType != 1) return;
         if (!PolyBlurConfig.INSTANCE.getBlurHand()) return;
         if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {

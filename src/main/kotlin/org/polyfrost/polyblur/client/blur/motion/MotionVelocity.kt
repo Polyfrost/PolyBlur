@@ -3,6 +3,7 @@ package org.polyfrost.polyblur.client.blur.motion
 import net.minecraft.client.Minecraft
 import net.minecraft.util.Mth
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.FrameClock
 import kotlin.math.hypot
 import kotlin.math.min
 
@@ -62,8 +63,9 @@ object MotionVelocity {
         val aspect = if (height > 0) width.toFloat() / height.toFloat() else 1f
         val fovH = fovV * aspect
 
-        var vx = -(dYaw / fovH)
-        var vy = (dPitch / fovV)
+        val ts = FrameClock.timeScale
+        var vx = -(dYaw / fovH) * ts
+        var vy = (dPitch / fovV) * ts
 
         val mag = hypot(vx, vy)
         val intensity = (PolyBlurConfig.strength / 10f) * MAX_BLUR

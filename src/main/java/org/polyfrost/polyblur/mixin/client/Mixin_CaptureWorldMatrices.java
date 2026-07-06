@@ -18,6 +18,7 @@ import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
 import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
+import org.polyfrost.polyblur.client.blur.phosphor.WorldSnapshotTracker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -38,6 +39,7 @@ import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
 import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
+import org.polyfrost.polyblur.client.blur.phosphor.WorldSnapshotTracker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -205,6 +207,20 @@ public class Mixin_CaptureWorldMatrices {
             return;
         }
 
+        if (blurType == 2) {
+            if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+                MotionVelocityPass.run(Minecraft.getInstance().getMainRenderTarget());
+                MotionBlurReproject.render(Minecraft.getInstance().getMainRenderTarget());
+            } else {
+                CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
+                if (pool != null) {
+                    MotionBlur.render(Minecraft.getInstance().getMainRenderTarget(), pool);
+                }
+            }
+            WorldSnapshotTracker.INSTANCE.capture(Minecraft.getInstance().getMainRenderTarget());
+            return;
+        }
+
         if (blurType != 1) {
             return;
         }
@@ -248,6 +264,20 @@ public class Mixin_CaptureWorldMatrices {
                     PhosphorBlur.render(mainTarget, pool);
                 }
             }
+            return;
+        }
+
+        if (blurType == 2) {
+            if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+                MotionVelocityPass.run(mainTarget);
+                MotionBlurReproject.render(mainTarget);
+            } else {
+                CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
+                if (pool != null) {
+                    MotionBlur.render(mainTarget, pool);
+                }
+            }
+            WorldSnapshotTracker.INSTANCE.capture(mainTarget);
             return;
         }
 

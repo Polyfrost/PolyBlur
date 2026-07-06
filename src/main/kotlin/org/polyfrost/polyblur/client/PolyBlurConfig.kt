@@ -10,13 +10,14 @@ object PolyBlurConfig : KtConfig(
     icon = "/assets/polyblur/polyblur_dark.svg"
 ) {
     var isEnabled by switch(def = true, name = "Enabled")
-    var blurType by dropdown(options = arrayOf("Phosphor", "Unity"), def = 1, name = "Blur Type")
+    var blurType by dropdown(options = arrayOf("Phosphor", "Unity", "Hybrid"), def = 2, name = "Blur Type")
     var phosphorMode by dropdown(
         options = arrayOf("Weighted Max", "Linear Mix", "Alpha Decay"),
         def = 1,
         name = "Phosphor Mode"
     )
     var strength by slider(min = 1f, max = 10f, def = 3f, name = "Blur Strength")
+    var handBlurStrength by slider(min = 1f, max = 10f, def = 5f, name = "Hand Blur Strength")
     var motionBlurSamples by slider(min = 4f, max = 32f, def = 16f, name = "Motion Blur Samples")
 
     //? if >=1.21.5 {
@@ -26,6 +27,10 @@ object PolyBlurConfig : KtConfig(
     //?}
 
     init {
-        hideIf(::phosphorMode) { blurType != 0 }
+        hideIf(::phosphorMode) { blurType != 0 && blurType != 2 }
+        hideIf(::handBlurStrength) { blurType != 2 }
+        //? if >=1.21.5 {
+        hideIf(::blurHand) { blurType == 2 }
+        //?}
     }
 }

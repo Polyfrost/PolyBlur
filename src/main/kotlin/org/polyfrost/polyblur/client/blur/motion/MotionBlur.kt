@@ -186,7 +186,7 @@ object MotionBlur {
             //? if >=26.2 {
             /*.withVertexBinding(0, DefaultVertexFormat.POSITION)
             .withPrimitiveTopology(PrimitiveTopology.QUADS)
-            .withDepthStencilState(DepthStencilState(CompareOp.ALWAYS_PASS, false))
+            .withDepthStencilState(Optional.empty())
             .withColorTargetState(ColorTargetState.DEFAULT)
             .withBindGroupLayout(
                 BindGroupLayout.builder()
