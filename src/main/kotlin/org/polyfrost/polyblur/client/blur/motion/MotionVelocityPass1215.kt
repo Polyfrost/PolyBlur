@@ -39,6 +39,7 @@ object MotionVelocityPass {
             .withUniform("D", UniformType.VEC4)
             .withUniform("MaxVel", UniformType.FLOAT)
             .withSampler("DepthSampler")
+            .withSampler("HistorySampler")
             .build()
     }
 
@@ -46,7 +47,8 @@ object MotionVelocityPass {
     fun run(mainTarget: RenderTarget) {
         if (!WorldCamera.hasPrev) return
 
-        val velTarget = VelocityTarget.get(mainTarget.width, mainTarget.height)
+        val velTarget = VelocityTarget.beginFrame(mainTarget.width, mainTarget.height)
+        val histTarget = VelocityTarget.history ?: return
 
         WorldCamera.invCurVP(invCurVP)
         WorldCamera.prevVP(prevVP)
@@ -71,6 +73,7 @@ object MotionVelocityPass {
             renderPass.setVertexBuffer(0, vertexBuffer)
             renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
             renderPass.bindSampler("DepthSampler", mainTarget.getDepthTexture()!!)
+            renderPass.bindSampler("HistorySampler", histTarget.getColorTexture()!!)
             renderPass.setUniform("Reproj", reproj)
             renderPass.setUniform("InvRow3", invRow3.x, invRow3.y, invRow3.z, invRow3.w)
             renderPass.setUniform("D", dVec.x, dVec.y, dVec.z, dVec.w)

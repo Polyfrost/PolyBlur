@@ -57,6 +57,7 @@ object MotionVelocityPass {
             .withBindGroupLayout(
                 BindGroupLayout.builder()
                     .withSampler("DepthSampler")
+                    .withSampler("HistorySampler")
                     .withUniform("VelocityConfig", UniformType.UNIFORM_BUFFER)
                     .build()
             )
@@ -76,6 +77,7 @@ object MotionVelocityPass {
             //? if <26.2 {
             .withUniform("VelocityConfig", UniformType.UNIFORM_BUFFER)
             .withSampler("DepthSampler")
+            .withSampler("HistorySampler")
             //?}
             .build()
     }
@@ -84,7 +86,8 @@ object MotionVelocityPass {
     fun run(mainTarget: RenderTarget) {
         if (!WorldCamera.hasPrev) return
 
-        val velTarget = VelocityTarget.get(mainTarget.width, mainTarget.height)
+        val velTarget = VelocityTarget.beginFrame(mainTarget.width, mainTarget.height)
+        val histTarget = VelocityTarget.history ?: return
 
         WorldCamera.invCurVP(invCurVP)
         WorldCamera.prevVP(prevVP)
@@ -127,9 +130,11 @@ object MotionVelocityPass {
             renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
             //? if >=1.21.11 {
             /*renderPass.bindTexture("DepthSampler", mainTarget.getDepthTextureView()!!, BlurSampler.linearClamp)
+            renderPass.bindTexture("HistorySampler", histTarget.getColorTextureView()!!, BlurSampler.linearClamp)
             *///?}
             //? if <1.21.11 {
             renderPass.bindSampler("DepthSampler", mainTarget.getDepthTextureView()!!)
+            renderPass.bindSampler("HistorySampler", histTarget.getColorTextureView()!!)
             //?}
             renderPass.setUniform("VelocityConfig", MotionVelocityUniforms.buffer)
             //? if >=26.2 {

@@ -6,26 +6,46 @@ import com.mojang.blaze3d.pipeline.TextureTarget
 //? if >=26.2
 //import com.mojang.blaze3d.GpuFormat
 
+/**
+ * Double-buffered velocity target. The velocity pass reads the previous frame's
+ * result ([history]) to temporally smooth the freshly computed velocity, so the
+ * two buffers are ping-ponged every frame.
+ */
 object VelocityTarget {
-    private var target: TextureTarget? = null
+    private var targetA: TextureTarget? = null
+    private var targetB: TextureTarget? = null
     private var w = -1
     private var h = -1
+    private var parity = false
 
-    fun get(width: Int, height: Int): RenderTarget {
-        if (target == null || width != w || height != h) {
-            target?.destroyBuffers()
-            target =
-                //? if >=26.2 {
-                /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
-                *///?} else {
-                TextureTarget("PolyBlur Velocity", width, height, false)
-                //?}
+    private fun create(width: Int, height: Int): TextureTarget =
+        //? if >=26.2 {
+        /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
+        *///?} else {
+        TextureTarget("PolyBlur Velocity", width, height, false)
+        //?}
+
+    /**
+     * Swaps the buffers and returns the one to render this frame's velocity into.
+     * Must be called exactly once per frame, before [current] or [history] are used.
+     */
+    fun beginFrame(width: Int, height: Int): RenderTarget {
+        if (targetA == null || width != w || height != h) {
+            targetA?.destroyBuffers()
+            targetB?.destroyBuffers()
+            targetA = create(width, height)
+            targetB = create(width, height)
             w = width
             h = height
         }
-        return target!!
+        parity = !parity
+        return if (parity) targetA!! else targetB!!
     }
 
-    val current: RenderTarget? get() = target
+    /** The buffer written this frame; sampled by the blur pass. */
+    val current: RenderTarget? get() = if (parity) targetA else targetB
+
+    /** The buffer written last frame; sampled by the velocity pass for smoothing. */
+    val history: RenderTarget? get() = if (parity) targetB else targetA
 }
 //?}
