@@ -5,6 +5,8 @@ import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
 //? if >=26.2
 //import com.mojang.blaze3d.GpuFormat
+//? if <1.21.11
+import com.mojang.blaze3d.textures.FilterMode
 
 /**
  * Double-buffered velocity target. The velocity pass reads the previous frame's
@@ -18,18 +20,27 @@ object VelocityTarget {
     private var h = -1
     private var parity = false
 
-    private fun create(width: Int, height: Int): TextureTarget =
+    private fun half(v: Int): Int = maxOf(1, (v + 1) / 2)
+
+    private fun create(width: Int, height: Int): TextureTarget {
+        val target =
         //? if >=26.2 {
         /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
         *///?} else {
         TextureTarget("PolyBlur Velocity", width, height, false)
         //?}
+        //? if <1.21.11
+        target.setFilterMode(FilterMode.LINEAR)
+        return target
+    }
 
     /**
      * Swaps the buffers and returns the one to render this frame's velocity into.
      * Must be called exactly once per frame, before [current] or [history] are used.
      */
-    fun beginFrame(width: Int, height: Int): RenderTarget {
+    fun beginFrame(mainWidth: Int, mainHeight: Int): RenderTarget {
+        val width = half(mainWidth)
+        val height = half(mainHeight)
         if (targetA == null || width != w || height != h) {
             targetA?.destroyBuffers()
             targetB?.destroyBuffers()

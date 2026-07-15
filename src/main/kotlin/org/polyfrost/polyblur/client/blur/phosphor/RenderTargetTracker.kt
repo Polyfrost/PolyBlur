@@ -100,6 +100,8 @@ import com.mojang.blaze3d.resource.RenderTargetDescriptor
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
+import org.polyfrost.polyblur.client.blur.BlurPrewarm
+import org.polyfrost.polyblur.client.blur.BlurProfiler
 //? if >=26.2
 //import java.util.Optional
 //? if <26.2
@@ -141,10 +143,30 @@ object RenderTargetTracker {
     private var framebufferFactory: RenderTargetDescriptor? = null
     private var prevWidth = -1
     private var prevHeight = -1
-    private var internalPrevTarget: RenderTarget? = null
+    private var targetA: RenderTarget? = null
+    private var targetB: RenderTarget? = null
+    private var parity = false
+    private var bootstrap = true
+
+    private fun sized(target: RenderTarget?): RenderTarget? =
+        target?.takeIf { it.width == prevWidth && it.height == prevHeight }
 
     val prevTarget: RenderTarget?
-        get() = internalPrevTarget?.takeIf { it.width == prevWidth && it.height == prevHeight }
+        get() = sized(if (parity) targetB else targetA)
+
+    val writeTarget: RenderTarget?
+        get() = sized(if (parity) targetA else targetB)
+
+    fun swap() {
+        parity = !parity
+    }
+
+    val needsBootstrap: Boolean
+        get() = bootstrap
+
+    internal fun prewarm() = BlurPrewarm.compile(pipeline)
+
+    fun ensureSize(width: Int, height: Int) = updateSize(width, height)
 
     fun captureIntoPrevious(sourceTarget: RenderTarget) {
         RenderSystem.assertOnRenderThread()
@@ -152,10 +174,11 @@ object RenderTargetTracker {
         updateSize(sourceTarget.width, sourceTarget.height)
         val currentTarget = prevTarget ?: return
         blit(sourceTarget, currentTarget)
+        bootstrap = false
     }
 
     private fun updateSize(width: Int, height: Int) {
-        if (width == prevWidth && height == prevHeight && internalPrevTarget != null) {
+        if (width == prevWidth && height == prevHeight && targetA != null && targetB != null) {
             return
         }
 
@@ -164,20 +187,33 @@ object RenderTargetTracker {
         }
 
         free()
-        internalPrevTarget = framebufferFactory?.allocate()
+        targetA = framebufferFactory?.allocate()
+        targetB = framebufferFactory?.allocate()
         prevWidth = width
         prevHeight = height
+        bootstrap = true
     }
 
     private fun free() {
-        internalPrevTarget?.let { framebufferFactory?.free(it) }
-        internalPrevTarget = null
+        targetA?.let { framebufferFactory?.free(it) }
+        targetB?.let { framebufferFactory?.free(it) }
+        targetA = null
+        targetB = null
         prevWidth = -1
         prevHeight = -1
     }
 
     fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
         RenderSystem.assertOnRenderThread()
+        BlurProfiler.countBlit()
+
+        if (srcTarget.width == dstTarget.width && srcTarget.height == dstTarget.height) {
+            RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(
+                srcTarget.getColorTexture()!!, dstTarget.getColorTexture()!!,
+                0, 0, 0, 0, 0, srcTarget.width, srcTarget.height
+            )
+            return
+        }
 
         //? if >=26.2 {
         /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)

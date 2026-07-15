@@ -18,6 +18,8 @@ import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
 //? if >=1.21.5
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
+//? if >=1.21.5
+import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,6 +37,8 @@ public class Mixin_ApplyPhosphorBlur {
     @Inject(method = "render", at = @At("HEAD"))
     private void polyblur$tickFrameClock(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
         FrameClock.tick();
+        //? if >1.21.5
+        org.polyfrost.polyblur.client.blur.BlurProfiler.frameStart();
     }
 
     @Inject(
@@ -128,7 +132,9 @@ public class Mixin_ApplyPhosphorBlur {
         if (blurType != 1) return;
         if (!PolyBlurConfig.INSTANCE.getBlurHand()) return;
         if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
-            MotionBlurReproject.render(target);
+            if (!WorldCamera.INSTANCE.getVelocitySettled()) {
+                MotionBlurReproject.render(target);
+            }
         }
         //? if >1.21.5 {
         else {
@@ -139,6 +145,8 @@ public class Mixin_ApplyPhosphorBlur {
 
     @Inject(method = "render", at = @At("HEAD"))
     private void polyblur$stashResourcePool(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+        //? if >1.21.5
+        if (PolyBlurConfig.INSTANCE.isEnabled()) org.polyfrost.polyblur.client.blur.BlurPrewarm.run();
         org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setPool(this.resourcePool);
         //? if >=26.2 {
         /*org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setMainTarget(this.mainRenderTarget);

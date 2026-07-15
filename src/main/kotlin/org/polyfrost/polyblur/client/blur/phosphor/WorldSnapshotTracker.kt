@@ -14,11 +14,17 @@ object WorldSnapshotTracker {
     val snapshot: RenderTarget?
         get() = internalSnapshot?.takeIf { it.width == prevWidth && it.height == prevHeight }
 
-    fun capture(sourceTarget: RenderTarget) {
+    fun ensure(sourceTarget: RenderTarget): RenderTarget? {
         RenderSystem.assertOnRenderThread()
 
         updateSize(sourceTarget.width, sourceTarget.height)
-        val target = snapshot ?: return
+        return snapshot
+    }
+
+    fun capture(sourceTarget: RenderTarget) {
+        RenderSystem.assertOnRenderThread()
+
+        val target = ensure(sourceTarget) ?: return
         RenderTargetTracker.blit(sourceTarget, target)
     }
 

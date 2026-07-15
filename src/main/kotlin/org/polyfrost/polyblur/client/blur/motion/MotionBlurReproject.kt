@@ -21,6 +21,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.BlurPrewarm
+import org.polyfrost.polyblur.client.blur.BlurProfiler
 import org.polyfrost.polyblur.client.blur.phosphor.FullscreenQuad
 import org.polyfrost.polyblur.client.blur.phosphor.InternalTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.RenderTargetTracker
@@ -76,13 +78,21 @@ object MotionBlurReproject {
             .build()
     }
 
-    @JvmStatic
-    fun render(renderTarget: RenderTarget) {
-        val velTarget = VelocityTarget.current ?: return
-        if (!WorldCamera.hasPrev) return
+    internal fun prewarm() = BlurPrewarm.compile(pipeline)
 
-        InternalTargetTracker.updateSize(renderTarget.width, renderTarget.height)
-        val tempTarget = InternalTargetTracker.target ?: return
+    @JvmStatic
+    @JvmOverloads
+    fun render(renderTarget: RenderTarget, outTarget: RenderTarget? = null): Boolean =
+        BlurProfiler.section("motion.reproject") { renderInner(renderTarget, outTarget) }
+
+    private fun renderInner(renderTarget: RenderTarget, outTarget: RenderTarget?): Boolean {
+        val velTarget = VelocityTarget.current ?: return false
+        if (!WorldCamera.hasPrev) return false
+
+        val tempTarget = outTarget ?: run {
+            InternalTargetTracker.updateSize(renderTarget.width, renderTarget.height)
+            InternalTargetTracker.target ?: return false
+        }
 
         val intensity = (PolyBlurConfig.strength / 10f) * MAX_BLUR
         MotionReprojectUniforms.upload(intensity, PolyBlurConfig.motionBlurSamples, 1f, MotionVelocityPass.MAX_VEL)
@@ -132,6 +142,7 @@ object MotionBlurReproject {
         }
 
         RenderTargetTracker.blit(tempTarget, renderTarget)
+        return true
     }
 }
 //?}

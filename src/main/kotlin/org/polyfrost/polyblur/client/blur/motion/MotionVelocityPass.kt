@@ -23,6 +23,8 @@ import org.joml.Matrix4f
 import org.joml.Vector4f
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.BlurPrewarm
+import org.polyfrost.polyblur.client.blur.BlurProfiler
 import org.polyfrost.polyblur.client.blur.phosphor.FullscreenQuad
 import org.polyfrost.polyblur.client.blur.phosphor.location
 //? if >=1.21.11
@@ -82,8 +84,12 @@ object MotionVelocityPass {
             .build()
     }
 
+    internal fun prewarm() = BlurPrewarm.compile(pipeline)
+
     @JvmStatic
-    fun run(mainTarget: RenderTarget) {
+    fun run(mainTarget: RenderTarget) = BlurProfiler.section("motion.velocity") { runInner(mainTarget) }
+
+    private fun runInner(mainTarget: RenderTarget) {
         if (!WorldCamera.hasPrev) return
 
         val velTarget = VelocityTarget.beginFrame(mainTarget.width, mainTarget.height)

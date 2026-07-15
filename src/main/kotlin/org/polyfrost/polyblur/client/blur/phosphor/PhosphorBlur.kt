@@ -245,6 +245,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.BlurPrewarm
+import org.polyfrost.polyblur.client.blur.BlurProfiler
 //? if >=26.2
 //import java.util.Optional
 //? if <26.2
@@ -308,19 +310,24 @@ object PhosphorBlur {
             return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
         }
 
+    internal fun prewarm() = BlurPrewarm.compile(pipeline)
+
     @JvmStatic
-    fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
-        InternalTargetTracker.updateSize(renderTarget.width, renderTarget.height)
+    fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) =
+        BlurProfiler.section("phosphor") { renderInner(renderTarget, resourcePool) }
+
+    private fun renderInner(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
+        RenderTargetTracker.ensureSize(renderTarget.width, renderTarget.height)
 
         val prevTarget = RenderTargetTracker.prevTarget
-        if (prevTarget == null) {
+        if (prevTarget == null || RenderTargetTracker.needsBootstrap) {
             RenderTargetTracker.captureIntoPrevious(renderTarget)
             return
         }
 
         PhosphorBlurUniforms.upload(currentStrength, phosphorMode.toFloat())
 
-        val tempTarget = InternalTargetTracker.target ?: return
+        val tempTarget = RenderTargetTracker.writeTarget ?: return
 
         val builder = FrameGraphBuilder()
         val prevNode = builder.importExternal("previous", prevTarget)
@@ -384,7 +391,7 @@ object PhosphorBlur {
         builder.execute(resourcePool)
 
         RenderTargetTracker.blit(tempTarget, renderTarget)
-        RenderTargetTracker.captureIntoPrevious(renderTarget)
+        RenderTargetTracker.swap()
     }
 }
 //?}
