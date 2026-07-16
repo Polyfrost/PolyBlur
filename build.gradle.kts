@@ -369,7 +369,7 @@ publishMods {
     displayName = modversion
     version = "v$modversion"
     changelog = changelogs
-    type = BETA
+    type = STABLE
 
     modLoaders.add("fabric")
 
