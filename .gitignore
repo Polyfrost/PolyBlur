@@ -17,6 +17,11 @@ out
 build
 .gradle
 
+# fabric
+.fabric
+versions/*/logs
+versions/*/mods
+
 # other
 eclipse
 run

@@ -102,6 +102,9 @@ dependencies {
     implementation("org.polyfrost.oneconfig:ui:$oneConfigVersion")
     implementation("org.polyfrost.oneconfig:utils:$oneConfigVersion")
     implementation("org.polyfrost.oneconfig:hud:$oneConfigVersion")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+    testImplementation("net.fabricmc:fabric-loader-junit:${property("loader_version")}")
 }
 
 bloom {
@@ -322,6 +325,10 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(javaVersionInt))
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 tasks.jar {
