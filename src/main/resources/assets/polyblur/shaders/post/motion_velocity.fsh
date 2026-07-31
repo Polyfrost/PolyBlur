@@ -25,7 +25,12 @@ void main() {
     vec4 ndc = vec4(texCoord * 2.0 - 1.0, ndcZ, 1.0);
 
     vec4 clip = Reproj * ndc;
-    vec4 prevClip = (depth >= 0.99999) ? clip : (clip / dot(InvRow3, ndc) + D);
+    vec4 prevClip;
+    if (depth >= 0.99999) {
+        prevClip = clip;
+    } else {
+        prevClip = clip / dot(InvRow3, ndc) + D;
+    }
 
     vec2 prevUV = (prevClip.xy / prevClip.w) * 0.5 + 0.5;
 
