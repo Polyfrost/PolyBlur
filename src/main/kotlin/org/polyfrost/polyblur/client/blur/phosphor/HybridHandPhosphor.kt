@@ -24,7 +24,7 @@ import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
-import org.polyfrost.polyblur.client.blur.BlurProfiler
+// import org.polyfrost.polyblur.client.blur.BlurProfiler
 //? if >=1.21.11
 //import org.polyfrost.polyblur.client.blur.phosphor.BlurSampler
 //? if >=26.2
@@ -88,7 +88,8 @@ object HybridHandPhosphor {
 
     @JvmStatic
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) =
-        BlurProfiler.section("hybrid.hand") { renderInner(renderTarget, resourcePool) }
+        // BlurProfiler.section("hybrid.hand") { renderInner(renderTarget, resourcePool) }
+        renderInner(renderTarget, resourcePool)
 
     private fun renderInner(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
         RenderTargetTracker.ensureSize(renderTarget.width, renderTarget.height)

@@ -22,7 +22,7 @@ import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
-import org.polyfrost.polyblur.client.blur.BlurProfiler
+// import org.polyfrost.polyblur.client.blur.BlurProfiler
 import org.polyfrost.polyblur.client.blur.phosphor.FullscreenQuad
 import org.polyfrost.polyblur.client.blur.phosphor.InternalTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.RenderTargetTracker
@@ -83,7 +83,8 @@ object MotionBlurReproject {
     @JvmStatic
     @JvmOverloads
     fun render(renderTarget: RenderTarget, outTarget: RenderTarget? = null): Boolean =
-        BlurProfiler.section("motion.reproject") { renderInner(renderTarget, outTarget) }
+        // BlurProfiler.section("motion.reproject") { renderInner(renderTarget, outTarget) }
+        renderInner(renderTarget, outTarget)
 
     private fun renderInner(renderTarget: RenderTarget, outTarget: RenderTarget?): Boolean {
         val velTarget = VelocityTarget.current ?: return false

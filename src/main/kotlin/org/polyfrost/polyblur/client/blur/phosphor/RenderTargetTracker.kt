@@ -101,7 +101,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
-import org.polyfrost.polyblur.client.blur.BlurProfiler
+// import org.polyfrost.polyblur.client.blur.BlurProfiler
 //? if >=26.2
 //import java.util.Optional
 //? if <26.2
@@ -205,7 +205,7 @@ object RenderTargetTracker {
 
     fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
         RenderSystem.assertOnRenderThread()
-        BlurProfiler.countBlit()
+        // BlurProfiler.countBlit()
 
         if (srcTarget.width == dstTarget.width && srcTarget.height == dstTarget.height) {
             RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(

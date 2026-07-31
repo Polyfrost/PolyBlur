@@ -246,7 +246,7 @@ import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
-import org.polyfrost.polyblur.client.blur.BlurProfiler
+// import org.polyfrost.polyblur.client.blur.BlurProfiler
 //? if >=26.2
 //import java.util.Optional
 //? if <26.2
@@ -314,7 +314,8 @@ object PhosphorBlur {
 
     @JvmStatic
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) =
-        BlurProfiler.section("phosphor") { renderInner(renderTarget, resourcePool) }
+        // BlurProfiler.section("phosphor") { renderInner(renderTarget, resourcePool) }
+        renderInner(renderTarget, resourcePool)
 
     private fun renderInner(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
         RenderTargetTracker.ensureSize(renderTarget.width, renderTarget.height)

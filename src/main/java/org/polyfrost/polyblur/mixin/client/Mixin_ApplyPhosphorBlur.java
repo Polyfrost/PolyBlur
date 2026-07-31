@@ -37,8 +37,7 @@ public class Mixin_ApplyPhosphorBlur {
     @Inject(method = "render", at = @At("HEAD"))
     private void polyblur$tickFrameClock(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
         FrameClock.tick();
-        //? if >1.21.5
-        org.polyfrost.polyblur.client.blur.BlurProfiler.frameStart();
+        // org.polyfrost.polyblur.client.blur.BlurProfiler.frameStart();
     }
 
     @Inject(
