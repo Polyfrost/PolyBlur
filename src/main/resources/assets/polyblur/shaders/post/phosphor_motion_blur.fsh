@@ -13,8 +13,8 @@ layout(std140) uniform BlurConfig {
 };
 
 void main() {
-    vec4 curr = texture(DiffuseSampler, texCoord);
-    vec4 prev = texture(PrevSampler, texCoord);
+    vec4 curr = textureLod(DiffuseSampler, texCoord, 0.0);
+    vec4 prev = textureLod(PrevSampler, texCoord, 0.0);
 
     if (Mode < 0.5) {
         // Weighted Max: keep the brightest of the decayed previous frame and the current frame.

@@ -15,6 +15,10 @@ layout(std140) uniform BlurConfig {
     float MaxSamples;
     float Jitter;
     float MaxVel;
+    float InvIntensity;
+    float MinLen;
+    float ScreenW;
+    float ScreenH;
 };
 
 float gnoise(vec2 p) {
@@ -22,11 +26,11 @@ float gnoise(vec2 p) {
 }
 
 void main() {
-    vec2 vel = (texture(VelocitySampler, texCoord).rg * 2.0 - 1.0) * MaxVel;
+    vec2 vel = (textureLod(VelocitySampler, texCoord, 0.0).rg * 2.0 - 1.0) * MaxVel;
 
     float len = length(vel);
-    if (len < MaxVel * (4.0 / 255.0)) {
-        fragColor = texture(DiffuseSampler, texCoord);
+    if (len < MinLen) {
+        fragColor = textureLod(DiffuseSampler, texCoord, 0.0);
         return;
     }
 
@@ -35,17 +39,25 @@ void main() {
         len = Intensity;
     }
 
-    int n = int(clamp(len / max(Intensity, 1e-6) * MaxSamples, 2.0, MaxSamples));
-    float j = (gnoise(gl_FragCoord.xy) - 0.5) * Jitter;
+    float pixels = length(vel * vec2(ScreenW, ScreenH));
+    int n = int(clamp(min(len * InvIntensity * MaxSamples, pixels), 2.0, MaxSamples));
 
-    vec4 acc = vec4(0.0);
+    float j = (gnoise(gl_FragCoord.xy) - 0.5) * Jitter;
+    float invN = 1.0 / float(n);
+
+    float t = (0.5 + j) * invN - 0.5;
+    vec2 uv = texCoord + vel * t;
+    vec2 duv = vel * invN;
+
+    vec3 acc = vec3(0.0);
     float total = 0.0;
     for (int i = 0; i < n; i++) {
-        float t = (float(i) + 0.5 + j) / float(n) - 0.5;
         float w = 1.0 - abs(t) * 2.0;
-        acc += texture(DiffuseSampler, texCoord + vel * t) * w;
+        acc += textureLod(DiffuseSampler, uv, 0.0).rgb * w;
         total += w;
+        uv += duv;
+        t += invN;
     }
 
-    fragColor = total > 0.0 ? acc / total : texture(DiffuseSampler, texCoord);
+    fragColor = total > 0.0 ? vec4(acc / total, 1.0) : textureLod(DiffuseSampler, texCoord, 0.0);
 }

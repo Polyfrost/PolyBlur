@@ -83,6 +83,7 @@ object MotionVelocity {
 
         val maxSamples = PolyBlurConfig.motionBlurSamples
         val clampedMag = min(mag, intensity)
-        samples = (4f + (clampedMag / MAX_BLUR) * (maxSamples - 4f)).coerceIn(4f, maxSamples)
+        val pixels = hypot(velX * width, velY * height)
+        samples = min(4f + (clampedMag / MAX_BLUR) * (maxSamples - 4f), pixels).coerceIn(4f, maxSamples)
     }
 }

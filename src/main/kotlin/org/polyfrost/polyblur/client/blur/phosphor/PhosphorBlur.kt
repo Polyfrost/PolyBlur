@@ -223,7 +223,6 @@ object PhosphorBlur {
 *///?}
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.framegraph.FrameGraphBuilder
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.pipeline.RenderTarget
 //? if >=26.2
@@ -241,7 +240,9 @@ import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.resource.CrossFrameResourcePool
 import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
+//? if <26.2
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
+//? if <26.2
 import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
@@ -256,11 +257,15 @@ object PhosphorBlur {
     private val pipeline by lazy {
         RenderPipeline.builder()
             .withLocation(location(PolyBlurConstants.ID, "phosphor_motion_blur_pipeline"))
-            .withVertexShader(location(PolyBlurConstants.ID, "core/fullscreen_quad"))
+            //? if >=1.21.10 {
+            .withVertexShader("core/screenquad")
+            //?}
+            //? if <1.21.10 {
+            /*.withVertexShader(location(PolyBlurConstants.ID, "core/fullscreen_quad"))
+            *///?}
             .withFragmentShader(location(PolyBlurConstants.ID, "post/phosphor_motion_blur"))
             //? if >=26.2 {
-            /*.withVertexBinding(0, DefaultVertexFormat.POSITION)
-            .withPrimitiveTopology(PrimitiveTopology.QUADS)
+            /*.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .withDepthStencilState(Optional.empty())
             .withColorTargetState(ColorTargetState.DEFAULT)
             .withBindGroupLayout(
@@ -271,9 +276,12 @@ object PhosphorBlur {
                     .build()
             )
             *///?}
-            //? if <26.2 {
-            .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+            //? if >=1.21.10 && <26.2 {
+            .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
             //?}
+            //? if <1.21.10 {
+            /*.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+            *///?}
             //? if >=26.1 && <26.2 {
             /*.withDepthStencilState(DepthStencilState(CompareOp.ALWAYS_PASS, false))
             .withColorTargetState(ColorTargetState.DEFAULT)
@@ -313,11 +321,12 @@ object PhosphorBlur {
     internal fun prewarm() = BlurPrewarm.compile(pipeline)
 
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER")
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) =
-        // BlurProfiler.section("phosphor") { renderInner(renderTarget, resourcePool) }
-        renderInner(renderTarget, resourcePool)
+        // BlurProfiler.section("phosphor") { renderInner(renderTarget) }
+        renderInner(renderTarget)
 
-    private fun renderInner(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
+    private fun renderInner(renderTarget: RenderTarget) {
         RenderTargetTracker.ensureSize(renderTarget.width, renderTarget.height)
 
         val prevTarget = RenderTargetTracker.prevTarget
@@ -330,66 +339,32 @@ object PhosphorBlur {
 
         val tempTarget = RenderTargetTracker.writeTarget ?: return
 
-        val builder = FrameGraphBuilder()
-        val prevNode = builder.importExternal("previous", prevTarget)
-        val tempNode = builder.importExternal("phosphor_temp", tempTarget)
+        RenderSystem.getDevice().createCommandEncoder().createRenderPass(
+            { "PolyBlur/Phosphor" },
+            tempTarget.getColorTextureView()!!,
+            //? if >=26.2 {
+            /*Optional.empty()
+            *///?}
+            //? if <26.2 {
+            OptionalInt.empty()
+            //?}
+        ).use { renderPass ->
+            renderPass.setPipeline(pipeline)
 
-        builder.addPass("PolyBlur/Phosphor").apply {
-            reads(prevNode)
-            readsAndWrites(tempNode)
+            //? if >=1.21.11 {
+            /*renderPass.bindTexture("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
+            *///?}
+            //? if >=1.21.11 {
+            /*renderPass.bindTexture("PrevSampler", prevTarget.getColorTextureView()!!, BlurSampler.linearClamp)
+            *///?}
+            //? if <1.21.11 {
+            renderPass.bindSampler("DiffuseSampler", renderTarget.getColorTextureView()!!)
+            renderPass.bindSampler("PrevSampler", prevTarget.getColorTextureView()!!)
+            //?}
 
-            executes {
-                //? if >=26.2 {
-                /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
-                *///?}
-                //? if <26.2 {
-                val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
-                //?}
-                val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
-                val vertexBuffer = FullscreenQuad.vertexBuffer
-
-                RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-                    { "PolyBlur/Phosphor" },
-                    tempTarget.getColorTextureView()!!,
-                    //? if >=26.2 {
-                    /*Optional.empty()
-                    *///?}
-                    //? if <26.2 {
-                    OptionalInt.empty()
-                    //?}
-                ).use { renderPass ->
-                    renderPass.setPipeline(pipeline)
-                    //? if >=26.2 {
-                    /*renderPass.setVertexBuffer(0, vertexBuffer.slice())
-                    *///?}
-                    //? if <26.2 {
-                    renderPass.setVertexBuffer(0, vertexBuffer)
-                    //?}
-                    renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
-
-                    //? if >=1.21.11 {
-                    /*renderPass.bindTexture("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
-                    *///?}
-                    //? if >=1.21.11 {
-                    /*renderPass.bindTexture("PrevSampler", prevTarget.getColorTextureView()!!, BlurSampler.linearClamp)
-                    *///?}
-                    //? if <1.21.11 {
-                    renderPass.bindSampler("DiffuseSampler", renderTarget.getColorTextureView()!!)
-                    renderPass.bindSampler("PrevSampler", prevTarget.getColorTextureView()!!)
-                    //?}
-
-                    renderPass.setUniform("BlurConfig", PhosphorBlurUniforms.buffer)
-                    //? if >=26.2 {
-                    /*renderPass.drawIndexed(6, 1, 0, 0, 0)
-                    *///?}
-                    //? if <26.2 {
-                    renderPass.drawIndexed(0, 0, 6, 1)
-                    //?}
-                }
-            }
+            renderPass.setUniform("BlurConfig", PhosphorBlurUniforms.buffer)
+            FullscreenPass.draw(renderPass)
         }
-
-        builder.execute(resourcePool)
 
         RenderTargetTracker.blit(tempTarget, renderTarget)
         RenderTargetTracker.swap()

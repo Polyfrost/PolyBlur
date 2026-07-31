@@ -15,8 +15,8 @@ void main() {
     // Blur by TheKodeToad in Sol-Client, Credit to them
     // https://stackoverflow.com/questions/37913286/glsl-motion-blur-post-processing-2-textures-going-to-the-shader-are-the-same
 
-    vec4 curr = texture(DiffuseSampler, texCoord);
-    vec4 prev = texture(PrevSampler, texCoord);
+    vec4 curr = textureLod(DiffuseSampler, texCoord, 0.0);
+    vec4 prev = textureLod(PrevSampler, texCoord, 0.0);
 
     if (Mode < 0.5) {
         // Weighted Max

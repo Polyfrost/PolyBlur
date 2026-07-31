@@ -17,13 +17,15 @@ import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
+//? if <26.2
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
+//? if <26.2
 import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
 // import org.polyfrost.polyblur.client.blur.BlurProfiler
-import org.polyfrost.polyblur.client.blur.phosphor.FullscreenQuad
+import org.polyfrost.polyblur.client.blur.phosphor.FullscreenPass
 import org.polyfrost.polyblur.client.blur.phosphor.InternalTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.RenderTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.location
@@ -43,11 +45,15 @@ object MotionBlurReproject {
     private val pipeline by lazy {
         RenderPipeline.builder()
             .withLocation(location(PolyBlurConstants.ID, "unity_motion_blur_reproject_pipeline"))
-            .withVertexShader(location(PolyBlurConstants.ID, "core/fullscreen_quad"))
+            //? if >=1.21.10 {
+            .withVertexShader("core/screenquad")
+            //?}
+            //? if <1.21.10 {
+            /*.withVertexShader(location(PolyBlurConstants.ID, "core/fullscreen_quad"))
+            *///?}
             .withFragmentShader(location(PolyBlurConstants.ID, "post/unity_motion_blur_reproject"))
             //? if >=26.2 {
-            /*.withVertexBinding(0, DefaultVertexFormat.POSITION)
-            .withPrimitiveTopology(PrimitiveTopology.QUADS)
+            /*.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .withDepthStencilState(Optional.empty())
             .withColorTargetState(ColorTargetState.DEFAULT)
             .withBindGroupLayout(
@@ -58,9 +64,12 @@ object MotionBlurReproject {
                     .build()
             )
             *///?}
-            //? if <26.2 {
-            .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+            //? if >=1.21.10 && <26.2 {
+            .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
             //?}
+            //? if <1.21.10 {
+            /*.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+            *///?}
             //? if >=26.1 && <26.2 {
             /*.withDepthStencilState(DepthStencilState(CompareOp.ALWAYS_PASS, false))
             .withColorTargetState(ColorTargetState.DEFAULT)
@@ -96,16 +105,14 @@ object MotionBlurReproject {
         }
 
         val intensity = (PolyBlurConfig.strength / 10f) * MAX_BLUR
-        MotionReprojectUniforms.upload(intensity, PolyBlurConfig.motionBlurSamples, 1f, MotionVelocityPass.MAX_VEL)
-
-        //? if >=26.2 {
-        /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
-        *///?}
-        //? if <26.2 {
-        val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
-        //?}
-        val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
-        val vertexBuffer = FullscreenQuad.vertexBuffer
+        MotionReprojectUniforms.upload(
+            intensity,
+            PolyBlurConfig.motionBlurSamples,
+            1f,
+            MotionVelocityPass.MAX_VEL,
+            renderTarget.width,
+            renderTarget.height
+        )
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "PolyBlur/MotionReproject" },
@@ -118,13 +125,6 @@ object MotionBlurReproject {
             //?}
         ).use { renderPass ->
             renderPass.setPipeline(pipeline)
-            //? if >=26.2 {
-            /*renderPass.setVertexBuffer(0, vertexBuffer.slice())
-            *///?}
-            //? if <26.2 {
-            renderPass.setVertexBuffer(0, vertexBuffer)
-            //?}
-            renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
             //? if >=1.21.11 {
             /*renderPass.bindTexture("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
             renderPass.bindTexture("VelocitySampler", velTarget.getColorTextureView()!!, BlurSampler.linearClamp)
@@ -134,12 +134,7 @@ object MotionBlurReproject {
             renderPass.bindSampler("VelocitySampler", velTarget.getColorTextureView()!!)
             //?}
             renderPass.setUniform("BlurConfig", MotionReprojectUniforms.buffer)
-            //? if >=26.2 {
-            /*renderPass.drawIndexed(6, 1, 0, 0, 0)
-            *///?}
-            //? if <26.2 {
-            renderPass.drawIndexed(0, 0, 6, 1)
-            //?}
+            FullscreenPass.draw(renderPass)
         }
 
         RenderTargetTracker.blit(tempTarget, renderTarget)

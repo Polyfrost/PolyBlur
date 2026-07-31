@@ -14,12 +14,12 @@ layout(std140) uniform BlurConfig {
 };
 
 void main() {
-    vec4 curr = texture(DiffuseSampler, texCoord);
-    vec4 prev = texture(PrevSampler, texCoord);
-    vec4 world = texture(WorldSampler, texCoord);
+    vec4 curr = textureLod(DiffuseSampler, texCoord, 0.0);
+    vec4 prev = textureLod(PrevSampler, texCoord, 0.0);
+    vec4 world = textureLod(WorldSampler, texCoord, 0.0);
 
-    float diff = length(curr.rgb - world.rgb);
-    float mask = smoothstep(0.003, 0.02, diff);
+    vec3 delta = curr.rgb - world.rgb;
+    float mask = smoothstep(0.003 * 0.003, 0.02 * 0.02, dot(delta, delta));
 
     vec3 phosphor;
     if (Mode < 0.5) {

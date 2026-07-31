@@ -145,7 +145,6 @@ object MotionBlur {
 *///?}
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.framegraph.FrameGraphBuilder
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.pipeline.RenderTarget
 //? if >=26.2
@@ -163,10 +162,12 @@ import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.resource.CrossFrameResourcePool
 import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
+//? if <26.2
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
+//? if <26.2
 import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.PolyBlurConstants
-import org.polyfrost.polyblur.client.blur.phosphor.FullscreenQuad
+import org.polyfrost.polyblur.client.blur.phosphor.FullscreenPass
 import org.polyfrost.polyblur.client.blur.phosphor.InternalTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.RenderTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.location
@@ -181,11 +182,15 @@ object MotionBlur {
     private val pipeline by lazy {
         RenderPipeline.builder()
             .withLocation(location(PolyBlurConstants.ID, "unity_motion_blur_pipeline"))
-            .withVertexShader(location(PolyBlurConstants.ID, "core/fullscreen_quad"))
+            //? if >=1.21.10 {
+            .withVertexShader("core/screenquad")
+            //?}
+            //? if <1.21.10 {
+            /*.withVertexShader(location(PolyBlurConstants.ID, "core/fullscreen_quad"))
+            *///?}
             .withFragmentShader(location(PolyBlurConstants.ID, "post/unity_motion_blur"))
             //? if >=26.2 {
-            /*.withVertexBinding(0, DefaultVertexFormat.POSITION)
-            .withPrimitiveTopology(PrimitiveTopology.QUADS)
+            /*.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .withDepthStencilState(Optional.empty())
             .withColorTargetState(ColorTargetState.DEFAULT)
             .withBindGroupLayout(
@@ -195,9 +200,12 @@ object MotionBlur {
                     .build()
             )
             *///?}
-            //? if <26.2 {
-            .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+            //? if >=1.21.10 && <26.2 {
+            .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
             //?}
+            //? if <1.21.10 {
+            /*.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+            *///?}
             //? if >=26.1 && <26.2 {
             /*.withDepthStencilState(DepthStencilState(CompareOp.ALWAYS_PASS, false))
             .withColorTargetState(ColorTargetState.DEFAULT)
@@ -215,6 +223,7 @@ object MotionBlur {
     }
 
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER")
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
         InternalTargetTracker.updateSize(renderTarget.width, renderTarget.height)
 
@@ -228,60 +237,28 @@ object MotionBlur {
             MotionVelocity.JITTER
         )
 
-        val builder = FrameGraphBuilder()
-        val tempNode = builder.importExternal("motion_temp", tempTarget)
+        RenderSystem.getDevice().createCommandEncoder().createRenderPass(
+            { "PolyBlur/Motion" },
+            tempTarget.getColorTextureView()!!,
+            //? if >=26.2 {
+            /*Optional.empty()
+            *///?}
+            //? if <26.2 {
+            OptionalInt.empty()
+            //?}
+        ).use { renderPass ->
+            renderPass.setPipeline(pipeline)
 
-        builder.addPass("PolyBlur/Motion").apply {
-            readsAndWrites(tempNode)
+            //? if >=1.21.11 {
+            /*renderPass.bindTexture("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
+            *///?}
+            //? if <1.21.11 {
+            renderPass.bindSampler("DiffuseSampler", renderTarget.getColorTextureView()!!)
+            //?}
 
-            executes {
-                //? if >=26.2 {
-                /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
-                *///?}
-                //? if <26.2 {
-                val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
-                //?}
-                val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
-                val vertexBuffer = FullscreenQuad.vertexBuffer
-
-                RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-                    { "PolyBlur/Motion" },
-                    tempTarget.getColorTextureView()!!,
-                    //? if >=26.2 {
-                    /*Optional.empty()
-                    *///?}
-                    //? if <26.2 {
-                    OptionalInt.empty()
-                    //?}
-                ).use { renderPass ->
-                    renderPass.setPipeline(pipeline)
-                    //? if >=26.2 {
-                    /*renderPass.setVertexBuffer(0, vertexBuffer.slice())
-                    *///?}
-                    //? if <26.2 {
-                    renderPass.setVertexBuffer(0, vertexBuffer)
-                    //?}
-                    renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
-
-                    //? if >=1.21.11 {
-                    /*renderPass.bindTexture("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
-                    *///?}
-                    //? if <1.21.11 {
-                    renderPass.bindSampler("DiffuseSampler", renderTarget.getColorTextureView()!!)
-                    //?}
-
-                    renderPass.setUniform("MotionBlurConfig", MotionBlurUniforms.buffer)
-                    //? if >=26.2 {
-                    /*renderPass.drawIndexed(6, 1, 0, 0, 0)
-                    *///?}
-                    //? if <26.2 {
-                    renderPass.drawIndexed(0, 0, 6, 1)
-                    //?}
-                }
-            }
+            renderPass.setUniform("MotionBlurConfig", MotionBlurUniforms.buffer)
+            FullscreenPass.draw(renderPass)
         }
-
-        builder.execute(resourcePool)
 
         RenderTargetTracker.blit(tempTarget, renderTarget)
     }

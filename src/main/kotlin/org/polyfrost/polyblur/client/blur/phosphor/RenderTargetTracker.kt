@@ -98,7 +98,9 @@ import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.resource.RenderTargetDescriptor
 import com.mojang.blaze3d.systems.RenderSystem
+//? if <26.2
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
+//? if <26.2
 import com.mojang.blaze3d.vertex.VertexFormat
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
 // import org.polyfrost.polyblur.client.blur.BlurProfiler
@@ -110,11 +112,15 @@ import java.util.OptionalInt
 object RenderTargetTracker {
     private val pipeline = RenderPipeline.builder()
         .withLocation(location("polyblur", "previous_frame_tracker"))
-        .withVertexShader(location("polyblur", "core/fullscreen_quad"))
+        //? if >=1.21.10 {
+        .withVertexShader("core/screenquad")
+        //?}
+        //? if <1.21.10 {
+        /*.withVertexShader(location("polyblur", "core/fullscreen_quad"))
+        *///?}
         .withFragmentShader("core/blit_screen")
         //? if >=26.2 {
-        /*.withVertexBinding(0, DefaultVertexFormat.POSITION)
-        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        /*.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
         .withDepthStencilState(Optional.empty())
         .withColorTargetState(ColorTargetState.DEFAULT)
         .withBindGroupLayout(
@@ -123,9 +129,12 @@ object RenderTargetTracker {
                 .build()
         )
         *///?}
-        //? if <26.2 {
-        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+        //? if >=1.21.10 && <26.2 {
+        .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
         //?}
+        //? if <1.21.10 {
+        /*.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+        *///?}
         //? if >=26.1 && <26.2 {
         /*.withDepthStencilState(DepthStencilState(CompareOp.ALWAYS_PASS, false))
         .withColorTargetState(ColorTargetState.DEFAULT)
@@ -215,15 +224,6 @@ object RenderTargetTracker {
             return
         }
 
-        //? if >=26.2 {
-        /*val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
-        *///?}
-        //? if <26.2 {
-        val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
-        //?}
-        val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
-        val vertexBuffer = FullscreenQuad.vertexBuffer
-
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "PolyBlur/Previous Frame Tracker Blit" },
             dstTarget.getColorTextureView()!!,
@@ -235,25 +235,13 @@ object RenderTargetTracker {
             //?}
         ).use { renderPass ->
             renderPass.setPipeline(pipeline)
-            //? if >=26.2 {
-            /*renderPass.setVertexBuffer(0, vertexBuffer.slice())
-            *///?}
-            //? if <26.2 {
-            renderPass.setVertexBuffer(0, vertexBuffer)
-            //?}
-            renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
             //? if >=1.21.11 {
             /*renderPass.bindTexture("InSampler", srcTarget.getColorTextureView()!!, BlurSampler.linearClamp)
             *///?}
             //? if <1.21.11 {
             renderPass.bindSampler("InSampler", srcTarget.getColorTextureView()!!)
             //?}
-            //? if >=26.2 {
-            /*renderPass.drawIndexed(6, 1, 0, 0, 0)
-            *///?}
-            //? if <26.2 {
-            renderPass.drawIndexed(0, 0, 6, 1)
-            //?}
+            FullscreenPass.draw(renderPass)
         }
     }
 }

@@ -33,6 +33,10 @@ object MotionBlurReproject {
             .withUniform("MaxSamples", UniformType.FLOAT)
             .withUniform("Jitter", UniformType.FLOAT)
             .withUniform("MaxVel", UniformType.FLOAT)
+            .withUniform("InvIntensity", UniformType.FLOAT)
+            .withUniform("MinLen", UniformType.FLOAT)
+            .withUniform("ScreenW", UniformType.FLOAT)
+            .withUniform("ScreenH", UniformType.FLOAT)
             .withSampler("DiffuseSampler")
             .withSampler("VelocitySampler")
             .build()
@@ -65,6 +69,10 @@ object MotionBlurReproject {
             renderPass.setUniform("MaxSamples", PolyBlurConfig.motionBlurSamples)
             renderPass.setUniform("Jitter", 1f)
             renderPass.setUniform("MaxVel", MotionVelocityPass.MAX_VEL)
+            renderPass.setUniform("InvIntensity", 1f / maxOf(intensity, 1e-6f))
+            renderPass.setUniform("MinLen", MotionVelocityPass.MAX_VEL * (4f / 255f))
+            renderPass.setUniform("ScreenW", renderTarget.width.toFloat())
+            renderPass.setUniform("ScreenH", renderTarget.height.toFloat())
             renderPass.drawIndexed(0, 6)
         }
 
