@@ -24,20 +24,13 @@ void main() {
     }
 
     float j = (gnoise(gl_FragCoord.xy) - 0.5) * Jitter;
-    float invN = 1.0 / float(n);
-
-    float t = (0.5 + j) * invN - 0.5;
-    vec2 uv = texCoord + Velocity * t;
-    vec2 duv = Velocity * invN;
-
     vec3 acc = vec3(0.0);
     float total = 0.0;
     for (int i = 0; i < n; i++) {
+        float t = (float(i) + 0.5 + j) / float(n) - 0.5;
         float w = 1.0 - abs(t) * 2.0;
-        acc += textureLod(DiffuseSampler, uv, 0.0).rgb * w;
+        acc += textureLod(DiffuseSampler, texCoord + Velocity * t, 0.0).rgb * w;
         total += w;
-        uv += duv;
-        t += invN;
     }
 
     fragColor = total > 0.0 ? vec4(acc / total, 1.0) : textureLod(DiffuseSampler, texCoord, 0.0);
