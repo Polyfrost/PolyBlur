@@ -1,2 +1,2 @@
-## 2.0.1
-- Performance optimizations
+## 2.0.2
+- Fix rendering issues on NVIDIA graphics cards
