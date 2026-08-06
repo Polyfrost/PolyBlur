@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
+import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.motion.HybridWorldPass;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
@@ -34,6 +35,7 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
+import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.motion.HybridWorldPass;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
@@ -57,6 +59,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
+import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
 import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
 import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
@@ -99,7 +102,7 @@ public class Mixin_CaptureWorldMatrices {
         if (blurType != 1) {
             return;
         }
-        if (PolyBlurConfig.INSTANCE.getVelocityBuffer() && !WorldCamera.INSTANCE.getVelocitySettled()) {
+        if (BlurSettings.getVelocityBuffer() && !WorldCamera.INSTANCE.getVelocitySettled()) {
             MotionVelocityPass.run(Minecraft.getInstance().getMainRenderTarget());
             // Hand sharp -> blur pre-hand. (1.21.5 global blur stays post-GUI.)
             if (!PolyBlurConfig.INSTANCE.getBlurHand()) {
@@ -210,7 +213,7 @@ public class Mixin_CaptureWorldMatrices {
         }
 
         if (blurType == 2) {
-            if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+            if (BlurSettings.getVelocityBuffer()) {
                 HybridWorldPass.run(Minecraft.getInstance().getMainRenderTarget());
             } else {
                 CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
@@ -226,14 +229,14 @@ public class Mixin_CaptureWorldMatrices {
             return;
         }
 
-        if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+        if (BlurSettings.getVelocityBuffer()) {
             if (!WorldCamera.INSTANCE.getVelocitySettled()) {
                 MotionVelocityPass.run(Minecraft.getInstance().getMainRenderTarget());
             }
         }
 
         if (!PolyBlurConfig.INSTANCE.getBlurHand()) {
-            if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+            if (BlurSettings.getVelocityBuffer()) {
                 if (!WorldCamera.INSTANCE.getVelocitySettled()) {
                     MotionBlurReproject.render(Minecraft.getInstance().getMainRenderTarget());
                 }
@@ -273,13 +276,14 @@ public class Mixin_CaptureWorldMatrices {
         }
 
         if (blurType == 2) {
-            if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+            if (BlurSettings.getVelocityBuffer()) {
                 HybridWorldPass.run(mainTarget);
             } else {
                 CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
                 if (pool != null) {
                     MotionBlur.render(mainTarget, pool);
                 }
+                WorldSnapshotTracker.INSTANCE.capture(mainTarget);
             }
             return;
         }
@@ -288,14 +292,14 @@ public class Mixin_CaptureWorldMatrices {
             return;
         }
 
-        if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+        if (BlurSettings.getVelocityBuffer()) {
             if (!WorldCamera.INSTANCE.getVelocitySettled()) {
                 MotionVelocityPass.run(mainTarget);
             }
         }
 
         if (!PolyBlurConfig.INSTANCE.getBlurHand()) {
-            if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+            if (BlurSettings.getVelocityBuffer()) {
                 if (!WorldCamera.INSTANCE.getVelocitySettled()) {
                     MotionBlurReproject.render(mainTarget);
                 }

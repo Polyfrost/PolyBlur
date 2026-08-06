@@ -12,6 +12,8 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.FrameClock;
+//? if >=1.21.5
+import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
 //? if >1.21.5
 import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
@@ -90,7 +92,7 @@ public class Mixin_ApplyPhosphorBlur {
         //?} elif >1.21.5 && <26.2 {
         //?} elif =1.21.5 {
 
-        /*if (useMotion && !PolyBlurConfig.INSTANCE.getVelocityBuffer()) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
+        /*if (useMotion && !BlurSettings.getVelocityBuffer()) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         *///?} else {
         /*if (useMotion) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         else PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
@@ -130,7 +132,7 @@ public class Mixin_ApplyPhosphorBlur {
         //?}
         if (blurType != 1) return;
         if (!PolyBlurConfig.INSTANCE.getBlurHand()) return;
-        if (PolyBlurConfig.INSTANCE.getVelocityBuffer()) {
+        if (BlurSettings.getVelocityBuffer()) {
             if (!WorldCamera.INSTANCE.getVelocitySettled()) {
                 MotionBlurReproject.render(target);
             }

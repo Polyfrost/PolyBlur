@@ -8,6 +8,9 @@ object FrameClock {
     var dt = 1f / REF_FPS
         private set
 
+    var frame = 0L
+        private set
+
     val timeScale: Float
         get() = (1f / REF_FPS) / dt
 
@@ -16,6 +19,7 @@ object FrameClock {
 
     @JvmStatic
     fun tick() {
+        frame++
         val now = System.nanoTime()
         if (lastNs != 0L) {
             dt = ((now - lastNs) / 1_000_000_000.0).toFloat().coerceIn(0.001f, 0.1f)
