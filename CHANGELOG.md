@@ -1,2 +1,3 @@
-## 2.0.2
-- Fix rendering issues on NVIDIA graphics cards
+## 2.0.3
+- Fix iris compat on hand
+- Fix other rare crashes
