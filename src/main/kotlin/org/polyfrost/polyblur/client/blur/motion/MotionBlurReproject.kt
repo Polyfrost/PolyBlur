@@ -99,6 +99,8 @@ object MotionBlurReproject {
         val velTarget = VelocityTarget.current ?: return false
         if (!WorldCamera.hasPrev) return false
 
+        if (!RenderTargetTracker.isAttachmentInSync(renderTarget)) return false
+
         val tempTarget = outTarget ?: run {
             InternalTargetTracker.updateSize(renderTarget.width, renderTarget.height)
             InternalTargetTracker.target ?: return false

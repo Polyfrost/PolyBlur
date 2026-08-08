@@ -146,8 +146,9 @@ object HybridHandPhosphor {
             FullscreenPass.draw(renderPass)
         }
 
-        RenderTargetTracker.blit(tempTarget, renderTarget)
-        RenderTargetTracker.swap()
+        if (RenderTargetTracker.blit(tempTarget, renderTarget)) {
+            RenderTargetTracker.swap()
+        }
     }
 }
 //?}
