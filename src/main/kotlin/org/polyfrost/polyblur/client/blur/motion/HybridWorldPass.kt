@@ -11,13 +11,15 @@ object HybridWorldPass {
         val snapshot = WorldSnapshotTracker.ensure(mainTarget) ?: return
 
         if (WorldCamera.velocitySettled) {
-            RenderTargetTracker.blit(mainTarget, snapshot)
+            WorldSnapshotTracker.markCaptured(RenderTargetTracker.blit(mainTarget, snapshot))
             return
         }
 
         MotionVelocityPass.run(mainTarget)
-        if (!MotionBlurReproject.render(mainTarget, snapshot)) {
-            RenderTargetTracker.blit(mainTarget, snapshot)
+        if (MotionBlurReproject.render(mainTarget, snapshot)) {
+            WorldSnapshotTracker.markCaptured(true)
+        } else {
+            WorldSnapshotTracker.markCaptured(RenderTargetTracker.blit(mainTarget, snapshot))
         }
     }
 }

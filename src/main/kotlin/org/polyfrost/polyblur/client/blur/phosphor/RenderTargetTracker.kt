@@ -38,6 +38,13 @@ object RenderTargetTracker {
         blit(sourceTarget, currentTarget)
     }
 
+    fun isAttachmentInSync(target: RenderTarget): Boolean {
+        val texture = target.getColorTexture() ?: return false
+        return !texture.isClosed() &&
+            texture.getWidth(0) == target.width &&
+            texture.getHeight(0) == target.height
+    }
+
     private fun updateSize(width: Int, height: Int) {
         if (width == prevWidth && height == prevHeight && internalPrevTarget != null) {
             return
@@ -60,23 +67,46 @@ object RenderTargetTracker {
         prevHeight = -1
     }
 
-    fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget) {
+    fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget): Boolean {
         RenderSystem.assertOnRenderThread()
+
+        val srcTexture = srcTarget.getColorTexture()
+        val dstTexture = dstTarget.getColorTexture()
+
+        if (srcTexture == null || dstTexture == null || srcTexture.isClosed() || dstTexture.isClosed()) {
+            return false
+        }
+
+        val plan = planBlit(
+            srcWidth = srcTarget.width,
+            srcHeight = srcTarget.height,
+            srcTextureWidth = srcTexture.getWidth(0),
+            srcTextureHeight = srcTexture.getHeight(0),
+            dstWidth = dstTarget.width,
+            dstHeight = dstTarget.height,
+            dstTextureWidth = dstTexture.getWidth(0),
+            dstTextureHeight = dstTexture.getHeight(0),
+        )
+
+        if (plan == BlitPlan.SKIP) {
+            return false
+        }
 
         val autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
         val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
         val vertexBuffer = FullscreenQuad.vertexBuffer
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-            dstTarget.getColorTexture()!!,
+            dstTexture,
             OptionalInt.empty()
         ).use { renderPass ->
             renderPass.setPipeline(pipeline)
             renderPass.setVertexBuffer(0, vertexBuffer)
             renderPass.setIndexBuffer(indexBuffer, autoStorageIndexBuffer.type())
-            renderPass.bindSampler("InSampler", srcTarget.getColorTexture()!!)
+            renderPass.bindSampler("InSampler", srcTexture)
             renderPass.drawIndexed(0, 6)
         }
+        return true
     }
 }
 *///?}
@@ -161,6 +191,10 @@ object RenderTargetTracker {
     private var bootstrap = true
 
     private var skipLogged = false
+    private var skipWarned = false
+
+    private const val DESYNC_HINT =
+        "; expected while the window is minimised or the swapchain is being recreated"
 
     private fun sized(target: RenderTarget?): RenderTarget? =
         target?.takeIf { it.width == prevWidth && it.height == prevHeight }
@@ -177,6 +211,10 @@ object RenderTargetTracker {
 
     val needsBootstrap: Boolean
         get() = bootstrap
+
+    fun requireBootstrap() {
+        bootstrap = true
+    }
 
     internal fun prewarm() = BlurPrewarm.compile(pipeline)
 
@@ -219,10 +257,27 @@ object RenderTargetTracker {
     }
 
     fun isAttachmentInSync(target: RenderTarget): Boolean {
-        val texture = target.getColorTexture() ?: return false
-        return !texture.isClosed() &&
-            texture.getWidth(0) == target.width &&
-            texture.getHeight(0) == target.height
+        val texture = target.getColorTexture()
+        val view = target.getColorTextureView()
+
+        if (texture == null || view == null || texture.isClosed() || view.isClosed()) {
+            return skipBlit { "colour attachment missing or closed (${target.width}x${target.height})" }
+        }
+
+        val textureWidth = texture.getWidth(0)
+        val textureHeight = texture.getHeight(0)
+
+        if (textureWidth <= 0 || textureHeight <= 0 ||
+            textureWidth != target.width || textureHeight != target.height
+        ) {
+            return skipBlit {
+                "attachment is out of sync with its render target " +
+                    "(${target.width}x${target.height} backed by ${textureWidth}x$textureHeight)$DESYNC_HINT"
+            }
+        }
+
+        skipLogged = false
+        return true
     }
 
     fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget): Boolean {
@@ -235,12 +290,12 @@ object RenderTargetTracker {
         val dstView = dstTarget.getColorTextureView()
 
         if (srcTexture == null || dstTexture == null || srcView == null || dstView == null ||
-            srcTexture.isClosed() || dstTexture.isClosed()
+            srcTexture.isClosed() || dstTexture.isClosed() || srcView.isClosed() || dstView.isClosed()
         ) {
-            return skipBlit(
+            return skipBlit {
                 "colour attachment missing or closed " +
                     "(src ${srcTarget.width}x${srcTarget.height}, dst ${dstTarget.width}x${dstTarget.height})"
-            )
+            }
         }
 
         val srcTextureWidth = srcTexture.getWidth(0)
@@ -260,12 +315,11 @@ object RenderTargetTracker {
         )
 
         if (plan == BlitPlan.SKIP) {
-            return skipBlit(
+            return skipBlit {
                 "attachments are out of sync with their render targets (src " +
                     "${srcTarget.width}x${srcTarget.height} backed by ${srcTextureWidth}x$srcTextureHeight, dst " +
-                    "${dstTarget.width}x${dstTarget.height} backed by ${dstTextureWidth}x$dstTextureHeight); " +
-                    "expected while the window is minimised or the swapchain is being recreated"
-            )
+                    "${dstTarget.width}x${dstTarget.height} backed by ${dstTextureWidth}x$dstTextureHeight)$DESYNC_HINT"
+            }
         }
 
         skipLogged = false
@@ -300,10 +354,15 @@ object RenderTargetTracker {
         return true
     }
 
-    private fun skipBlit(reason: String): Boolean {
+    private inline fun skipBlit(reason: () -> String): Boolean {
         if (!skipLogged) {
             skipLogged = true
-            logger.debug("Skipping blit: {}", reason)
+            if (skipWarned) {
+                logger.debug("Skipping blit: {}", reason())
+            } else {
+                skipWarned = true
+                logger.warn("Skipping blit: {}. Further occurrences are logged at debug level.", reason())
+            }
         }
         return false
     }

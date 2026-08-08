@@ -327,6 +327,11 @@ object PhosphorBlur {
         renderInner(renderTarget)
 
     private fun renderInner(renderTarget: RenderTarget) {
+        if (!RenderTargetTracker.isAttachmentInSync(renderTarget)) {
+            RenderTargetTracker.requireBootstrap()
+            return
+        }
+
         RenderTargetTracker.ensureSize(renderTarget.width, renderTarget.height)
 
         val prevTarget = RenderTargetTracker.prevTarget
@@ -368,6 +373,8 @@ object PhosphorBlur {
 
         if (RenderTargetTracker.blit(tempTarget, renderTarget)) {
             RenderTargetTracker.swap()
+        } else {
+            RenderTargetTracker.requireBootstrap()
         }
     }
 }

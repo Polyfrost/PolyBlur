@@ -225,6 +225,8 @@ object MotionBlur {
     @JvmStatic
     @Suppress("UNUSED_PARAMETER")
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
+        if (!RenderTargetTracker.isAttachmentInSync(renderTarget)) return
+
         InternalTargetTracker.updateSize(renderTarget.width, renderTarget.height)
 
         val tempTarget = InternalTargetTracker.target ?: return

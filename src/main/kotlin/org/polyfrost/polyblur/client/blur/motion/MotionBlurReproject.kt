@@ -139,8 +139,7 @@ object MotionBlurReproject {
             FullscreenPass.draw(renderPass)
         }
 
-        RenderTargetTracker.blit(tempTarget, renderTarget)
-        return true
+        return RenderTargetTracker.blit(tempTarget, renderTarget)
     }
 }
 //?}

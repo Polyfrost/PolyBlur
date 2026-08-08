@@ -10,22 +10,31 @@ object WorldSnapshotTracker {
     private var prevWidth = -1
     private var prevHeight = -1
     private var internalSnapshot: RenderTarget? = null
+    private var holdsFrame = false
+
+    private val buffer: RenderTarget?
+        get() = internalSnapshot?.takeIf { it.width == prevWidth && it.height == prevHeight }
 
     val snapshot: RenderTarget?
-        get() = internalSnapshot?.takeIf { it.width == prevWidth && it.height == prevHeight }
+        get() = if (holdsFrame) buffer else null
 
     fun ensure(sourceTarget: RenderTarget): RenderTarget? {
         RenderSystem.assertOnRenderThread()
 
         updateSize(sourceTarget.width, sourceTarget.height)
-        return snapshot
+        return buffer
     }
 
-    fun capture(sourceTarget: RenderTarget) {
+    fun capture(sourceTarget: RenderTarget): Boolean {
         RenderSystem.assertOnRenderThread()
 
-        val target = ensure(sourceTarget) ?: return
-        RenderTargetTracker.blit(sourceTarget, target)
+        val target = ensure(sourceTarget) ?: return markCaptured(false)
+        return markCaptured(RenderTargetTracker.blit(sourceTarget, target))
+    }
+
+    fun markCaptured(captured: Boolean): Boolean {
+        holdsFrame = captured
+        return captured
     }
 
     private fun updateSize(width: Int, height: Int) {
@@ -46,6 +55,7 @@ object WorldSnapshotTracker {
     private fun free() {
         internalSnapshot?.let { framebufferFactory?.free(it) }
         internalSnapshot = null
+        holdsFrame = false
         prevWidth = -1
         prevHeight = -1
     }
