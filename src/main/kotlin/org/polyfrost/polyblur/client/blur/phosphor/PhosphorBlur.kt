@@ -26,11 +26,11 @@ object PhosphorBlur {
         get() {
             val s = PolyBlurConfig.strength
             val base = when (phosphorMode) {
-                // Weighted Max: decay factor applied to the previous frame.
+                // weighted max decay factor applied to the previous frame
                 0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // Alpha Decay: raw feedback strength.
+                // alpha decay raw feedback strength
                 2 -> (s / 10f).coerceIn(0f, 1f)
-                // Linear Mix: blend towards the previous frame.
+                // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
             return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
@@ -97,11 +97,11 @@ object PhosphorBlur {
         get() {
             val s = PolyBlurConfig.strength
             val base = when (phosphorMode) {
-                // Weighted Max: decay factor applied to the previous frame.
+                // weighted max decay factor applied to the previous frame
                 0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // Alpha Decay: raw feedback strength.
+                // alpha decay raw feedback strength
                 2 -> (s / 10f).coerceIn(0f, 1f)
-                // Linear Mix: blend towards the previous frame.
+                // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
             return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
@@ -175,11 +175,11 @@ object PhosphorBlur {
         get() {
             val s = PolyBlurConfig.strength
             val base = when (phosphorMode) {
-                // Weighted Max: decay factor applied to the previous frame.
+                // weighted max decay factor applied to the previous frame
                 0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // Alpha Decay: raw feedback strength.
+                // alpha decay raw feedback strength
                 2 -> (s / 10f).coerceIn(0f, 1f)
-                // Linear Mix: blend towards the previous frame.
+                // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
             return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
@@ -308,11 +308,11 @@ object PhosphorBlur {
         get() {
             val s = PolyBlurConfig.strength
             val base = when (phosphorMode) {
-                // Weighted Max: decay factor applied to the previous frame.
+                // weighted max decay factor applied to the previous frame
                 0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // Alpha Decay: raw feedback strength.
+                // alpha decay raw feedback strength
                 2 -> (s / 10f).coerceIn(0f, 1f)
-                // Linear Mix: blend towards the previous frame.
+                // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
             return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()

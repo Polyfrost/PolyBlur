@@ -1,6 +1,6 @@
 #version 150
 
-// without UBO support (1.21.5 and below)
+// variant for versions without ubo support
 
 uniform sampler2D DepthSampler;
 uniform sampler2D HistorySampler;
@@ -9,12 +9,11 @@ in vec2 texCoord;
 
 out vec4 fragColor;
 
-uniform mat4 Reproj;    // prevVP * inverse(curVP)
-uniform vec4 InvRow3;   // 4th row of inverse(curVP)
-uniform vec4 D;         // prevVP * vec4(cameraDelta, 0)
+uniform mat4 Reproj;    // prevVP times the inverse of curVP
+uniform vec4 InvRow3;   // 4th row of the inverse of curVP
+uniform vec4 D;         // prevVP applied to the camera delta as a direction
 uniform float MaxVel;
 
-// See motion_velocity.fsh for the rationale behind temporal smoothing.
 const float VELOCITY_SMOOTHING = 0.35;
 
 void main() {

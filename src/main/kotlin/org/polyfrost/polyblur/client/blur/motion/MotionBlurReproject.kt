@@ -36,9 +36,7 @@ import org.polyfrost.polyblur.client.blur.phosphor.location
 //? if <26.2
 import java.util.OptionalInt
 
-/**
- * Pass 2 post-hand pre-GUI
- */
+/** pass 2 runs after the hand and before the GUI */
 object MotionBlurReproject {
     private const val MAX_BLUR = 0.15f
 

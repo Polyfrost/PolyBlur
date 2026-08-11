@@ -8,7 +8,7 @@ import kotlin.math.hypot
 import kotlin.math.min
 
 object MotionVelocity {
-    /** Max smear half-length in UV units at full strength. */
+    /** max smear half length in UV units at full strength */
     private const val MAX_BLUR = 0.08f
     const val JITTER = 1.0f
 

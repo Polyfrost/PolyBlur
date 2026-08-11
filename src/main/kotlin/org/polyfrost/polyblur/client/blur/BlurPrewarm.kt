@@ -34,7 +34,6 @@ object BlurPrewarm {
         }
     }
 
-    /** Each pass calls this from its own `prewarm`, where its pipeline is in scope. */
     internal fun compile(pipeline: RenderPipeline): Boolean =
         RenderSystem.getDevice().precompilePipeline(pipeline).isValid()
 }

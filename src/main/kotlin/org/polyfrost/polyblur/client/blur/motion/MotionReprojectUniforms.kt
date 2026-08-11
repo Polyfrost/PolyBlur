@@ -5,7 +5,7 @@ import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
 
 object MotionReprojectUniforms {
-    // 8 floats -> 32 bytes
+    // 8 floats packed as 32 bytes
     private const val SIZE = 32
     private val device get() = RenderSystem.getDevice()
 

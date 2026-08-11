@@ -29,7 +29,7 @@ class BlitPlanTest {
         )
     }
 
-    /** The crash: VulkanMod's 10x10 placeholder swapchain framebuffer behind a 1920x1080 main target. */
+    /** the crash from vulkanmod placing a 10x10 placeholder swapchain framebuffer behind a 1920x1080 main target */
     @Test
     fun `destination smaller than it reports is skipped`() {
         assertEquals(

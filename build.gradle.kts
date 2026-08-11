@@ -4,65 +4,83 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("dev.kikugie.loom-back-compat")
-    id("org.jetbrains.kotlin.jvm") version "2.3.0"
+    id("org.jetbrains.kotlin.jvm") version "2.4.10"
     id("dev.deftu.gradle.bloom") version "0.2.0"
-    id("me.modmuss50.mod-publish-plugin") version "1.1.0"
+    id("me.modmuss50.mod-publish-plugin") version "2.2.0"
 }
 
-val oneConfigVersion = "1.0.0-beta.6"
+val modid: String = sc.properties["mod.id"]
+val modname: String = sc.properties["mod.name"]
+val modversion: String = sc.properties["mod.version"]
+val mcversion: String = sc.current.version
+val versionrange: String = sc.properties["mod.mc_compat"]
+val loaderversion: String = sc.properties["deps.fabric_loader"]
+val oneconfigversion: String = sc.properties["deps.oneconfig"]
+val fapiversion: String = sc.properties["deps.fabric_api"]
 
-val modid = property("mod.id") as String
-val modname = property("mod.name") as String
-val modversion = property("mod.version") as String
-val mcversion = property("minecraft_version") as String
-val versionrange = property("minecraft_version_range")
-val loaderversion = property("loader_version")
+version = "$modversion+$mcversion"
+base.archivesName = modid
 
-base {
-    archivesName.set("$modid-$modversion+$mcversion")
+val requiredJava: JavaVersion = when {
+    sc.current.parsed >= "26.1" -> JavaVersion.VERSION_25
+    sc.current.parsed >= "1.20.5" -> JavaVersion.VERSION_21
+    sc.current.parsed >= "1.18" -> JavaVersion.VERSION_17
+    sc.current.parsed >= "1.17" -> JavaVersion.VERSION_16
+    else -> JavaVersion.VERSION_1_8
 }
+
+val compatibleVersions: List<String> = sc.properties.rawOrNull("mod", "mc_releases")
+    ?.asList().orEmpty().map { it.toString() }
 
 repositories {
+    fun strictMaven(url: String, alias: String, vararg groups: String) = exclusiveContent {
+        forRepository { maven(url) { name = alias } }
+        filter { groups.forEach(::includeGroup) }
+    }
+
     mavenCentral()
-    gradlePluginPortal()
     google()
+    maven("https://repo.polyfrost.org/releases") { name = "Polyfrost Releases" }
+    maven("https://repo.polyfrost.org/snapshots") { name = "Polyfrost Snapshots" }
+    maven("https://central.sonatype.com/repository/maven-snapshots") {
+        name = "Sonatype Snapshots"
+        content { includeGroup("net.kyori") }
+    }
+    strictMaven("https://maven.deftu.dev/releases", "Deftu", "dev.deftu")
+    strictMaven("https://maven.terraformersmc.com/", "TerraformersMC", "com.terraformersmc")
+    strictMaven("https://maven.fabricmc.net/", "FabricMC", "net.fabricmc")
+    strictMaven("https://www.cursemaven.com", "CurseForge", "curse.maven")
+    strictMaven("https://api.modrinth.com/maven", "Modrinth", "maven.modrinth")
+}
 
-    maven("https://maven.parchmentmc.org")
-    maven("https://repo.polyfrost.org/releases")
-    maven("https://repo.polyfrost.org/snapshots")
-    maven("https://maven.gegy.dev/releases")
+dependencies {
+    minecraft("com.mojang:minecraft:$mcversion")
+    loomx.applyMojangMappings()
 
-    maven("https://central.sonatype.com/repository/maven-snapshots")
-    maven("https://maven.logix.dev/snapshots") {
-        content {
-            excludeGroup("net.kyori")
-            excludeGroup("com.terraformersmc")
-        }
+    modImplementation("net.fabricmc:fabric-loader:$loaderversion")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:$fapiversion")
+    modImplementation("org.polyfrost.oneconfig:$mcversion-fabric:$oneconfigversion")
+    for (module in arrayOf("commands", "config", "config-impl", "events", "internal", "ui", "utils", "hud")) {
+        implementation("org.polyfrost.oneconfig:$module:$oneconfigversion")
     }
-    maven("https://nexus.prsm.wtf/repository/maven-public/maven-repo/releases/")
-    maven("https://repo.hypixel.net/repository/Hypixel/")
-    maven("https://maven.deftu.dev/releases")
 
-    maven("https://maven.fabricmc.net/releases")
-    maven("https://maven.terraformersmc.com/releases") {
-        content { includeGroup("com.terraformersmc") }
-    }
-    maven("https://jitpack.io") {
-        content { includeGroupAndSubgroups("com.github") }
-    }
-    maven("https://maven.bawnorton.com/releases") {
-        content { includeGroup("com.github.bawnorton.mixinsquared") }
-    }
-    maven("https://maven.azureaaron.net/releases") {
-        content { includeGroup("net.azureaaron") }
-    }
-    maven("https://redirector.kotlinlang.org/maven/compose-dev")
+    testImplementation("org.junit.jupiter:junit-jupiter:${sc.properties.get<String>("deps.junit")}")
+    testImplementation("net.fabricmc:fabric-loader-junit:$loaderversion")
 }
 
 loom {
+    fabricModJsonPath = rootProject.file("src/main/resources/fabric.mod.json")
+
+    decompilerOptions.named("vineflower") {
+        options.put("mark-corresponding-synthetics", "1")
+    }
+
     runConfigs.all {
-        ideConfigGenerated(stonecutter.current.isActive)
-        runDir = "../../run"
+        preferGradleTask = true
+        generateRunConfig = true
+        runDirectory = rootProject.file("run")
+        jvmArguments.add("-Dmixin.debug.export=true")
+
         if (project.hasProperty("autoWorld")) {
             programArgs("--quickPlaySingleplayer", project.property("autoWorld").toString())
         }
@@ -71,41 +89,25 @@ loom {
     runConfigs.remove(runConfigs["server"])
 }
 
-dependencies {
-    minecraft("com.mojang:minecraft:${property("minecraft_version")}")
+java {
+    withSourcesJar()
+    targetCompatibility = requiredJava
+    sourceCompatibility = requiredJava
 
-    val hasOfficialMappings = findProperty("has_official_mappings")?.toString()?.toBoolean() ?: true
-    if (hasOfficialMappings) {
-        @Suppress("UnstableApiUsage")
-        mappings(loom.layered {
-            officialMojangMappings()
-            optionalProp("${property("parchment_version")}") {
-                parchment("org.parchmentmc.data:parchment-${property("minecraft_version")}:$it@zip")
-            }
-            optionalProp("${property("yalmm_version")}") {
-                mappings("dev.lambdaurora:yalmm-mojbackward:${property("minecraft_version")}+build.$it")
-            }
-        })
-    } else {
-        findProperty("mappings_version")?.toString()?.takeUnless { it.isBlank() }?.let {
-            mappings(it)
-        }
+    toolchain {
+        vendor = JvmVendorSpec.ADOPTIUM
+        languageVersion = JavaLanguageVersion.of(requiredJava.majorVersion)
     }
+}
 
-    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
-    modImplementation("org.polyfrost.oneconfig:${property("minecraft_version")}-fabric:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:commands:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:config:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:config-impl:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:events:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:internal:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:ui:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:utils:$oneConfigVersion")
-    implementation("org.polyfrost.oneconfig:hud:$oneConfigVersion")
+val kotlinJvmTarget = JvmTarget.fromTarget(requiredJava.majorVersion)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
-    testImplementation("net.fabricmc:fabric-loader-junit:${property("loader_version")}")
+tasks.withType<JavaCompile>().configureEach {
+    options.release = requiredJava.majorVersion.toInt()
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions.jvmTarget = kotlinJvmTarget
 }
 
 bloom {
@@ -114,257 +116,231 @@ bloom {
     replacement("@MOD_VERSION@", modversion)
 }
 
-tasks.processResources {
-    val postEffectJson = when {
-        mcversion == "1.21.4" -> """
-            {
-                "targets": {},
-                "passes": [
-                    {
-                        "program": "polyblur:post/phosphor_motion_blur_legacy",
-                        "inputs": [
-                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
-                            { "sampler_name": "Prev", "target": "polyblur:previous" }
-                        ],
-                        "uniforms": [
-                            { "name": "Strength", "values": [ 0.4 ] }
-                        ],
-                        "output": "minecraft:main"
-                    }
-                ]
-            }
-        """.trimIndent()
-        mcversion == "1.21.5" -> """
-            {
-                "targets": {},
-                "passes": [
-                    {
-                        "vertex_shader": "minecraft:post/blit",
-                        "fragment_shader": "polyblur:post/phosphor_motion_blur_legacy",
-                        "inputs": [
-                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
-                            { "sampler_name": "Prev", "target": "polyblur:previous" }
-                        ],
-                        "uniforms": [
-                            { "name": "Strength", "type": "float", "values": [ 0.4 ] }
-                        ],
-                        "output": "minecraft:main"
-                    }
-                ]
-            }
-        """.trimIndent()
-        mcversion == "1.21.8" -> """
-            {
-                "targets": {},
-                "passes": [
-                    {
-                        "vertex_shader": "minecraft:post/blit",
-                        "fragment_shader": "polyblur:post/phosphor_motion_blur",
-                        "inputs": [
-                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
-                            { "sampler_name": "Prev", "target": "polyblur:previous" }
-                        ],
-                        "uniforms": {
-                            "BlurConfig": [
-                                {
-                                    "name": "Strength",
-                                    "type": "float",
-                                    "value": 0.4
-                                }
-                            ]
-                        },
-                        "output": "minecraft:main"
-                    }
-                ]
-            }
-        """.trimIndent()
-        else -> """
-            {
-                "targets": {},
-                "passes": [
-                    {
-                        "vertex_shader": "minecraft:core/screenquad",
-                        "fragment_shader": "polyblur:post/phosphor_motion_blur",
-                        "inputs": [
-                            { "sampler_name": "Diffuse", "target": "minecraft:main" },
-                            { "sampler_name": "Prev", "target": "polyblur:previous" }
-                        ],
-                        "uniforms": {
-                            "BlurConfig": [
-                                {
-                                    "name": "Strength",
-                                    "type": "float",
-                                    "value": 0.4
-                                }
-                            ]
-                        },
-                        "output": "minecraft:main"
-                    }
-                ]
-            }
-        """.trimIndent()
-    }
-
-    val motionEffectJson = when {
-        mcversion == "1.21.4" -> """
-            {
-                "targets": {},
-                "passes": [
-                    {
-                        "program": "polyblur:post/unity_motion_blur_legacy",
-                        "inputs": [
-                            { "sampler_name": "Diffuse", "target": "minecraft:main" }
-                        ],
-                        "uniforms": [
-                            { "name": "VelocityX", "values": [ 0.0 ] },
-                            { "name": "VelocityY", "values": [ 0.0 ] },
-                            { "name": "Samples", "values": [ 4.0 ] },
-                            { "name": "Jitter", "values": [ 1.0 ] }
-                        ],
-                        "output": "minecraft:main"
-                    }
-                ]
-            }
-        """.trimIndent()
-        mcversion == "1.21.5" -> """
-            {
-                "targets": {},
-                "passes": [
-                    {
-                        "vertex_shader": "minecraft:post/blit",
-                        "fragment_shader": "polyblur:post/unity_motion_blur_legacy",
-                        "inputs": [
-                            { "sampler_name": "Diffuse", "target": "minecraft:main" }
-                        ],
-                        "uniforms": [
-                            { "name": "VelocityX", "type": "float", "values": [ 0.0 ] },
-                            { "name": "VelocityY", "type": "float", "values": [ 0.0 ] },
-                            { "name": "Samples", "type": "float", "values": [ 4.0 ] },
-                            { "name": "Jitter", "type": "float", "values": [ 1.0 ] }
-                        ],
-                        "output": "minecraft:main"
-                    }
-                ]
-            }
-        """.trimIndent()
-        else -> ""
-    }
-
-    val props = mapOf(
-        "mod_id" to modid,
-        "mod_name" to modname,
-        "mod_version" to modversion,
-        "minecraft_version_range" to versionrange,
-        "loader_version" to loaderversion,
-        "java_version" to "JAVA_${findProperty("java_version")?.toString() ?: "21"}"
-    )
-
-    inputs.properties(props)
-    inputs.property("postEffectJson", postEffectJson)
-    inputs.property("motionEffectJson", motionEffectJson)
-
-    filesMatching(listOf("fabric.mod.json", "mixins.$modid.json")) {
-        expand(props)
-    }
-
-    exclude("assets/polyblur/post_effect/phosphor_motion_blur.json")
-    exclude("assets/polyblur/post_effect/unity_motion_blur.json")
-
-    if (mcversion != "1.21.1") {
-        exclude(
-            "assets/minecraft/shaders/post/phosphor_motion_blur.json",
-            "assets/minecraft/shaders/program/phosphor_motion_blur.json",
-            "assets/minecraft/shaders/program/phosphor_motion_blur.fsh",
-            "assets/minecraft/shaders/post/unity_motion_blur.json",
-            "assets/minecraft/shaders/program/unity_motion_blur.json",
-            "assets/minecraft/shaders/program/unity_motion_blur.fsh"
-        )
-    }
-
-    if (mcversion != "1.21.4") {
-        exclude(
-            "assets/polyblur/shaders/post/phosphor_motion_blur_legacy.json",
-            "assets/polyblur/shaders/post/unity_motion_blur_legacy.json"
-        )
-    }
-
-    doLast {
-        val output = destinationDir.resolve("assets/polyblur/post_effect/phosphor_motion_blur.json")
-        output.parentFile.mkdirs()
-        output.writeText("$postEffectJson\n")
-
-        if (motionEffectJson.isNotEmpty()) {
-            val motionOutput = destinationDir.resolve("assets/polyblur/post_effect/unity_motion_blur.json")
-            motionOutput.parentFile.mkdirs()
-            motionOutput.writeText("$motionEffectJson\n")
+tasks {
+    test {
+        useJUnitPlatform()
+        testLogging {
+            showStackTraces = true
+            exceptionFormat = TestExceptionFormat.FULL
         }
     }
-}
 
-val javaVersionStr = findProperty("java_version")?.toString() ?: "21"
-val javaVersionInt = javaVersionStr.toInt()
+    processResources {
+        val postEffectJson = when {
+            mcversion == "1.21.4" -> """
+                {
+                    "targets": {},
+                    "passes": [
+                        {
+                            "program": "polyblur:post/phosphor_motion_blur_legacy",
+                            "inputs": [
+                                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                                { "sampler_name": "Prev", "target": "polyblur:previous" }
+                            ],
+                            "uniforms": [
+                                { "name": "Strength", "values": [ 0.4 ] }
+                            ],
+                            "output": "minecraft:main"
+                        }
+                    ]
+                }
+            """.trimIndent()
+            mcversion == "1.21.5" -> """
+                {
+                    "targets": {},
+                    "passes": [
+                        {
+                            "vertex_shader": "minecraft:post/blit",
+                            "fragment_shader": "polyblur:post/phosphor_motion_blur_legacy",
+                            "inputs": [
+                                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                                { "sampler_name": "Prev", "target": "polyblur:previous" }
+                            ],
+                            "uniforms": [
+                                { "name": "Strength", "type": "float", "values": [ 0.4 ] }
+                            ],
+                            "output": "minecraft:main"
+                        }
+                    ]
+                }
+            """.trimIndent()
+            mcversion == "1.21.8" -> """
+                {
+                    "targets": {},
+                    "passes": [
+                        {
+                            "vertex_shader": "minecraft:post/blit",
+                            "fragment_shader": "polyblur:post/phosphor_motion_blur",
+                            "inputs": [
+                                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                                { "sampler_name": "Prev", "target": "polyblur:previous" }
+                            ],
+                            "uniforms": {
+                                "BlurConfig": [
+                                    {
+                                        "name": "Strength",
+                                        "type": "float",
+                                        "value": 0.4
+                                    }
+                                ]
+                            },
+                            "output": "minecraft:main"
+                        }
+                    ]
+                }
+            """.trimIndent()
+            else -> """
+                {
+                    "targets": {},
+                    "passes": [
+                        {
+                            "vertex_shader": "minecraft:core/screenquad",
+                            "fragment_shader": "polyblur:post/phosphor_motion_blur",
+                            "inputs": [
+                                { "sampler_name": "Diffuse", "target": "minecraft:main" },
+                                { "sampler_name": "Prev", "target": "polyblur:previous" }
+                            ],
+                            "uniforms": {
+                                "BlurConfig": [
+                                    {
+                                        "name": "Strength",
+                                        "type": "float",
+                                        "value": 0.4
+                                    }
+                                ]
+                            },
+                            "output": "minecraft:main"
+                        }
+                    ]
+                }
+            """.trimIndent()
+        }
 
-val kotlinJvmTarget = when (javaVersionInt) {
-    21 -> JvmTarget.JVM_21
-    22 -> JvmTarget.JVM_22
-    23 -> JvmTarget.JVM_23
-    24 -> JvmTarget.JVM_24
-    25 -> JvmTarget.JVM_25
-    else -> JvmTarget.JVM_21
-}
+        val motionEffectJson = when {
+            mcversion == "1.21.4" -> """
+                {
+                    "targets": {},
+                    "passes": [
+                        {
+                            "program": "polyblur:post/unity_motion_blur_legacy",
+                            "inputs": [
+                                { "sampler_name": "Diffuse", "target": "minecraft:main" }
+                            ],
+                            "uniforms": [
+                                { "name": "VelocityX", "values": [ 0.0 ] },
+                                { "name": "VelocityY", "values": [ 0.0 ] },
+                                { "name": "Samples", "values": [ 4.0 ] },
+                                { "name": "Jitter", "values": [ 1.0 ] }
+                            ],
+                            "output": "minecraft:main"
+                        }
+                    ]
+                }
+            """.trimIndent()
+            mcversion == "1.21.5" -> """
+                {
+                    "targets": {},
+                    "passes": [
+                        {
+                            "vertex_shader": "minecraft:post/blit",
+                            "fragment_shader": "polyblur:post/unity_motion_blur_legacy",
+                            "inputs": [
+                                { "sampler_name": "Diffuse", "target": "minecraft:main" }
+                            ],
+                            "uniforms": [
+                                { "name": "VelocityX", "type": "float", "values": [ 0.0 ] },
+                                { "name": "VelocityY", "type": "float", "values": [ 0.0 ] },
+                                { "name": "Samples", "type": "float", "values": [ 4.0 ] },
+                                { "name": "Jitter", "type": "float", "values": [ 1.0 ] }
+                            ],
+                            "output": "minecraft:main"
+                        }
+                    ]
+                }
+            """.trimIndent()
+            else -> ""
+        }
 
-tasks.withType<JavaCompile>().configureEach {
-    options.release.set(javaVersionInt)
-}
+        val props = mapOf(
+            "mod_id" to modid,
+            "mod_name" to modname,
+            "mod_version" to modversion,
+            "minecraft_version_range" to versionrange,
+            "loader_version" to loaderversion,
+            "java_version" to "JAVA_${requiredJava.majorVersion}"
+        )
 
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions.jvmTarget.set(kotlinJvmTarget)
-}
+        inputs.properties(props)
+        inputs.property("postEffectJson", postEffectJson)
+        inputs.property("motionEffectJson", motionEffectJson)
 
-java {
-    withSourcesJar()
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(javaVersionInt))
+        filesMatching(listOf("fabric.mod.json", "mixins.$modid.json")) {
+            expand(props)
+        }
+
+        exclude("assets/polyblur/post_effect/phosphor_motion_blur.json")
+        exclude("assets/polyblur/post_effect/unity_motion_blur.json")
+
+        if (mcversion != "1.21.1") {
+            exclude(
+                "assets/minecraft/shaders/post/phosphor_motion_blur.json",
+                "assets/minecraft/shaders/program/phosphor_motion_blur.json",
+                "assets/minecraft/shaders/program/phosphor_motion_blur.fsh",
+                "assets/minecraft/shaders/post/unity_motion_blur.json",
+                "assets/minecraft/shaders/program/unity_motion_blur.json",
+                "assets/minecraft/shaders/program/unity_motion_blur.fsh"
+            )
+        }
+
+        if (mcversion != "1.21.4") {
+            exclude(
+                "assets/polyblur/shaders/post/phosphor_motion_blur_legacy.json",
+                "assets/polyblur/shaders/post/unity_motion_blur_legacy.json"
+            )
+        }
+
+        doLast {
+            val output = destinationDir.resolve("assets/polyblur/post_effect/phosphor_motion_blur.json")
+            output.parentFile.mkdirs()
+            output.writeText("$postEffectJson\n")
+
+            if (motionEffectJson.isNotEmpty()) {
+                val motionOutput = destinationDir.resolve("assets/polyblur/post_effect/unity_motion_blur.json")
+                motionOutput.parentFile.mkdirs()
+                motionOutput.writeText("$motionEffectJson\n")
+            }
+        }
+    }
+
+    jar {
+        inputs.property("archivesName", base.archivesName)
+
+        from(rootProject.file("LICENSE")) {
+            rename { "${it}_${inputs.properties["archivesName"]}" }
+        }
+    }
+
+    register<Copy>("buildAndCollect") {
+        group = "build"
+        description = "Builds mod jars and copies results to `build/libs/{mod version}/`"
+
+        inputs.property("version", modversion)
+        from(loomx.modJar.flatMap { it.archiveFile }, loomx.modSourcesJar.flatMap { it.archiveFile })
+        into(rootProject.layout.buildDirectory.file("libs/$modversion"))
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        showStackTraces = true
-        exceptionFormat = TestExceptionFormat.FULL
-    }
-}
+val modrinthId = listOf("oneconfig.publish.modrinth", "publish.modrinth")
+    .firstNotNullOfOrNull { findProperty(it) }?.toString()?.takeIf { it.isNotBlank() }
+val modrinthToken = listOf("oneconfig.publish.modrinth.token", "publish.modrinth.token", "modrinth.token")
+    .firstNotNullOfOrNull { findProperty(it) }?.toString()?.takeIf { it.isNotBlank() }
 
-tasks.jar {
-    inputs.property("archivesName", base.archivesName)
-
-    from("LICENSE") {
-        rename { "${it}_${inputs.properties["archivesName"]}" }
-    }
-}
-
-fun <T> optionalProp(property: String, block: (String) -> T?): T? =
-    findProperty(property)?.toString()?.takeUnless { it.isBlank() }?.let(block)
-
-val modrinthMinecraftVersionOverride = mapOf(
-    "1.21.8" to listOf("1.21.7", "1.21.8"),
-    "1.21.10" to listOf("1.21.9", "1.21.10"),
-    "26.1" to listOf("26.1", "26.1.1", "26.1.2")
-)
-
-val modrinthId = listOf("oneconfig.publish.modrinth", "publish.modrinth").firstNotNullOfOrNull { findProperty(it) }?.toString()?.takeIf { it.isNotBlank() }
-val modrinthToken = listOf("oneconfig.publish.modrinth.token", "publish.modrinth.token", "modrinth.token").firstNotNullOfOrNull { findProperty(it) }?.toString()?.takeIf { it.isNotBlank() }
-val minecraftVersion = modrinthMinecraftVersionOverride[mcversion] ?: listOf(mcversion)
-val publishJarTaskName = if ("remapJar" in tasks.names) "remapJar" else "jar"
 val changelogs = rootProject.file("CHANGELOG.md").takeIf { it.exists() }?.readText() ?: "No changelog provided."
 
-val validateChangelog by tasks.registering {
+val validateChangelog = tasks.register("validateChangelog") {
     description = "Validates that the changelog is written for the current version."
-    doLast {
-        if (!changelogs.contains(modversion)) {
-            throw GradleException("Changelog for version $modversion not found.")
-        }
+    if (!changelogs.contains(modversion)) {
+        throw GradleException("Changelog for version $modversion not found.")
     }
 }
 
@@ -376,7 +352,7 @@ tasks.matching { it.name == "publishModrinth" }.configureEach {
 }
 
 publishMods {
-    file = tasks.named<AbstractArchiveTask>(publishJarTaskName).flatMap { it.archiveFile }
+    file = loomx.modJar.flatMap { it.archiveFile }
 
     displayName = modversion
     version = "v$modversion"
@@ -392,7 +368,7 @@ publishMods {
             projectId = modrinthId
             accessToken = modrinthToken.orEmpty()
 
-            minecraftVersions.addAll(minecraftVersion)
+            minecraftVersions.addAll(compatibleVersions.ifEmpty { listOf(mcversion) })
 
             requires("oneconfig")
             requires("fabric-language-kotlin")

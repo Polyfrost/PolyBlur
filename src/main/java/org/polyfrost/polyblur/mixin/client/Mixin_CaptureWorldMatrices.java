@@ -73,8 +73,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LevelRenderer.class)
 public class Mixin_CaptureWorldMatrices {
     //? if =1.21.5 {
-    /*// 1.21.5 renderLevel: (alloc, delta, bool, Camera, GameRenderer, Matrix4f view, Matrix4f proj).
-    @Inject(method = "renderLevel", at = @At("RETURN"))
+    /*@Inject(method = "renderLevel", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices15(
             GraphicsResourceAllocator allocator,
             DeltaTracker deltaTracker,
@@ -104,7 +103,7 @@ public class Mixin_CaptureWorldMatrices {
         }
         if (BlurSettings.getVelocityBuffer() && !WorldCamera.INSTANCE.getVelocitySettled()) {
             MotionVelocityPass.run(Minecraft.getInstance().getMainRenderTarget());
-            // Hand sharp -> blur pre-hand. (1.21.5 global blur stays post-GUI.)
+            // sharp hand means blur must run before the hand while global blur stays post gui
             if (!PolyBlurConfig.INSTANCE.getBlurHand()) {
                 MotionBlurReproject.render(Minecraft.getInstance().getMainRenderTarget());
             }

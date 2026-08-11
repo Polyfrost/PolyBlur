@@ -14,13 +14,13 @@ void main() {
     vec4 prev = textureLod(PrevSampler, texCoord, 0.0);
 
     if (Mode < 0.5) {
-        // Weighted Max
+        // weighted max
         fragColor = vec4(max(prev.rgb * Strength, curr.rgb), 1.0);
     } else if (Mode < 1.5) {
-        // Linear Mix
+        // linear mix
         fragColor = vec4(mix(curr.rgb, prev.rgb, Strength), 1.0);
     } else {
-        // Alpha Decay
+        // alpha decay
         float a = max(0.0, min(prev.a - 0.325, prev.a * Strength * 0.95));
         fragColor = vec4(prev.rgb * a + curr.rgb * (1.0 - a), 1.0);
     }

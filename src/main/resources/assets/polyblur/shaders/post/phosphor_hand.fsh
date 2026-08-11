@@ -1,8 +1,8 @@
 #version 150
 
-uniform sampler2D DiffuseSampler; // current frame: unity-blurred world + sharp hand on top
-uniform sampler2D PrevSampler;    // previous final frame (phosphor feedback history)
-uniform sampler2D WorldSampler;   // pre-hand snapshot: unity-blurred world only
+uniform sampler2D DiffuseSampler; // current frame with blurred world and sharp hand on top
+uniform sampler2D PrevSampler;    // previous final frame used as phosphor feedback history
+uniform sampler2D WorldSampler;   // snapshot taken before the hand with blurred world only
 
 in vec2 texCoord;
 
@@ -23,13 +23,13 @@ void main() {
 
     vec3 phosphor;
     if (Mode < 0.5) {
-        // Weighted Max: keep the brightest of the decayed previous frame and the current frame.
+        // weighted max
         phosphor = max(prev.rgb * Strength, curr.rgb);
     } else if (Mode < 1.5) {
-        // Linear Mix: blend linearly towards the previous frame.
+        // linear mix
         phosphor = mix(curr.rgb, prev.rgb, Strength);
     } else {
-        // Alpha Decay: accumulate with a decaying feedback alpha.
+        // alpha decay
         float a = max(0.0, min(prev.a - 0.325, prev.a * Strength * 0.95));
         phosphor = prev.rgb * a + curr.rgb * (1.0 - a);
     }

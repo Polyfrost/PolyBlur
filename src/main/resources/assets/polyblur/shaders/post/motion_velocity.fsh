@@ -1,6 +1,6 @@
 #version 150
 
-// Pass 1 pre-GUI
+// pass 1 runs before the gui
 
 uniform sampler2D DepthSampler;
 uniform sampler2D HistorySampler;

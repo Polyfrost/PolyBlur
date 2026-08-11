@@ -7,7 +7,7 @@ import org.joml.Matrix4f
 import org.joml.Vector4f
 
 object MotionVelocityUniforms {
-    // mat4 (0..63) + vec4 (64..79) + vec4 (80..95) + float MaxVel (96) + float TimeScale (100) + float ZZeroToOne (104) + float Alpha (108) -> 112
+    // std140 layout mat4 at 0 vec4 at 64 vec4 at 80 then floats MaxVel 96 TimeScale 100 ZZeroToOne 104 Alpha 108
     private const val SIZE = 112
     private val device get() = RenderSystem.getDevice()
 

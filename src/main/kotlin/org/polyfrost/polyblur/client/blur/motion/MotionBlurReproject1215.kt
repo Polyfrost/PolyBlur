@@ -16,7 +16,6 @@ import org.polyfrost.polyblur.client.blur.phosphor.RenderTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.location
 import java.util.OptionalInt
 
-/** 1.21.5 pass no UBO. */
 object MotionBlurReproject {
     private const val MAX_BLUR = 0.15f
 

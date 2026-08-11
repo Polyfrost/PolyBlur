@@ -1,7 +1,6 @@
 #version 150
 
-// Blur pass for versions without UBO support (1.21.5 and  below).
-// Same as unity_motion_blur_reproject.fsh but with individual uniforms.
+// blur pass variant for versions without ubo support using individual uniforms
 
 uniform sampler2D DiffuseSampler;
 uniform sampler2D VelocitySampler;

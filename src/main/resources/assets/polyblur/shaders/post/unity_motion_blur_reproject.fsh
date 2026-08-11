@@ -1,7 +1,6 @@
 #version 150
 
-// post-gui pass 2: directional blur along the per-pixel velocity buffer
-// produced by motion_velocity.fsh
+// post gui pass 2 blurs directionally along the velocity buffer from the velocity pass
 
 uniform sampler2D DiffuseSampler;
 uniform sampler2D VelocitySampler;

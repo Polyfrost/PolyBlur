@@ -36,9 +36,6 @@ import org.polyfrost.polyblur.client.blur.phosphor.location
 //? if <26.2
 import java.util.OptionalInt
 
-/**
- * pre-gui pass 1
- */
 object MotionVelocityPass {
     const val MAX_VEL = 0.25f
 

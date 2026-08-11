@@ -12,20 +12,20 @@ uniform float BlendFactor = 0.7;
 uniform float Mode = 1.0;
 
 void main() {
-    // Blur by TheKodeToad in Sol-Client, Credit to them
+    // blur by TheKodeToad in Sol Client credit to them
     // https://stackoverflow.com/questions/37913286/glsl-motion-blur-post-processing-2-textures-going-to-the-shader-are-the-same
 
     vec4 curr = textureLod(DiffuseSampler, texCoord, 0.0);
     vec4 prev = textureLod(PrevSampler, texCoord, 0.0);
 
     if (Mode < 0.5) {
-        // Weighted Max
+        // weighted max
         fragColor = vec4(max(prev.rgb * BlendFactor, curr.rgb), 1.0);
     } else if (Mode < 1.5) {
-        // Linear Mix
+        // linear mix
         fragColor = vec4(mix(curr.rgb, prev.rgb, BlendFactor), 1.0);
     } else {
-        // Alpha Decay
+        // alpha decay
         float a = max(0.0, min(prev.a - 0.325, prev.a * BlendFactor * 0.95));
         fragColor = vec4(prev.rgb * a + curr.rgb * (1.0 - a), 1.0);
     }

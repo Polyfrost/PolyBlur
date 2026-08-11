@@ -6,7 +6,7 @@ import com.mojang.blaze3d.buffers.Std140SizeCalculator
 import com.mojang.blaze3d.systems.RenderSystem
 
 object MotionBlurUniforms {
-    // vec2 Velocity (0..7), float Samples (8), float Jitter (12) -> 16 bytes.
+    // std140 layout velX velY samples jitter packed into 16 bytes
     private val blockSize = Std140SizeCalculator().putFloat().putFloat().putFloat().putFloat().get()
     private val device get() = RenderSystem.getDevice()
 

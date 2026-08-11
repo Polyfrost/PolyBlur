@@ -8,11 +8,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget
 //? if <1.21.11
 import com.mojang.blaze3d.textures.FilterMode
 
-/**
- * Double-buffered velocity target. The velocity pass reads the previous frame's
- * result ([history]) to temporally smooth the freshly computed velocity, so the
- * two buffers are ping-ponged every frame.
- */
+/** two buffers ping ponged every frame so the pass can read last frame velocity for temporal smoothing */
 object VelocityTarget {
     private var targetA: TextureTarget? = null
     private var targetB: TextureTarget? = null
@@ -34,10 +30,7 @@ object VelocityTarget {
         return target
     }
 
-    /**
-     * Swaps the buffers and returns the one to render this frame's velocity into.
-     * Must be called exactly once per frame, before [current] or [history] are used.
-     */
+    /** must be called exactly once per frame before current or history are used */
     fun beginFrame(mainWidth: Int, mainHeight: Int): RenderTarget {
         val width = half(mainWidth)
         val height = half(mainHeight)
@@ -53,10 +46,8 @@ object VelocityTarget {
         return if (parity) targetA!! else targetB!!
     }
 
-    /** The buffer written this frame; sampled by the blur pass. */
     val current: RenderTarget? get() = if (parity) targetA else targetB
 
-    /** The buffer written last frame; sampled by the velocity pass for smoothing. */
     val history: RenderTarget? get() = if (parity) targetB else targetA
 }
 //?}
