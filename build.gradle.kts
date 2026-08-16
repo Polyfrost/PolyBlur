@@ -282,20 +282,15 @@ tasks {
         exclude("assets/polyblur/post_effect/unity_motion_blur.json")
 
         if (mcversion != "1.21.1") {
-            exclude(
-                "assets/minecraft/shaders/post/phosphor_motion_blur.json",
-                "assets/minecraft/shaders/program/phosphor_motion_blur.json",
-                "assets/minecraft/shaders/program/phosphor_motion_blur.fsh",
-                "assets/minecraft/shaders/post/unity_motion_blur.json",
-                "assets/minecraft/shaders/program/unity_motion_blur.json",
-                "assets/minecraft/shaders/program/unity_motion_blur.fsh"
-            )
+            exclude("assets/minecraft/shaders/**")
         }
 
         if (mcversion != "1.21.4") {
             exclude(
                 "assets/polyblur/shaders/post/phosphor_motion_blur_legacy.json",
-                "assets/polyblur/shaders/post/unity_motion_blur_legacy.json"
+                "assets/polyblur/shaders/post/unity_motion_blur_legacy.json",
+                "assets/polyblur/shaders/post/motion_velocity_legacy.json",
+                "assets/polyblur/shaders/post/motion_reproject_legacy.json"
             )
         }
 

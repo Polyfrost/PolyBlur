@@ -1,6 +1,5 @@
 package org.polyfrost.polyblur.client.blur.motion
 
-//? if >=1.21.5 {
 import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 import org.polyfrost.polyblur.client.PolyBlurConfig
@@ -67,4 +66,3 @@ object WorldCamera {
     val deltaY: Float get() = (curY - prevY).toFloat()
     val deltaZ: Float get() = (curZ - prevZ).toFloat()
 }
-//?}

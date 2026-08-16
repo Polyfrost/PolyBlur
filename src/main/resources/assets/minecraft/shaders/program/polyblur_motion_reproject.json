@@ -1,0 +1,70 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "one",
+        "dstrgb": "zero"
+    },
+    "vertex": "polyblur_fullscreen_quad",
+    "fragment": "polyblur_motion_reproject",
+    "attributes": [
+        "Position"
+    ],
+    "samplers": [
+        {
+            "name": "DiffuseSampler"
+        },
+        {
+            "name": "VelocitySampler"
+        }
+    ],
+    "uniforms": [
+        {
+            "name": "Intensity",
+            "type": "float",
+            "count": 1,
+            "values": [ 0.045 ]
+        },
+        {
+            "name": "MaxSamples",
+            "type": "float",
+            "count": 1,
+            "values": [ 16.0 ]
+        },
+        {
+            "name": "Jitter",
+            "type": "float",
+            "count": 1,
+            "values": [ 1.0 ]
+        },
+        {
+            "name": "MaxVel",
+            "type": "float",
+            "count": 1,
+            "values": [ 0.25 ]
+        },
+        {
+            "name": "InvIntensity",
+            "type": "float",
+            "count": 1,
+            "values": [ 22.222221 ]
+        },
+        {
+            "name": "MinLen",
+            "type": "float",
+            "count": 1,
+            "values": [ 0.00392157 ]
+        },
+        {
+            "name": "ScreenW",
+            "type": "float",
+            "count": 1,
+            "values": [ 1.0 ]
+        },
+        {
+            "name": "ScreenH",
+            "type": "float",
+            "count": 1,
+            "values": [ 1.0 ]
+        }
+    ]
+}

@@ -6,21 +6,17 @@ import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 //? if >1.21.1
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
-//? if >=1.21.5
 import com.mojang.blaze3d.pipeline.RenderTarget;
 //? if <1.21.11
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.FrameClock;
-//? if >=1.21.5
 import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
 //? if >1.21.5
 import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
-//? if >=1.21.5
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
-//? if >=1.21.5
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
@@ -85,16 +81,29 @@ public class Mixin_ApplyPhosphorBlur {
         RenderSystem.resetTextureMatrix();
         boolean useMotion = PolyBlurConfig.INSTANCE.getBlurType() == 1;
         //? if =1.21.1 {
-        /*if (useMotion) MotionBlur.render(this.minecraft.getMainRenderTarget());
-        else PhosphorBlur.render(this.minecraft.getMainRenderTarget());
-        *///?} elif >=26.2 {
-        //?} elif >1.21.5 && <26.2 {
-        //?} elif =1.21.5 {
-
+        /*RenderTarget target = this.minecraft.getMainRenderTarget();
+        // hybrid falls back to phosphor over the whole frame here, so it always covers the hand
+        boolean blurHand = PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand();
+        if (!useMotion) {
+            if (blurHand) PhosphorBlur.render(target);
+        } else if (BlurSettings.getVelocityBuffer()) {
+            if (blurHand && !WorldCamera.INSTANCE.getVelocitySettled()) MotionBlurReproject.render(target);
+        } else if (blurHand) {
+            MotionBlur.render(target);
+        }
+        *///?} elif =1.21.4 {
+        /*RenderTarget target = this.minecraft.getMainRenderTarget();
+        // hybrid falls back to phosphor over the whole frame here, so it always covers the hand
+        boolean blurHand = PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand();
+        if (!useMotion) {
+            if (blurHand) PhosphorBlur.render(target, this.resourcePool);
+        } else if (BlurSettings.getVelocityBuffer()) {
+            if (blurHand && !WorldCamera.INSTANCE.getVelocitySettled()) MotionBlurReproject.render(target);
+        } else if (blurHand) {
+            MotionBlur.render(target, this.resourcePool);
+        }
+        *///?} elif =1.21.5 {
         /*if (useMotion && !BlurSettings.getVelocityBuffer()) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
-        *///?} else {
-        /*if (useMotion) MotionBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
-        else PhosphorBlur.render(this.minecraft.getMainRenderTarget(), this.resourcePool);
         *///?}
     }
 
@@ -142,7 +151,9 @@ public class Mixin_ApplyPhosphorBlur {
         }
         //?}
     }
+    //?}
 
+    //? if >1.21.1 {
     @Inject(method = "render", at = @At("HEAD"))
     private void polyblur$stashResourcePool(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
         //? if >1.21.5

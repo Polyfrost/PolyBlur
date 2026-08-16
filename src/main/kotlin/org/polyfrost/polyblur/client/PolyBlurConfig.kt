@@ -44,7 +44,6 @@ object PolyBlurConfig : KtConfig(
         description = "How many samples the blur is built from. Higher is smoother but costs more FPS."
     )
 
-    //? if >=1.21.5 {
     var velocityBuffer by switch(
         def = true,
         name = "Velocity Buffer",
@@ -60,13 +59,10 @@ object PolyBlurConfig : KtConfig(
         name = "Blur Hand",
         description = "Blurs your held item along with the world."
     )
-    //?}
 
     init {
         hideIf(::phosphorMode) { blurType != 0 && blurType != 2 }
         hideIf(::handBlurStrength) { blurType != 2 }
-        //? if >=1.21.5 {
         hideIf(::blurHand) { blurType == 2 }
-        //?}
     }
 }

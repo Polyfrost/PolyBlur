@@ -1,6 +1,6 @@
 package org.polyfrost.polyblur.client.blur.motion
 
-//? if >=1.21.5 {
+//? if >1.21.1 {
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.resource.CrossFrameResourcePool
 

@@ -1,12 +1,15 @@
 package org.polyfrost.polyblur.client.blur.motion
 
-//? if >=1.21.5 {
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
 //? if >=26.2
 //import com.mojang.blaze3d.GpuFormat
-//? if <1.21.11
+//? if >=1.21.5 && <1.21.11
 import com.mojang.blaze3d.textures.FilterMode
+//? if =1.21.1
+//import net.minecraft.client.Minecraft
+//? if <1.21.5
+//import org.lwjgl.opengl.GL11
 
 /** two buffers ping ponged every frame so the pass can read last frame velocity for temporal smoothing */
 object VelocityTarget {
@@ -22,11 +25,24 @@ object VelocityTarget {
         val target =
         //? if >=26.2 {
         /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
-        *///?} else {
+        *///?} elif >=1.21.5 {
         TextureTarget("PolyBlur Velocity", width, height, false)
-        //?}
-        //? if <1.21.11
+        //?} elif =1.21.4 {
+        /*TextureTarget(width, height, false)
+        *///?} else {
+        /*TextureTarget(width, height, false, Minecraft.ON_OSX)
+        *///?}
+        //? if >=1.21.5 && <1.21.11
         target.setFilterMode(FilterMode.LINEAR)
+        //? if <1.21.5 {
+        /*target.setFilterMode(GL11.GL_LINEAR)
+        // zero velocity encodes to the middle of the range, so the history buffer must not start black
+        target.setClearColor(0.5f, 0.5f, 0f, 1f)
+        *///?}
+        //? if =1.21.1
+        //target.clear(Minecraft.ON_OSX)
+        //? if =1.21.4
+        //target.clear()
         return target
     }
 
@@ -50,4 +66,3 @@ object VelocityTarget {
 
     val history: RenderTarget? get() = if (parity) targetB else targetA
 }
-//?}

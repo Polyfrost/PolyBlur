@@ -69,9 +69,129 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 *///?}
+//? if =1.21.4 {
+/*import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.resource.CrossFrameResourcePool;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import org.joml.Matrix4f;
+import org.polyfrost.polyblur.client.PolyBlurConfig;
+import org.polyfrost.polyblur.client.blur.BlurSettings;
+import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
+import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
+import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
+import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
+import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
+import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+*///?}
+//? if =1.21.1 {
+/*import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import org.joml.Matrix4f;
+import org.polyfrost.polyblur.client.PolyBlurConfig;
+import org.polyfrost.polyblur.client.blur.BlurSettings;
+import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
+import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
+import org.polyfrost.polyblur.client.blur.motion.MotionVelocityPass;
+import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
+import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+*///?}
 
 @Mixin(LevelRenderer.class)
 public class Mixin_CaptureWorldMatrices {
+    //? if =1.21.1 {
+    /*@Inject(method = "renderLevel", at = @At("RETURN"))
+    private void polyblur$captureWorldMatrices11(
+            DeltaTracker deltaTracker,
+            boolean renderBlockOutline,
+            Camera camera,
+            GameRenderer gameRenderer,
+            LightTexture lightTexture,
+            Matrix4f frustumMatrix,
+            Matrix4f projectionMatrix,
+            CallbackInfo ci
+    ) {
+        WorldCamera.INSTANCE.capture(frustumMatrix, projectionMatrix, camera.getPosition());
+        if (!PolyBlurConfig.INSTANCE.isEnabled()) {
+            return;
+        }
+
+        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
+        // hybrid falls back to phosphor over the whole frame here, so it always covers the hand
+        boolean blurHand = PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand();
+
+        if (PolyBlurConfig.INSTANCE.getBlurType() != 1) {
+            if (!blurHand) PhosphorBlur.render(target);
+            return;
+        }
+
+        if (BlurSettings.getVelocityBuffer()) {
+            if (!WorldCamera.INSTANCE.getVelocitySettled()) {
+                MotionVelocityPass.run(target);
+                // a sharp hand means the blur has to run before the hand is drawn
+                if (!blurHand) MotionBlurReproject.render(target);
+            }
+        } else if (!blurHand) {
+            MotionBlur.render(target);
+        }
+    }
+    *///?}
+
+    //? if =1.21.4 {
+    /*@Inject(method = "renderLevel", at = @At("RETURN"))
+    private void polyblur$captureWorldMatrices14(
+            GraphicsResourceAllocator allocator,
+            DeltaTracker deltaTracker,
+            boolean renderBlockOutline,
+            Camera camera,
+            GameRenderer gameRenderer,
+            Matrix4f frustumMatrix,
+            Matrix4f projectionMatrix,
+            CallbackInfo ci
+    ) {
+        WorldCamera.INSTANCE.capture(frustumMatrix, projectionMatrix, camera.getPosition());
+        if (!PolyBlurConfig.INSTANCE.isEnabled()) {
+            return;
+        }
+
+        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
+        // hybrid falls back to phosphor over the whole frame here, so it always covers the hand
+        boolean blurHand = PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand();
+
+        if (PolyBlurConfig.INSTANCE.getBlurType() != 1) {
+            if (!blurHand) {
+                CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
+                if (pool != null) PhosphorBlur.render(target, pool);
+            }
+            return;
+        }
+
+        if (BlurSettings.getVelocityBuffer()) {
+            if (!WorldCamera.INSTANCE.getVelocitySettled()) {
+                MotionVelocityPass.run(target);
+                // a sharp hand means the blur has to run before the hand is drawn
+                if (!blurHand) MotionBlurReproject.render(target);
+            }
+        } else if (!blurHand) {
+            CrossFrameResourcePool pool = ResourcePoolHolder.INSTANCE.getPool();
+            if (pool != null) MotionBlur.render(target, pool);
+        }
+    }
+    *///?}
+
     //? if =1.21.5 {
     /*@Inject(method = "renderLevel", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices15(

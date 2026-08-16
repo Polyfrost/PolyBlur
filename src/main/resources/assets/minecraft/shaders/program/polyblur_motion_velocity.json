@@ -1,0 +1,46 @@
+{
+    "blend": {
+        "func": "add",
+        "srcrgb": "one",
+        "dstrgb": "zero"
+    },
+    "vertex": "polyblur_fullscreen_quad",
+    "fragment": "polyblur_motion_velocity",
+    "attributes": [
+        "Position"
+    ],
+    "samplers": [
+        {
+            "name": "DepthSampler"
+        },
+        {
+            "name": "HistorySampler"
+        }
+    ],
+    "uniforms": [
+        {
+            "name": "Reproj",
+            "type": "matrix4x4",
+            "count": 16,
+            "values": [ 1.0,  0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  1.0 ]
+        },
+        {
+            "name": "InvRow3",
+            "type": "float",
+            "count": 4,
+            "values": [ 0.0,  0.0,  0.0,  1.0 ]
+        },
+        {
+            "name": "D",
+            "type": "float",
+            "count": 4,
+            "values": [ 0.0,  0.0,  0.0,  0.0 ]
+        },
+        {
+            "name": "MaxVel",
+            "type": "float",
+            "count": 1,
+            "values": [ 0.25 ]
+        }
+    ]
+}
