@@ -1,6 +1,8 @@
 //? if =1.21.4 {
 /*{
-    "targets": {},
+    "targets": {
+        "swap": {}
+    },
     "passes": [
         {
             "program": "polyblur:post/phosphor_motion_blur_legacy",
@@ -8,9 +10,12 @@
                 { "sampler_name": "Diffuse", "target": "minecraft:main" },
                 { "sampler_name": "Prev", "target": "polyblur:previous" }
             ],
-            "uniforms": [
-                { "name": "Strength", "values": [ 0.4 ] },
-                { "name": "Mode", "values": [ 1.0 ] }
+            "output": "swap"
+        },
+        {
+            "program": "minecraft:post/blit",
+            "inputs": [
+                { "sampler_name": "In", "target": "swap" }
             ],
             "output": "minecraft:main"
         }
@@ -29,8 +34,8 @@
                 { "sampler_name": "Prev", "target": "polyblur:previous" }
             ],
             "uniforms": [
-                { "name": "Strength", "type": "float", "values": [ 0.4 ] },
-                { "name": "Mode", "type": "float", "values": [ 1.0 ] }
+                { "name": "Strength", "type": "float" },
+                { "name": "Mode", "type": "float" }
             ],
             "output": "minecraft:main"
         }

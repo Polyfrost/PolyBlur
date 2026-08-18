@@ -145,7 +145,7 @@ object PhosphorBlur {
     private fun blit(inputTarget: RenderTarget, outputTarget: RenderTarget) {
         inputTarget.bindRead()
         outputTarget.bindWrite(true)
-        inputTarget.blitToScreen(0, 0)
+        inputTarget.blitToScreen(outputTarget.width, outputTarget.height)
         outputTarget.unbindWrite()
         inputTarget.unbindRead()
     }

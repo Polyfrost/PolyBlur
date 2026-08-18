@@ -127,9 +127,15 @@ tasks {
 
     processResources {
         val postEffectJson = when {
+            // On 1.21.4 a pass clears its output before sampling its inputs, so a pass can never
+            // read and write the same target - we ping-pong through an internal swap target instead
+            // Uniforms set dynamically via PostChain.setUniform must not be listed on the pass,
+            // or the static config values would override them every frame
             mcversion == "1.21.4" -> """
                 {
-                    "targets": {},
+                    "targets": {
+                        "swap": {}
+                    },
                     "passes": [
                         {
                             "program": "polyblur:post/phosphor_motion_blur_legacy",
@@ -137,14 +143,20 @@ tasks {
                                 { "sampler_name": "Diffuse", "target": "minecraft:main" },
                                 { "sampler_name": "Prev", "target": "polyblur:previous" }
                             ],
-                            "uniforms": [
-                                { "name": "Strength", "values": [ 0.4 ] }
+                            "output": "swap"
+                        },
+                        {
+                            "program": "minecraft:post/blit",
+                            "inputs": [
+                                { "sampler_name": "In", "target": "swap" }
                             ],
                             "output": "minecraft:main"
                         }
                     ]
                 }
             """.trimIndent()
+            // On 1.21.5 pass uniforms declare the pipeline uniforms, so they must be listed, but
+            // omitting "values" keeps them dynamic (set from code) instead of pinned to defaults
             mcversion == "1.21.5" -> """
                 {
                     "targets": {},
@@ -157,7 +169,8 @@ tasks {
                                 { "sampler_name": "Prev", "target": "polyblur:previous" }
                             ],
                             "uniforms": [
-                                { "name": "Strength", "type": "float", "values": [ 0.4 ] }
+                                { "name": "Strength", "type": "float" },
+                                { "name": "Mode", "type": "float" }
                             ],
                             "output": "minecraft:main"
                         }
@@ -219,18 +232,21 @@ tasks {
         val motionEffectJson = when {
             mcversion == "1.21.4" -> """
                 {
-                    "targets": {},
+                    "targets": {
+                        "swap": {}
+                    },
                     "passes": [
                         {
                             "program": "polyblur:post/unity_motion_blur_legacy",
                             "inputs": [
                                 { "sampler_name": "Diffuse", "target": "minecraft:main" }
                             ],
-                            "uniforms": [
-                                { "name": "VelocityX", "values": [ 0.0 ] },
-                                { "name": "VelocityY", "values": [ 0.0 ] },
-                                { "name": "Samples", "values": [ 4.0 ] },
-                                { "name": "Jitter", "values": [ 1.0 ] }
+                            "output": "swap"
+                        },
+                        {
+                            "program": "minecraft:post/blit",
+                            "inputs": [
+                                { "sampler_name": "In", "target": "swap" }
                             ],
                             "output": "minecraft:main"
                         }
@@ -248,10 +264,10 @@ tasks {
                                 { "sampler_name": "Diffuse", "target": "minecraft:main" }
                             ],
                             "uniforms": [
-                                { "name": "VelocityX", "type": "float", "values": [ 0.0 ] },
-                                { "name": "VelocityY", "type": "float", "values": [ 0.0 ] },
-                                { "name": "Samples", "type": "float", "values": [ 4.0 ] },
-                                { "name": "Jitter", "type": "float", "values": [ 1.0 ] }
+                                { "name": "VelocityX", "type": "float" },
+                                { "name": "VelocityY", "type": "float" },
+                                { "name": "Samples", "type": "float" },
+                                { "name": "Jitter", "type": "float" }
                             ],
                             "output": "minecraft:main"
                         }
