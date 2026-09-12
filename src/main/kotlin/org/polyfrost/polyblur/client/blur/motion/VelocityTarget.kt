@@ -3,9 +3,9 @@ package org.polyfrost.polyblur.client.blur.motion
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
 //? if >=26.2
-//import com.mojang.blaze3d.GpuFormat
+import com.mojang.blaze3d.GpuFormat
 //? if >=1.21.5 && <1.21.11
-import com.mojang.blaze3d.textures.FilterMode
+//import com.mojang.blaze3d.textures.FilterMode
 //? if =1.21.1
 //import net.minecraft.client.Minecraft
 //? if <1.21.5
@@ -24,16 +24,16 @@ object VelocityTarget {
     private fun create(width: Int, height: Int): TextureTarget {
         val target =
         //? if >=26.2 {
-        /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
-        *///?} elif >=1.21.5 {
-        TextureTarget("PolyBlur Velocity", width, height, false)
-        //?} elif =1.21.4 {
+        TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
+        //?} elif >=1.21.5 {
+        /*TextureTarget("PolyBlur Velocity", width, height, false)
+        *///?} elif =1.21.4 {
         /*TextureTarget(width, height, false)
         *///?} else {
         /*TextureTarget(width, height, false, Minecraft.ON_OSX)
         *///?}
         //? if >=1.21.5 && <1.21.11
-        target.setFilterMode(FilterMode.LINEAR)
+        //target.setFilterMode(FilterMode.LINEAR)
         //? if <1.21.5 {
         /*target.setFilterMode(GL11.GL_LINEAR)
         // zero velocity encodes to the middle of the range, so the history buffer must not start black

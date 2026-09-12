@@ -1,7 +1,7 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
 //? if >=1.21.11 {
-/*import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.textures.AddressMode
 import com.mojang.blaze3d.textures.FilterMode
 import com.mojang.blaze3d.textures.GpuSampler
@@ -19,4 +19,4 @@ object BlurSampler {
         )
     }
 }
-*///?}
+//?}

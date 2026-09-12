@@ -33,17 +33,17 @@ object MotionVelocity {
     fun update(width: Int, height: Int) {
         val mc = Minecraft.getInstance()
         //? if >=26.2 {
-        /*val camera = mc.gameRenderer.mainCamera()
-        *///?} else {
-        val camera = mc.gameRenderer.mainCamera
-        //?}
+        val camera = mc.gameRenderer.mainCamera()
+        //?} else {
+        /*val camera = mc.gameRenderer.mainCamera
+        *///?}
         //? if >=1.21.11 {
-        /*val yaw = camera.yRot()
+        val yaw = camera.yRot()
         val pitch = camera.xRot()
-        *///?} else {
-        val yaw = camera.yRot
+        //?} else {
+        /*val yaw = camera.yRot
         val pitch = camera.xRot
-        //?}
+        *///?}
 
         if (prevYaw.isNaN()) {
             prevYaw = yaw

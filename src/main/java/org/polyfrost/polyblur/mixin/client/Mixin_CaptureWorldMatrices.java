@@ -3,7 +3,7 @@ package org.polyfrost.polyblur.mixin.client;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 //? if >1.21.5 && <26.1 {
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+/*import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import net.minecraft.client.Camera;
@@ -24,9 +24,9 @@ import org.polyfrost.polyblur.client.blur.phosphor.WorldSnapshotTracker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-//?}
+*///?}
 //? if >=26.1 {
-/*import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
@@ -47,7 +47,7 @@ import org.polyfrost.polyblur.client.blur.phosphor.WorldSnapshotTracker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-*///?}
+//?}
 //? if >=26.1 && <26.2
 //import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
 //? if =1.21.5 {
@@ -250,7 +250,7 @@ public class Mixin_CaptureWorldMatrices {
     *///?}
 
     //? if >=1.21.10 && <26.1 {
-    @Inject(method = "renderLevel", at = @At("RETURN"))
+    /*@Inject(method = "renderLevel", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices(
             GraphicsResourceAllocator allocator,
             DeltaTracker deltaTracker,
@@ -266,7 +266,7 @@ public class Mixin_CaptureWorldMatrices {
     ) {
         polyblur$runMotion(frustumMatrix, projectionMatrix, camera);
     }
-    //?}
+    *///?}
 
     //? if >=26.1 && <26.2 {
     
@@ -289,7 +289,7 @@ public class Mixin_CaptureWorldMatrices {
 
     //? if >=26.2 {
     
-    /*@Inject(method = "render", at = @At("RETURN"))
+    @Inject(method = "render", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices(
             GraphicsResourceAllocator allocator,
             DeltaTracker deltaTracker,
@@ -303,16 +303,16 @@ public class Mixin_CaptureWorldMatrices {
     ) {
         polyblur$runMotion(camera);
     }
-    *///?}
+    //?}
 
     //? if >1.21.5 && <26.1 {
-    private void polyblur$runMotion(Matrix4f view, Matrix4f projection, Camera camera) {
+    /*private void polyblur$runMotion(Matrix4f view, Matrix4f projection, Camera camera) {
         WorldCamera.INSTANCE.capture(view, projection,
                 //? if >=1.21.11 {
-                /*camera.position()
-                *///?} else {
-                camera.getPosition()
-                //?}
+                camera.position()
+                //?} else {
+                /^camera.getPosition()
+                ^///?}
         );
 
         if (!PolyBlurConfig.INSTANCE.isEnabled()) {
@@ -367,10 +367,10 @@ public class Mixin_CaptureWorldMatrices {
             }
         }
     }
-    //?}
+    *///?}
 
     //? if >=26.1 {
-    /*private void polyblur$runMotion(CameraRenderState camera) {
+    private void polyblur$runMotion(CameraRenderState camera) {
         WorldCamera.INSTANCE.capture(camera.viewRotationMatrix, camera.projectionMatrix, camera.pos);
 
         if (!PolyBlurConfig.INSTANCE.isEnabled()) {
@@ -430,5 +430,5 @@ public class Mixin_CaptureWorldMatrices {
             }
         }
     }
-    *///?}
+    //?}
 }

@@ -3,7 +3,7 @@ package org.polyfrost.polyblur.client.blur
 //? if >1.21.5 {
 import org.apache.logging.log4j.LogManager
 //? if <26.2
-import org.lwjgl.opengl.GL11C
+//import org.lwjgl.opengl.GL11C
 
 object BlurProfiler {
     private val logger = LogManager.getLogger("PolyBlur/Profiler")
@@ -57,7 +57,7 @@ object BlurProfiler {
         if (!enabled) return
         if (depth++ > 0) return
         //? if <26.2
-        if (syncMode) GL11C.glFinish()
+        //if (syncMode) GL11C.glFinish()
         val s = sections.getOrPut(name) { Section() }
         current = s
         s.beginNs = System.nanoTime()
@@ -68,7 +68,7 @@ object BlurProfiler {
         if (!enabled || --depth > 0) return
         val s = current ?: return
         //? if <26.2
-        if (syncMode) GL11C.glFinish()
+        //if (syncMode) GL11C.glFinish()
         val d = System.nanoTime() - s.beginNs
         s.cpuNs += d
         if (d > s.cpuMaxNs) s.cpuMaxNs = d

@@ -14,9 +14,9 @@ object MotionReprojectUniforms {
             { "MotionReproject_UBO" },
             GpuBuffer.USAGE_UNIFORM or GpuBuffer.USAGE_MAP_WRITE,
             //? if >=1.21.11
-            //SIZE.toLong()
+            SIZE.toLong()
             //? if <1.21.11
-            SIZE
+            //SIZE
         )
     }
 
@@ -24,7 +24,7 @@ object MotionReprojectUniforms {
         val invIntensity = 1f / maxOf(intensity, 1e-6f)
         val minLen = maxVel * (4f / 255f)
         //? if >=26.2 {
-        /*buffer.map(false, true).use { mapped ->
+        buffer.map(false, true).use { mapped ->
             val bb = mapped.data()
             bb.putFloat(0, intensity)
             bb.putFloat(4, maxSamples)
@@ -35,8 +35,8 @@ object MotionReprojectUniforms {
             bb.putFloat(24, width.toFloat())
             bb.putFloat(28, height.toFloat())
         }
-        *///?} else {
-        device.createCommandEncoder().mapBuffer(buffer, false, true).use { mapped ->
+        //?} else {
+        /*device.createCommandEncoder().mapBuffer(buffer, false, true).use { mapped ->
             val bb = mapped.data()
             bb.putFloat(0, intensity)
             bb.putFloat(4, maxSamples)
@@ -47,7 +47,7 @@ object MotionReprojectUniforms {
             bb.putFloat(24, width.toFloat())
             bb.putFloat(28, height.toFloat())
         }
-        //?}
+        *///?}
     }
 }
 //?}

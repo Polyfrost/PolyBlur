@@ -16,15 +16,15 @@ object MotionVelocityUniforms {
             { "MotionVelocity_UBO" },
             GpuBuffer.USAGE_UNIFORM or GpuBuffer.USAGE_MAP_WRITE,
             //? if >=1.21.11
-            //SIZE.toLong()
+            SIZE.toLong()
             //? if <1.21.11
-            SIZE
+            //SIZE
         )
     }
 
     fun upload(reproj: Matrix4f, invRow3: Vector4f, d: Vector4f, maxVel: Float, timeScale: Float, zZeroToOne: Float, alpha: Float) {
         //? if >=26.2 {
-        /*buffer.map(false, true).use { mapped ->
+        buffer.map(false, true).use { mapped ->
             val bb = mapped.data()
             reproj.get(0, bb)
             invRow3.get(64, bb)
@@ -34,8 +34,8 @@ object MotionVelocityUniforms {
             bb.putFloat(104, zZeroToOne)
             bb.putFloat(108, alpha)
         }
-        *///?} else {
-        device.createCommandEncoder().mapBuffer(buffer, false, true).use { mapped ->
+        //?} else {
+        /*device.createCommandEncoder().mapBuffer(buffer, false, true).use { mapped ->
             val bb = mapped.data()
             reproj.get(0, bb)
             invRow3.get(64, bb)
@@ -45,7 +45,7 @@ object MotionVelocityUniforms {
             bb.putFloat(104, zZeroToOne)
             bb.putFloat(108, alpha)
         }
-        //?}
+        *///?}
     }
 }
 //?}

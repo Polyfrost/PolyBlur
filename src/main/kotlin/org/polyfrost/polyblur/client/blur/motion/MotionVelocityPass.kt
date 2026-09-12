@@ -4,23 +4,23 @@ package org.polyfrost.polyblur.client.blur.motion
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.pipeline.RenderTarget
 //? if >=26.2
-//import com.mojang.blaze3d.PrimitiveTopology
+import com.mojang.blaze3d.PrimitiveTopology
 //? if >=26.1
-//import com.mojang.blaze3d.pipeline.ColorTargetState
+import com.mojang.blaze3d.pipeline.ColorTargetState
 //? if >=26.2
-//import com.mojang.blaze3d.pipeline.BindGroupLayout
+import com.mojang.blaze3d.pipeline.BindGroupLayout
 //? if >=26.1
-//import com.mojang.blaze3d.pipeline.DepthStencilState
+import com.mojang.blaze3d.pipeline.DepthStencilState
 //? if >=26.1
-//import com.mojang.blaze3d.platform.CompareOp
+import com.mojang.blaze3d.platform.CompareOp
 //? if <26.1
-import com.mojang.blaze3d.platform.DepthTestFunction
+//import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
 //? if <26.2
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
+//import com.mojang.blaze3d.vertex.DefaultVertexFormat
 //? if <26.2
-import com.mojang.blaze3d.vertex.VertexFormat
+//import com.mojang.blaze3d.vertex.VertexFormat
 import org.joml.Matrix4f
 import org.joml.Vector4f
 import org.polyfrost.polyblur.PolyBlurConstants
@@ -30,11 +30,11 @@ import org.polyfrost.polyblur.client.blur.BlurPrewarm
 import org.polyfrost.polyblur.client.blur.phosphor.FullscreenPass
 import org.polyfrost.polyblur.client.blur.phosphor.location
 //? if >=1.21.11
-//import org.polyfrost.polyblur.client.blur.phosphor.BlurSampler
+import org.polyfrost.polyblur.client.blur.phosphor.BlurSampler
 //? if >=26.2
-//import java.util.Optional
+import java.util.Optional
 //? if <26.2
-import java.util.OptionalInt
+//import java.util.OptionalInt
 
 object MotionVelocityPass {
     const val MAX_VEL = 0.25f
@@ -58,7 +58,7 @@ object MotionVelocityPass {
             *///?}
             .withFragmentShader(location(PolyBlurConstants.ID, "post/motion_velocity"))
             //? if >=26.2 {
-            /*.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+            .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
             .withDepthStencilState(Optional.empty())
             .withColorTargetState(ColorTargetState.DEFAULT)
             .withBindGroupLayout(
@@ -68,10 +68,10 @@ object MotionVelocityPass {
                     .withUniform("VelocityConfig", UniformType.UNIFORM_BUFFER)
                     .build()
             )
-            *///?}
-            //? if >=1.21.10 && <26.2 {
-            .withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
             //?}
+            //? if >=1.21.10 && <26.2 {
+            /*.withVertexFormat(DefaultVertexFormat.EMPTY, VertexFormat.Mode.TRIANGLES)
+            *///?}
             //? if <1.21.10 {
             /*.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
             *///?}
@@ -80,15 +80,15 @@ object MotionVelocityPass {
             .withColorTargetState(ColorTargetState.DEFAULT)
             *///?}
             //? if <26.1 {
-            .withDepthWrite(false)
+            /*.withDepthWrite(false)
             .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
             .withColorWrite(true, true)
-            //?}
+            *///?}
             //? if <26.2 {
-            .withUniform("VelocityConfig", UniformType.UNIFORM_BUFFER)
+            /*.withUniform("VelocityConfig", UniformType.UNIFORM_BUFFER)
             .withSampler("DepthSampler")
             .withSampler("HistorySampler")
-            //?}
+            *///?}
             .build()
     }
 
@@ -115,11 +115,11 @@ object MotionVelocityPass {
             dVec.set(0f, 0f, 0f, 0f)
         }
         //? if >=26.2 {
-        /*val zZeroToOne = if (RenderSystem.getDevice().deviceInfo.isZZeroToOne) 1f else 0f
-        *///?}
-        //? if <26.2 {
-        val zZeroToOne = 0f
+        val zZeroToOne = if (RenderSystem.getDevice().deviceInfo.isZZeroToOne) 1f else 0f
         //?}
+        //? if <26.2 {
+        /*val zZeroToOne = 0f
+        *///?}
         val timeScale = org.polyfrost.polyblur.client.blur.FrameClock.timeScale
         val alpha = 1f - Math.pow((1f - VELOCITY_SMOOTHING).toDouble(), (1f / maxOf(timeScale, 1e-6f)).toDouble()).toFloat()
         MotionVelocityUniforms.upload(reproj, invRow3, dVec, MAX_VEL, timeScale, zZeroToOne, alpha)
@@ -128,21 +128,21 @@ object MotionVelocityPass {
             { "PolyBlur/MotionVelocity" },
             velTarget.getColorTextureView()!!,
             //? if >=26.2 {
-            /*Optional.empty()
-            *///?}
-            //? if <26.2 {
-            OptionalInt.empty()
+            Optional.empty()
             //?}
+            //? if <26.2 {
+            /*OptionalInt.empty()
+            *///?}
         ).use { renderPass ->
             renderPass.setPipeline(pipeline)
             //? if >=1.21.11 {
-            /*renderPass.bindTexture("DepthSampler", mainTarget.getDepthTextureView()!!, BlurSampler.linearClamp)
+            renderPass.bindTexture("DepthSampler", mainTarget.getDepthTextureView()!!, BlurSampler.linearClamp)
             renderPass.bindTexture("HistorySampler", histTarget.getColorTextureView()!!, BlurSampler.linearClamp)
-            *///?}
-            //? if <1.21.11 {
-            renderPass.bindSampler("DepthSampler", mainTarget.getDepthTextureView()!!)
-            renderPass.bindSampler("HistorySampler", histTarget.getColorTextureView()!!)
             //?}
+            //? if <1.21.11 {
+            /*renderPass.bindSampler("DepthSampler", mainTarget.getDepthTextureView()!!)
+            renderPass.bindSampler("HistorySampler", histTarget.getColorTextureView()!!)
+            *///?}
             renderPass.setUniform("VelocityConfig", MotionVelocityUniforms.buffer)
             FullscreenPass.draw(renderPass)
         }

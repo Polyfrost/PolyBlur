@@ -16,11 +16,11 @@ object FullscreenPass {
         renderPass.drawIndexed(0, 0, 6, 1)
         *///?}
         //? if >=1.21.10 && <26.2 {
-        renderPass.draw(0, 3)
-        //?}
-        //? if >=26.2 {
-        /*renderPass.draw(3, 1, 0, 0)
+        /*renderPass.draw(0, 3)
         *///?}
+        //? if >=26.2 {
+        renderPass.draw(3, 1, 0, 0)
+        //?}
     }
 }
 //?}
