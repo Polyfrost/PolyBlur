@@ -1,8 +1,8 @@
 package org.polyfrost.polyblur.client.blur
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import net.minecraft.client.Minecraft
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject
@@ -35,6 +35,10 @@ object BlurPrewarm {
     }
 
     internal fun compile(pipeline: RenderPipeline): Boolean =
-        RenderSystem.getDevice().precompilePipeline(pipeline).isValid()
+        //? if >=26.3 {
+        RenderSystem.getCompiledPipelineNullable(pipeline) != null
+        //?} else {
+        /*RenderSystem.getDevice().precompilePipeline(pipeline).isValid()
+        *///?}
 }
 //?}

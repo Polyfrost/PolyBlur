@@ -1,20 +1,16 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
-//? if <1.21.5
-//import com.mojang.blaze3d.pipeline.RenderTarget
-//? if <1.21.5
-//import com.mojang.blaze3d.pipeline.TextureTarget
-//? if <1.21.5
-//import com.mojang.blaze3d.platform.GlStateManager
-//? if <1.21.5
-//import com.mojang.blaze3d.systems.RenderSystem
-//? if <1.21.5
-//import org.lwjgl.opengl.GL30
+//? if <1.21.5 {
+/*import com.mojang.blaze3d.pipeline.RenderTarget
+import com.mojang.blaze3d.pipeline.TextureTarget
+import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.renderpearl.backend.opengl.GlStateManager
+import org.lwjgl.opengl.GL30
+
 //? if =1.21.1
 //import net.minecraft.client.Minecraft
 
-//? if <1.21.5 {
-/*// scratch buffer the blur passes render into before the result is copied back over the main target
+// scratch buffer the blur passes render into before the result is copied back over the main target
 object LegacyScratchTarget {
     private var buffer: TextureTarget? = null
     private var prevWidth = -1
@@ -62,7 +58,6 @@ object LegacyBlit {
         return true
     }
 }
-*///?}
 
 //? if =1.21.1 {
 /*private fun newLegacyTarget(width: Int, height: Int): TextureTarget =
@@ -72,4 +67,5 @@ object LegacyBlit {
 //? if =1.21.4 {
 /*private fun newLegacyTarget(width: Int, height: Int): TextureTarget =
     TextureTarget(width, height, false)
+*///?}
 *///?}

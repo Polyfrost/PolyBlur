@@ -1,9 +1,9 @@
 package org.polyfrost.polyblur.client.blur.motion
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.buffers.Std140SizeCalculator
 import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.renderpearl.api.buffers.GpuBuffer
 
 object MotionBlurUniforms {
     // std140 layout velX velY samples jitter packed into 16 bytes

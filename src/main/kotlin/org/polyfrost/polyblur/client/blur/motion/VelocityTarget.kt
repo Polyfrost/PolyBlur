@@ -2,14 +2,18 @@ package org.polyfrost.polyblur.client.blur.motion
 
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
+
 //? if >=26.2
-import com.mojang.blaze3d.GpuFormat
+import com.mojang.renderpearl.api.GpuFormat
+
 //? if >=1.21.5 && <1.21.11
-//import com.mojang.blaze3d.textures.FilterMode
-//? if =1.21.1
-//import net.minecraft.client.Minecraft
+//import com.mojang.renderpearl.api.textures.FilterMode
+
 //? if <1.21.5
 //import org.lwjgl.opengl.GL11
+
+//? if =1.21.1
+//import net.minecraft.client.Minecraft
 
 /** two buffers ping ponged every frame so the pass can read last frame velocity for temporal smoothing */
 object VelocityTarget {
@@ -23,9 +27,11 @@ object VelocityTarget {
 
     private fun create(width: Int, height: Int): TextureTarget {
         val target =
-        //? if >=26.2 {
-        TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
-        //?} elif >=1.21.5 {
+        //? if >=26.3 {
+        TextureTarget("PolyBlur Velocity", width, height, GpuFormat.RGBA8_UNORM, null)
+        //?} elif >=26.2 {
+        /*TextureTarget("PolyBlur Velocity", width, height, false, GpuFormat.RGBA8_UNORM)
+        *///?} elif >=1.21.5 {
         /*TextureTarget("PolyBlur Velocity", width, height, false)
         *///?} elif =1.21.4 {
         /*TextureTarget(width, height, false)

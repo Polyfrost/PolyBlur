@@ -3,9 +3,9 @@ package org.polyfrost.polyblur.mixin.client;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 //? if >1.21.5 && <26.1 {
-/*import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.resource.CrossFrameResourcePool;
+/*import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -26,10 +26,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 *///?}
 //? if >=26.1 {
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import org.joml.Matrix4fc;
@@ -287,9 +287,26 @@ public class Mixin_CaptureWorldMatrices {
     }
     *///?}
 
-    //? if >=26.2 {
-    
+    //? if >=26.3 {
+
     @Inject(method = "render", at = @At("RETURN"))
+    private void polyblur$captureWorldMatrices(
+            GraphicsResourceAllocator allocator,
+            boolean renderBlockOutline,
+            CameraRenderState camera,
+            GpuBufferSlice fogBuffer,
+            Vector4f fogColor,
+            boolean flag,
+            boolean flag2,
+            CallbackInfo ci
+    ) {
+        polyblur$runMotion(camera);
+    }
+    //?}
+
+    //? if >=26.2 && <26.3 {
+
+    /*@Inject(method = "render", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices(
             GraphicsResourceAllocator allocator,
             DeltaTracker deltaTracker,
@@ -303,7 +320,7 @@ public class Mixin_CaptureWorldMatrices {
     ) {
         polyblur$runMotion(camera);
     }
-    //?}
+    *///?}
 
     //? if >1.21.5 && <26.1 {
     /*private void polyblur$runMotion(Matrix4f view, Matrix4f projection, Camera camera) {

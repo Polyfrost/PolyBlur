@@ -1,13 +1,13 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
 //? if =1.21.5 {
-/*import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.pipeline.RenderTarget
+/*import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.resource.RenderTargetDescriptor
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.vertex.VertexFormat
 import java.util.OptionalInt
 
 object RenderTargetTracker {
@@ -112,33 +112,33 @@ object RenderTargetTracker {
 *///?}
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.pipeline.RenderTarget
-//? if >=26.2
-import com.mojang.blaze3d.PrimitiveTopology
-//? if >=26.1
-import com.mojang.blaze3d.pipeline.ColorTargetState
-//? if >=26.2
-import com.mojang.blaze3d.pipeline.BindGroupLayout
-//? if >=26.1
-import com.mojang.blaze3d.pipeline.DepthStencilState
-//? if >=26.1
-import com.mojang.blaze3d.platform.CompareOp
-//? if <26.1
-//import com.mojang.blaze3d.platform.DepthTestFunction
 import com.mojang.blaze3d.resource.RenderTargetDescriptor
 import com.mojang.blaze3d.systems.RenderSystem
-//? if <26.2
-//import com.mojang.blaze3d.vertex.DefaultVertexFormat
-//? if <26.2
-//import com.mojang.blaze3d.vertex.VertexFormat
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
 // import org.polyfrost.polyblur.client.blur.BlurProfiler
-//? if >=26.2
+
+//? if >=26.3
+import com.mojang.renderpearl.api.pipeline.UniformType
+
+//? if >=26.2 {
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology
 import java.util.Optional
-//? if <26.2
-//import java.util.OptionalInt
+//?} else {
+/*import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import com.mojang.renderpearl.api.vertex.VertexFormat
+import java.util.OptionalInt
+*///?}
+
+//? if >=26.1 {
+import com.mojang.renderpearl.api.pipeline.ColorTargetState
+import com.mojang.renderpearl.api.pipeline.DepthStencilState
+import com.mojang.renderpearl.api.pipeline.CompareOp
+//?} else
+//import com.mojang.blaze3d.platform.DepthTestFunction
 
 object RenderTargetTracker {
     private val pipeline = RenderPipeline.builder()
@@ -156,7 +156,11 @@ object RenderTargetTracker {
         .withColorTargetState(ColorTargetState.DEFAULT)
         .withBindGroupLayout(
             BindGroupLayout.builder()
-                .withSampler("InSampler")
+                //? if >=26.3 {
+                .withUniform("InSampler", UniformType.COMBINED_IMAGE_SAMPLER)
+                //?} else {
+                /*.withSampler("InSampler")
+                *///?}
                 .build()
         )
         //?}
@@ -342,11 +346,16 @@ object RenderTargetTracker {
             /*OptionalInt.empty()
             *///?}
         ).use { renderPass ->
-            renderPass.setPipeline(pipeline)
-            //? if >=1.21.11 {
-            renderPass.bindTexture("InSampler", srcView, BlurSampler.linearClamp)
-            //?}
-            //? if <1.21.11 {
+            //? if >=26.3 {
+            renderPass.setPipeline(RenderSystem.getCompiledPipeline(pipeline))
+            //?} else {
+            /*renderPass.setPipeline(pipeline)
+            *///?}
+            //? if >=26.3 {
+            renderPass.setUniform("InSampler", srcView, BlurSampler.linearClamp)
+            //?} elif >=1.21.11 {
+            /*renderPass.bindTexture("InSampler", srcView, BlurSampler.linearClamp)
+            *///?} else {
             /*renderPass.bindSampler("InSampler", srcView)
             *///?}
             FullscreenPass.draw(renderPass)

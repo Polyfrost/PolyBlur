@@ -33,7 +33,11 @@ public class Mixin_ApplyPhosphorBlur {
     @Shadow @Final private RenderTarget mainRenderTarget;
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void polyblur$tickFrameClock(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    //? if >=26.3 {
+    private void polyblur$tickFrameClock(CallbackInfo ci) {
+    //?} else {
+    /*private void polyblur$tickFrameClock(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    *///?}
         FrameClock.tick();
     }
 
@@ -72,7 +76,11 @@ public class Mixin_ApplyPhosphorBlur {
             )
             *///?}
     )
-    private void polyblur$applyPhosphorBlur(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    //? if >=26.3 {
+    private void polyblur$applyPhosphorBlur(CallbackInfo ci) {
+    //?} else {
+    /*private void polyblur$applyPhosphorBlur(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    *///?}
         if (!PolyBlurConfig.INSTANCE.isEnabled() || this.minecraft.level == null || this.minecraft.getConnection() == null) {
             return;
         }
@@ -110,13 +118,25 @@ public class Mixin_ApplyPhosphorBlur {
     //? if >=1.21.5 {
     @Inject(
             method = "render",
+            //? if >=26.3 {
             at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel()V",
+                    shift = At.Shift.AFTER
+            )
+            //?} else {
+            /*at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V",
                     shift = At.Shift.AFTER
             )
+            *///?}
     )
-    private void polyblur$applyReprojectBlur(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    //? if >=26.3 {
+    private void polyblur$applyReprojectBlur(CallbackInfo ci) {
+    //?} else {
+    /*private void polyblur$applyReprojectBlur(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    *///?}
         if (!PolyBlurConfig.INSTANCE.isEnabled() || this.minecraft.level == null || this.minecraft.getConnection() == null) {
             return;
         }
@@ -155,7 +175,11 @@ public class Mixin_ApplyPhosphorBlur {
 
     //? if >1.21.1 {
     @Inject(method = "render", at = @At("HEAD"))
-    private void polyblur$stashResourcePool(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    //? if >=26.3 {
+    private void polyblur$stashResourcePool(CallbackInfo ci) {
+    //?} else {
+    /*private void polyblur$stashResourcePool(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    *///?}
         //? if >1.21.5
         if (PolyBlurConfig.INSTANCE.isEnabled()) org.polyfrost.polyblur.client.blur.BlurPrewarm.run();
         org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setPool(this.resourcePool);

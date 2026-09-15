@@ -1,26 +1,10 @@
 package org.polyfrost.polyblur.client.blur.motion
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.pipeline.RenderTarget
-//? if >=26.2
-import com.mojang.blaze3d.PrimitiveTopology
-//? if >=26.1
-import com.mojang.blaze3d.pipeline.ColorTargetState
-//? if >=26.2
-import com.mojang.blaze3d.pipeline.BindGroupLayout
-//? if >=26.1
-import com.mojang.blaze3d.pipeline.DepthStencilState
-//? if >=26.1
-import com.mojang.blaze3d.platform.CompareOp
-//? if <26.1
-//import com.mojang.blaze3d.platform.DepthTestFunction
-import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
-//? if <26.2
-//import com.mojang.blaze3d.vertex.DefaultVertexFormat
-//? if <26.2
-//import com.mojang.blaze3d.vertex.VertexFormat
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.pipeline.UniformType
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
@@ -29,12 +13,26 @@ import org.polyfrost.polyblur.client.blur.phosphor.FullscreenPass
 import org.polyfrost.polyblur.client.blur.phosphor.InternalTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.RenderTargetTracker
 import org.polyfrost.polyblur.client.blur.phosphor.location
+
+//? if >=26.2 {
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology
+import java.util.Optional
+//?} else {
+/*import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import com.mojang.renderpearl.api.vertex.VertexFormat
+import java.util.OptionalInt
+*///?}
+
+//? if >=26.1 {
+import com.mojang.renderpearl.api.pipeline.ColorTargetState
+import com.mojang.renderpearl.api.pipeline.CompareOp
+import com.mojang.renderpearl.api.pipeline.DepthStencilState
+//?} else
+//import com.mojang.blaze3d.platform.DepthTestFunction
+
 //? if >=1.21.11
 import org.polyfrost.polyblur.client.blur.phosphor.BlurSampler
-//? if >=26.2
-import java.util.Optional
-//? if <26.2
-//import java.util.OptionalInt
 
 /** pass 2 runs after the hand and before the GUI */
 object MotionBlurReproject {
@@ -56,8 +54,13 @@ object MotionBlurReproject {
             .withColorTargetState(ColorTargetState.DEFAULT)
             .withBindGroupLayout(
                 BindGroupLayout.builder()
-                    .withSampler("DiffuseSampler")
+                    //? if >=26.3 {
+                    .withUniform("DiffuseSampler", UniformType.COMBINED_IMAGE_SAMPLER)
+                    .withUniform("VelocitySampler", UniformType.COMBINED_IMAGE_SAMPLER)
+                    //?} else {
+                    /*.withSampler("DiffuseSampler")
                     .withSampler("VelocitySampler")
+                    *///?}
                     .withUniform("BlurConfig", UniformType.UNIFORM_BUFFER)
                     .build()
             )
@@ -124,12 +127,18 @@ object MotionBlurReproject {
             /*OptionalInt.empty()
             *///?}
         ).use { renderPass ->
-            renderPass.setPipeline(pipeline)
-            //? if >=1.21.11 {
-            renderPass.bindTexture("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
+            //? if >=26.3 {
+            renderPass.setPipeline(RenderSystem.getCompiledPipeline(pipeline))
+            //?} else {
+            /*renderPass.setPipeline(pipeline)
+            *///?}
+            //? if >=26.3 {
+            renderPass.setUniform("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
+            renderPass.setUniform("VelocitySampler", velTarget.getColorTextureView()!!, BlurSampler.linearClamp)
+            //?} elif >=1.21.11 {
+            /*renderPass.bindTexture("DiffuseSampler", renderTarget.getColorTextureView()!!, BlurSampler.linearClamp)
             renderPass.bindTexture("VelocitySampler", velTarget.getColorTextureView()!!, BlurSampler.linearClamp)
-            //?}
-            //? if <1.21.11 {
+            *///?} else {
             /*renderPass.bindSampler("DiffuseSampler", renderTarget.getColorTextureView()!!)
             renderPass.bindSampler("VelocitySampler", velTarget.getColorTextureView()!!)
             *///?}

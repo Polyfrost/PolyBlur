@@ -1,10 +1,10 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.systems.RenderPass
+import com.mojang.renderpearl.api.commands.RenderPass
 //? if <1.21.10 {
 /*import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.VertexFormat
+import com.mojang.renderpearl.api.vertex.VertexFormat
 *///?}
 
 object FullscreenPass {

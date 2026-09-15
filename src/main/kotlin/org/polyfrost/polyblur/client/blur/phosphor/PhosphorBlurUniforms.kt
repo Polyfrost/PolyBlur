@@ -1,9 +1,9 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.buffers.Std140SizeCalculator
 import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.renderpearl.api.buffers.GpuBuffer
 
 object PhosphorBlurUniforms {
     private val blockSize = Std140SizeCalculator().putFloat().putFloat().get()

@@ -1,12 +1,25 @@
-#version 150
+//? if >=26.3 {
+#version 330
+#extension GL_ARB_separate_shader_objects : require
+//?}
+//? if <26.3 {
+//#version 150
+//?}
 
 uniform sampler2D DiffuseSampler; // current frame with blurred world and sharp hand on top
 uniform sampler2D PrevSampler;    // previous final frame used as phosphor feedback history
 uniform sampler2D WorldSampler;   // snapshot taken before the hand with blurred world only
 
-in vec2 texCoord;
+//? if >=26.3 {
+layout(location = 0) in vec2 texCoord;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
+//?}
+//? if <26.3 {
+//in vec2 texCoord;
+//
+//out vec4 fragColor;
+//?}
 
 layout(std140) uniform BlurConfig {
     float Strength;

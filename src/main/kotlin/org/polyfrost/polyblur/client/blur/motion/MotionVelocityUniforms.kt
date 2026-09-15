@@ -1,8 +1,8 @@
 package org.polyfrost.polyblur.client.blur.motion
 
 //? if >1.21.5 {
-import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.renderpearl.api.buffers.GpuBuffer
 import org.joml.Matrix4f
 import org.joml.Vector4f
 

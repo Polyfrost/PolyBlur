@@ -3,10 +3,11 @@ package org.polyfrost.polyblur.client.blur.phosphor
 //? if >=1.21.5 {
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.resource.RenderTargetDescriptor
-//? if >=26.2
-import com.mojang.blaze3d.GpuFormat
-//? if >=26.2
+
+//? if >=26.2 {
+import com.mojang.renderpearl.api.GpuFormat
 import org.joml.Vector4f
+//?}
 
 object InternalTargetTracker {
     private var framebufferFactory: RenderTargetDescriptor? = null
@@ -40,8 +41,10 @@ object InternalTargetTracker {
 }
 
 fun createTargetDescriptor(width: Int, height: Int): RenderTargetDescriptor =
-    //? if >=26.2
-    RenderTargetDescriptor(width, height, false, Vector4f(0f, 0f, 0f, 0f), GpuFormat.RGBA8_UNORM)
-    //? if <26.2
+    //? if >=26.3 {
+    RenderTargetDescriptor(width, height, RenderTargetDescriptor.TextureProperties(Vector4f(0f, 0f, 0f, 0f), GpuFormat.RGBA8_UNORM), null)
+    //?} elif >=26.2 {
+    /*RenderTargetDescriptor(width, height, false, Vector4f(0f, 0f, 0f, 0f), GpuFormat.RGBA8_UNORM)
+    *///?} else
     //RenderTargetDescriptor(width, height, false, 0)
 //?}

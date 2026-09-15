@@ -1,14 +1,16 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
 //? if >=1.21.5 {
-import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
-//? if >=26.2
-import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.ByteBufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.vertex.VertexFormat
+
+//? if >=26.2
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology
+
 
 object FullscreenQuad {
     val vertexBuffer: GpuBuffer by lazy {

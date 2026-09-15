@@ -1,13 +1,26 @@
-#version 150
+//? if >=26.3 {
+#version 330
+#extension GL_ARB_separate_shader_objects : require
+//?}
+//? if <26.3 {
+//#version 150
+//?}
 
 // pass 1 runs before the gui
 
 uniform sampler2D DepthSampler;
 uniform sampler2D HistorySampler;
 
-in vec2 texCoord;
+//? if >=26.3 {
+layout(location = 0) in vec2 texCoord;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
+//?}
+//? if <26.3 {
+//in vec2 texCoord;
+//
+//out vec4 fragColor;
+//?}
 
 layout(std140) uniform VelocityConfig {
     mat4 Reproj;
