@@ -1,6 +1,13 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
-//? if <1.21.11 {
+//? if =1.8.9 {
+/*import net.minecraft.resource.Identifier
+
+fun location(namespace: String, path: String): Identifier =
+    Identifier(namespace, path)
+*///?}
+
+//? if >1.8.9 && <1.21.11 {
 /*import net.minecraft.resources.ResourceLocation
 
 fun location(namespace: String, path: String): ResourceLocation =

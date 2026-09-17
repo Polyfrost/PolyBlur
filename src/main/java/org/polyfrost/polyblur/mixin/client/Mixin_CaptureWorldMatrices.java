@@ -1,7 +1,20 @@
 package org.polyfrost.polyblur.mixin.client;
 
+//? if >1.8.9
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
+//? if =1.8.9 {
+/*import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.render.platform.GLX;
+import net.minecraft.client.renderer.GameRenderer;
+import org.polyfrost.polyblur.client.PolyBlurConfig;
+import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
+import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+*///?}
 //? if >1.21.5 && <26.1 {
 /*import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
@@ -110,8 +123,29 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 *///?}
 
+//~ if =1.8.9 'LevelRenderer' -> 'GameRenderer'
 @Mixin(LevelRenderer.class)
 public class Mixin_CaptureWorldMatrices {
+    //? if =1.8.9 {
+    /*@Inject(method = "render(IFJ)V", at = @At(value = "CONSTANT", args = "stringValue=hand"))
+    private void polyblur$renderWorldBlur(int anaglyphRenderPass, float tickDelta, long renderTimeLimit, CallbackInfo ci) {
+        if (!PolyBlurConfig.INSTANCE.isEnabled() || !GLX.usePostProcess) {
+            return;
+        }
+
+        if (PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand()) {
+            return;
+        }
+
+        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
+        if (PolyBlurConfig.INSTANCE.getBlurType() == 1) {
+            MotionBlur.render(target);
+        } else {
+            PhosphorBlur.render(target);
+        }
+    }
+    *///?}
+
     //? if =1.21.1 {
     /*@Inject(method = "renderLevel", at = @At("RETURN"))
     private void polyblur$captureWorldMatrices11(

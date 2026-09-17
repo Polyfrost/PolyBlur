@@ -1,6 +1,6 @@
 package org.polyfrost.polyblur.client.blur.motion
 
-//? if =1.21.1 {
+//? if =1.21.1 || =1.8.9 {
 /*import com.google.gson.JsonSyntaxException
 import com.mojang.blaze3d.pipeline.RenderTarget
 import net.minecraft.client.Minecraft
@@ -8,6 +8,10 @@ import net.minecraft.client.renderer.PostChain
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.blur.phosphor.location
 import java.io.IOException
+//? if =1.8.9 {
+/^import org.polyfrost.polyblur.client.blur.phosphor.processLegacy
+import org.polyfrost.polyblur.client.blur.phosphor.setUniform
+^///?}
 
 object MotionBlur {
     private val logger = LogManager.getLogger(MotionBlur::class.java)
@@ -25,6 +29,7 @@ object MotionBlur {
         shader.setUniform("VelocityY", MotionVelocity.velY)
         shader.setUniform("Samples", MotionVelocity.samples)
         shader.setUniform("Jitter", MotionVelocity.JITTER)
+        //~ if =1.8.9 'process(0f)' -> 'processLegacy()'
         shader.process(0f)
     }
 

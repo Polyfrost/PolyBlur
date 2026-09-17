@@ -1,6 +1,6 @@
 package org.polyfrost.polyblur.client.blur.motion
 
-//? if <1.21.5 {
+//? if >1.8.9 && <1.21.5 {
 /*import com.mojang.blaze3d.pipeline.RenderTarget
 import org.joml.Matrix4f
 import org.joml.Vector4f

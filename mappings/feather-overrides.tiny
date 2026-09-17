@@ -1,0 +1,5 @@
+tiny	2	0	intermediary	named
+c	net/minecraft/client/Minecraft	net/minecraft/client/Minecraft
+	f	Lnet/minecraft/unmapped/C_34399650;	f_26407825	level
+	m	()Lnet/minecraft/unmapped/C_88014908;	m_55181026	getConnection
+	m	()Lnet/minecraft/unmapped/C_06196994;	m_17688331	getMainRenderTarget

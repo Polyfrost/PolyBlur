@@ -1,6 +1,6 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
-//? if =1.21.1 {
+//? if =1.21.1 || =1.8.9 {
 /*import com.google.gson.JsonSyntaxException
 import com.mojang.blaze3d.pipeline.RenderTarget
 import net.minecraft.client.Minecraft
@@ -8,6 +8,11 @@ import net.minecraft.client.renderer.PostChain
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import java.io.IOException
+//? if =1.8.9 {
+/^import com.mojang.blaze3d.platform.GlStateManager
+import org.lwjgl.opengl.GL11
+import org.polyfrost.polyblur.mixin.client.PostChainAccessor
+^///?}
 
 object PhosphorBlur {
     private val logger = LogManager.getLogger(PhosphorBlur::class.java)
@@ -33,7 +38,8 @@ object PhosphorBlur {
                 // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
-            return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
         }
 
     @JvmStatic
@@ -41,6 +47,7 @@ object PhosphorBlur {
         val shader = getPostChain(renderTarget) ?: return
         shader.setUniform("BlendFactor", currentStrength)
         shader.setUniform("Mode", phosphorMode.toFloat())
+        //~ if =1.8.9 'process(0f)' -> 'processLegacy()'
         shader.process(0f)
     }
 
@@ -69,6 +76,27 @@ object PhosphorBlur {
         }
     }
 }
+
+//? if =1.8.9 {
+/^fun PostChain.setUniform(name: String, value: Float) {
+    for (pass in (this as PostChainAccessor).passes) {
+        pass.effect.getUniform(name)?.set(value)
+    }
+}
+
+fun PostChain.processLegacy() {
+    GlStateManager.matrixMode(GL11.GL_TEXTURE)
+    GlStateManager.pushMatrix()
+    GlStateManager.loadIdentity()
+    process(0f)
+    GlStateManager.popMatrix()
+    GlStateManager.matrixMode(GL11.GL_MODELVIEW)
+    GlStateManager.disableBlend()
+    GlStateManager.enableDepthTest()
+    GlStateManager.enableAlphaTest()
+    Minecraft.getInstance().mainRenderTarget.bindWrite(true)
+}
+^///?}
 *///?}
 
 //? if =1.21.4 {
@@ -104,7 +132,8 @@ object PhosphorBlur {
                 // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
-            return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
         }
 
     @JvmStatic
@@ -182,7 +211,8 @@ object PhosphorBlur {
                 // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
-            return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
         }
 
     @JvmStatic
@@ -317,7 +347,8 @@ object PhosphorBlur {
                 // linear mix blend towards the previous frame
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
-            return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
         }
 
     internal fun prewarm() = BlurPrewarm.compile(pipeline)
