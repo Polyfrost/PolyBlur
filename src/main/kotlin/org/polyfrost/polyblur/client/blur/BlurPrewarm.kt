@@ -16,12 +16,16 @@ object BlurPrewarm {
     private var done = false
 
     @JvmStatic
+    var failed = false
+        private set
+
+    @JvmStatic
     fun run() {
         if (done) return
         if (Minecraft.getInstance().level == null) return
         done = true
 
-        val failed = listOf(
+        val failures = listOf(
             "motion velocity" to MotionVelocityPass.prewarm(),
             "motion reproject" to MotionBlurReproject.prewarm(),
             "hybrid hand" to HybridHandPhosphor.prewarm(),
@@ -29,8 +33,9 @@ object BlurPrewarm {
             "blit" to RenderTargetTracker.prewarm(),
         ).filterNot { it.second }.map { it.first }
 
-        if (failed.isNotEmpty()) {
-            logger.warn("Blur pipelines failed to compile: {}. Blur will not render.", failed)
+        if (failures.isNotEmpty()) {
+            failed = true
+            logger.warn("Blur pipelines failed to compile: {}. Blur will not render.", failures)
         }
     }
 

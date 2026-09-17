@@ -102,7 +102,7 @@ object MotionVelocityPass {
     fun run(mainTarget: RenderTarget) = runInner(mainTarget)
 
     private fun runInner(mainTarget: RenderTarget) {
-        if (!WorldCamera.hasPrev) return
+        if (BlurPrewarm.failed || !WorldCamera.hasPrev) return
 
         val velTarget = VelocityTarget.beginFrame(mainTarget.width, mainTarget.height)
         val histTarget = VelocityTarget.history ?: return

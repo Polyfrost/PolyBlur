@@ -1,10 +1,6 @@
-//? if >=26.3 {
 #version 330
+//? if >=26.3
 #extension GL_ARB_separate_shader_objects : require
-//?}
-//? if <26.3 {
-//#version 150
-//?}
 
 // pass 1 runs before the gui
 

@@ -329,6 +329,7 @@ object PhosphorBlur {
         renderInner(renderTarget)
 
     private fun renderInner(renderTarget: RenderTarget) {
+        if (BlurPrewarm.failed) return
         if (!RenderTargetTracker.isAttachmentInSync(renderTarget)) {
             RenderTargetTracker.requireBootstrap()
             return

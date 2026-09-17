@@ -6,7 +6,18 @@ stonecutter active "26.3" /* [SC] DO NOT EDIT */
 
 stonecutter {
     parameters {
+        // shaders only used on targets below 1.21.9 have no directives and must keep #version 150
+        filters.exclude(
+            "resources/assets/minecraft/shaders/**",
+            "resources/assets/polyblur/shaders/core/**",
+            "resources/assets/polyblur/shaders/post/*_legacy.fsh",
+            "resources/assets/polyblur/shaders/post/*_uniform.fsh",
+        )
         replacements {
+            // vanilla raised its GLSL version to 330 in 1.21.9
+            string(eval(current.version, ">=1.21.10")) {
+                replace("#version 150", "#version 330")
+            }
             string(eval(current.version, ">= 26.3")) {
                 replace("com.mojang.blaze3d.GpuFormat", "com.mojang.renderpearl.api.GpuFormat")
                 replace("com.mojang.blaze3d.PrimitiveTopology", "com.mojang.renderpearl.api.pipeline.PrimitiveTopology")

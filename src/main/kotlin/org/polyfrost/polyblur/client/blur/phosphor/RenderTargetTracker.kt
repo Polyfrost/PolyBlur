@@ -285,6 +285,7 @@ object RenderTargetTracker {
     }
 
     fun blit(srcTarget: RenderTarget, dstTarget: RenderTarget): Boolean {
+        if (BlurPrewarm.failed) return false
         RenderSystem.assertOnRenderThread()
         // BlurProfiler.countBlit()
 

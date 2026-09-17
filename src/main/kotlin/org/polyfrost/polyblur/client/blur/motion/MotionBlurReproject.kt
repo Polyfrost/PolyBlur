@@ -97,6 +97,7 @@ object MotionBlurReproject {
         renderInner(renderTarget, outTarget)
 
     private fun renderInner(renderTarget: RenderTarget, outTarget: RenderTarget?): Boolean {
+        if (BlurPrewarm.failed) return false
         val velTarget = VelocityTarget.current ?: return false
         if (!WorldCamera.hasPrev) return false
 
