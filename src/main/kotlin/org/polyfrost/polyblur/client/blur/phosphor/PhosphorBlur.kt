@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.PostChain
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.PhosphorFeedback
 import java.io.IOException
 //? if =1.8.9 {
 /^import com.mojang.blaze3d.platform.GlStateManager
@@ -28,19 +29,7 @@ object PhosphorBlur {
 
     @JvmStatic
     val currentStrength: Float
-        get() {
-            val s = PolyBlurConfig.strength
-            val base = when (phosphorMode) {
-                // weighted max decay factor applied to the previous frame
-                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // alpha decay raw feedback strength
-                2 -> (s / 10f).coerceIn(0f, 1f)
-                // linear mix blend towards the previous frame
-                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
-            }
-            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
-            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
-        }
+        get() = PhosphorFeedback.of(phosphorMode, PolyBlurConfig.strength)
 
     @JvmStatic
     fun render(renderTarget: RenderTarget) {
@@ -109,6 +98,7 @@ import net.minecraft.client.Minecraft
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.PhosphorFeedback
 
 object PhosphorBlur {
     private val logger = LogManager.getLogger(PhosphorBlur::class.java)
@@ -122,19 +112,7 @@ object PhosphorBlur {
 
     @JvmStatic
     val currentStrength: Float
-        get() {
-            val s = PolyBlurConfig.strength
-            val base = when (phosphorMode) {
-                // weighted max decay factor applied to the previous frame
-                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // alpha decay raw feedback strength
-                2 -> (s / 10f).coerceIn(0f, 1f)
-                // linear mix blend towards the previous frame
-                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
-            }
-            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
-            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
-        }
+        get() = PhosphorFeedback.of(phosphorMode, PolyBlurConfig.strength)
 
     @JvmStatic
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
@@ -190,6 +168,7 @@ import net.minecraft.client.Minecraft
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.PhosphorFeedback
 
 object PhosphorBlur {
     private val logger = LogManager.getLogger(PhosphorBlur::class.java)
@@ -201,19 +180,7 @@ object PhosphorBlur {
 
     @JvmStatic
     val currentStrength: Float
-        get() {
-            val s = PolyBlurConfig.strength
-            val base = when (phosphorMode) {
-                // weighted max decay factor applied to the previous frame
-                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // alpha decay raw feedback strength
-                2 -> (s / 10f).coerceIn(0f, 1f)
-                // linear mix blend towards the previous frame
-                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
-            }
-            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
-            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
-        }
+        get() = PhosphorFeedback.of(phosphorMode, PolyBlurConfig.strength)
 
     @JvmStatic
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
@@ -260,6 +227,7 @@ import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.api.pipeline.UniformType
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.PhosphorFeedback
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
 // import org.polyfrost.polyblur.client.blur.BlurProfiler
 
@@ -337,19 +305,7 @@ object PhosphorBlur {
 
     @JvmStatic
     val currentStrength: Float
-        get() {
-            val s = PolyBlurConfig.strength
-            val base = when (phosphorMode) {
-                // weighted max decay factor applied to the previous frame
-                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                // alpha decay raw feedback strength
-                2 -> (s / 10f).coerceIn(0f, 1f)
-                // linear mix blend towards the previous frame
-                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
-            }
-            val decayed = Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
-            return if (phosphorMode == 1) decayed.coerceAtMost(0.95f) else decayed
-        }
+        get() = PhosphorFeedback.of(phosphorMode, PolyBlurConfig.strength)
 
     internal fun prewarm() = BlurPrewarm.compile(pipeline)
 
