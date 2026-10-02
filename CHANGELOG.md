@@ -1,2 +1,2 @@
-## 2.2.1
-- Fixed the game crashing because of invalid shaders
+## 2.2.2
+- Fix hybrid blur on 1.8.9
