@@ -175,6 +175,7 @@ import net.minecraft.client.renderer.PostChain
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.FrameClock
+import org.polyfrost.polyblur.client.blur.PhosphorFeedback
 import java.io.IOException
 
 object HybridHandPhosphor {
@@ -187,15 +188,7 @@ object HybridHandPhosphor {
     private var lastFrame = -1L
 
     private val handStrength: Float
-        get() {
-            val s = PolyBlurConfig.handBlurStrength
-            val base = when (PhosphorBlur.phosphorMode) {
-                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
-                2 -> (s / 10f).coerceIn(0f, 1f)
-                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
-            }
-            return Math.pow(base.toDouble(), FrameClock.decayExponent.toDouble()).toFloat()
-        }
+        get() = PhosphorFeedback.of(PhosphorBlur.phosphorMode, PolyBlurConfig.handBlurStrength)
 
     @JvmStatic
     fun snapshotWorld(renderTarget: RenderTarget) {
