@@ -1,2 +1,2 @@
-## 2.2.1
-- Port to 1.8.9
+## 2.2.2
+- Fix hybrid blur on 1.8.9
