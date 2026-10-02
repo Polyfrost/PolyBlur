@@ -11,6 +11,7 @@ import org.polyfrost.polyblur.client.blur.PhosphorFeedback
 import java.io.IOException
 //? if =1.8.9 {
 /^import com.mojang.blaze3d.platform.GlStateManager
+import net.minecraft.client.render.platform.GLX
 import org.lwjgl.opengl.GL11
 import org.polyfrost.polyblur.mixin.client.PostChainAccessor
 ^///?}
@@ -73,6 +74,8 @@ object PhosphorBlur {
     }
 }
 
+private const val MAX_SAMPLER_UNIT = 2
+
 fun PostChain.processLegacy(passes: IntRange? = null) {
     GlStateManager.matrixMode(GL11.GL_TEXTURE)
     GlStateManager.pushMatrix()
@@ -80,6 +83,13 @@ fun PostChain.processLegacy(passes: IntRange? = null) {
     if (passes == null) process(0f) else (this as PostChainAccessor).passes.slice(passes).forEach { it.process(0f) }
     GlStateManager.popMatrix()
     GlStateManager.matrixMode(GL11.GL_MODELVIEW)
+    for (unit in MAX_SAMPLER_UNIT downTo 1) {
+        GlStateManager.activeTexture(GLX.GL_TEXTURE0 + unit)
+        GlStateManager.disableTexture()
+    }
+    GlStateManager.activeTexture(GLX.GL_TEXTURE0)
+    GlStateManager.enableTexture()
+    GlStateManager.color4f(1f, 1f, 1f, 1f)
     GlStateManager.disableBlend()
     GlStateManager.enableDepthTest()
     GlStateManager.enableAlphaTest()
