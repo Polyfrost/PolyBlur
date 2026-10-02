@@ -84,11 +84,11 @@ object PhosphorBlur {
     }
 }
 
-fun PostChain.processLegacy() {
+fun PostChain.processLegacy(passes: IntRange? = null) {
     GlStateManager.matrixMode(GL11.GL_TEXTURE)
     GlStateManager.pushMatrix()
     GlStateManager.loadIdentity()
-    process(0f)
+    if (passes == null) process(0f) else (this as PostChainAccessor).passes.slice(passes).forEach { it.process(0f) }
     GlStateManager.popMatrix()
     GlStateManager.matrixMode(GL11.GL_MODELVIEW)
     GlStateManager.disableBlend()

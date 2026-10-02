@@ -16,7 +16,7 @@ import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.FrameClock;
 import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
-//? if >1.21.5
+//? if >1.21.5 || =1.8.9
 import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
 //? if >1.8.9 {
@@ -108,11 +108,11 @@ public class Mixin_ApplyPhosphorBlur {
         //? if =1.8.9 {
         /*if (!GLX.usePostProcess) return;
         RenderTarget target = this.minecraft.getMainRenderTarget();
-        boolean blurHand = PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand();
-        if (!useMotion) {
-            if (blurHand) PhosphorBlur.render(target);
-        } else if (blurHand) {
-            MotionBlur.render(target);
+        if (PolyBlurConfig.INSTANCE.getBlurType() == 2) {
+            HybridHandPhosphor.render(target);
+        } else if (PolyBlurConfig.INSTANCE.getBlurHand()) {
+            if (useMotion) MotionBlur.render(target);
+            else PhosphorBlur.render(target);
         }
         *///?} elif =1.21.1 {
         /*RenderTarget target = this.minecraft.getMainRenderTarget();

@@ -10,6 +10,7 @@ import net.minecraft.client.render.platform.GLX;
 import net.minecraft.client.renderer.GameRenderer;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
+import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -133,11 +134,17 @@ public class Mixin_CaptureWorldMatrices {
             return;
         }
 
-        if (PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand()) {
+        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
+        if (PolyBlurConfig.INSTANCE.getBlurType() == 2) {
+            MotionBlur.render(target);
+            HybridHandPhosphor.snapshotWorld(target);
             return;
         }
 
-        RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
+        if (PolyBlurConfig.INSTANCE.getBlurHand()) {
+            return;
+        }
+
         if (PolyBlurConfig.INSTANCE.getBlurType() == 1) {
             MotionBlur.render(target);
         } else {

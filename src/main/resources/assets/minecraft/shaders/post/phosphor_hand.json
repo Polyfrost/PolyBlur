@@ -1,0 +1,39 @@
+{
+    "targets": [
+        "swap",
+        "previous",
+        "world"
+    ],
+    "passes": [
+        {
+            "name": "blit",
+            "intarget": "minecraft:main",
+            "outtarget": "world"
+        },
+        {
+            "name": "phosphor_hand",
+            "intarget": "minecraft:main",
+            "outtarget": "swap",
+            "auxtargets": [
+                {
+                    "name": "PrevSampler",
+                    "id": "previous"
+                },
+                {
+                    "name": "WorldSampler",
+                    "id": "world"
+                }
+            ]
+        },
+        {
+            "name": "blit",
+            "intarget": "swap",
+            "outtarget": "previous"
+        },
+        {
+            "name": "blit",
+            "intarget": "swap",
+            "outtarget": "minecraft:main"
+        }
+    ]
+}

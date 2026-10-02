@@ -173,3 +173,72 @@ object HybridHandPhosphor {
     }
 }
 //?}
+
+//? if =1.8.9 {
+/*import com.google.gson.JsonSyntaxException
+import com.mojang.blaze3d.pipeline.RenderTarget
+import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.PostChain
+import org.apache.logging.log4j.LogManager
+import org.polyfrost.polyblur.client.PolyBlurConfig
+import java.io.IOException
+
+object HybridHandPhosphor {
+    private val logger = LogManager.getLogger(HybridHandPhosphor::class.java)
+    private val shaderLocation = location("minecraft", "shaders/post/phosphor_hand.json")
+
+    private var postChain: PostChain? = null
+    private var prevWidth = -1
+    private var prevHeight = -1
+
+    private val handStrength: Float
+        get() {
+            val s = PolyBlurConfig.handBlurStrength
+            val base = when (PhosphorBlur.phosphorMode) {
+                0 -> (0.7f + (s / 100f) * 3f - 0.01f).coerceIn(0f, 1f)
+                2 -> (s / 10f).coerceIn(0f, 1f)
+                else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
+            }
+            return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+        }
+
+    @JvmStatic
+    fun snapshotWorld(renderTarget: RenderTarget) {
+        getPostChain(renderTarget)?.processLegacy(0..0)
+    }
+
+    @JvmStatic
+    fun render(renderTarget: RenderTarget) {
+        if (renderTarget.viewWidth != prevWidth || renderTarget.viewHeight != prevHeight) return
+        val shader = postChain ?: return
+        shader.setUniform("BlendFactor", handStrength)
+        shader.setUniform("Mode", PhosphorBlur.phosphorMode.toFloat())
+        shader.processLegacy(1..3)
+    }
+
+    private fun getPostChain(renderTarget: RenderTarget): PostChain? {
+        if (postChain != null && renderTarget.viewWidth == prevWidth && renderTarget.viewHeight == prevHeight) {
+            return postChain
+        }
+
+        postChain?.close()
+        postChain = null
+
+        return try {
+            val minecraft = Minecraft.getInstance()
+            PostChain(minecraft.textureManager, minecraft.resourceManager, renderTarget, shaderLocation).also {
+                it.resize(renderTarget.viewWidth, renderTarget.viewHeight)
+                postChain = it
+                prevWidth = renderTarget.viewWidth
+                prevHeight = renderTarget.viewHeight
+            }
+        } catch (e: IOException) {
+            logger.error("Could not load hybrid hand blur", e)
+            null
+        } catch (e: JsonSyntaxException) {
+            logger.error("Could not parse hybrid hand blur", e)
+            null
+        }
+    }
+}
+*///?}

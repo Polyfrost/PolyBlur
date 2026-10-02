@@ -117,6 +117,7 @@ loom {
         generateRunConfig = true
         runDirectory = rootProject.file("run")
         jvmArguments.add("-Dmixin.debug.export=true")
+        if (isOrnithe && System.getProperty("os.name").startsWith("Mac")) jvmArguments.add("-XstartOnFirstThread")
 
         if (project.hasProperty("autoWorld")) {
             programArgs("--quickPlaySingleplayer", project.property("autoWorld").toString())
@@ -345,6 +346,7 @@ tasks {
             }
         } else {
             exclude("assets/minecraft/shaders/program/*_glsl120.fsh")
+            exclude("assets/minecraft/shaders/**/phosphor_hand.json")
             if (mcversion != "1.21.1") {
                 exclude("assets/minecraft/shaders/**")
             }
