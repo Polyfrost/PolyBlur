@@ -181,6 +181,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.PostChain
 import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.PolyBlurConfig
+import org.polyfrost.polyblur.client.blur.FrameClock
 import java.io.IOException
 
 object HybridHandPhosphor {
@@ -190,6 +191,7 @@ object HybridHandPhosphor {
     private var postChain: PostChain? = null
     private var prevWidth = -1
     private var prevHeight = -1
+    private var lastFrame = -1L
 
     private val handStrength: Float
         get() {
@@ -199,7 +201,7 @@ object HybridHandPhosphor {
                 2 -> (s / 10f).coerceIn(0f, 1f)
                 else -> ((s / 10f) + 0.1f).coerceIn(0.1f, 0.99f)
             }
-            return Math.pow(base.toDouble(), org.polyfrost.polyblur.client.blur.FrameClock.decayExponent.toDouble()).toFloat()
+            return Math.pow(base.toDouble(), FrameClock.decayExponent.toDouble()).toFloat()
         }
 
     @JvmStatic
@@ -211,7 +213,9 @@ object HybridHandPhosphor {
     fun render(renderTarget: RenderTarget) {
         if (renderTarget.viewWidth != prevWidth || renderTarget.viewHeight != prevHeight) return
         val shader = postChain ?: return
-        shader.setUniform("BlendFactor", handStrength)
+        val bootstrap = FrameClock.frame != lastFrame + 1
+        lastFrame = FrameClock.frame
+        shader.setUniform("BlendFactor", if (bootstrap) 0f else handStrength)
         shader.setUniform("Mode", PhosphorBlur.phosphorMode.toFloat())
         shader.processLegacy(1..3)
     }
@@ -229,6 +233,7 @@ object HybridHandPhosphor {
             PostChain(minecraft.textureManager, minecraft.resourceManager, renderTarget, shaderLocation).also {
                 it.resize(renderTarget.viewWidth, renderTarget.viewHeight)
                 postChain = it
+                lastFrame = -1L
                 prevWidth = renderTarget.viewWidth
                 prevHeight = renderTarget.viewHeight
             }
