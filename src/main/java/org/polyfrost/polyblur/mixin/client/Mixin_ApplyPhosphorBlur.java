@@ -1,5 +1,6 @@
 package org.polyfrost.polyblur.mixin.client;
 
+//? if >1.8.9
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -7,17 +8,21 @@ import org.spongepowered.asm.mixin.Mixin;
 //? if >1.21.1
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-//? if <1.21.11
+//? if >1.8.9 && <1.21.11
 //import com.mojang.blaze3d.systems.RenderSystem;
+//? if =1.8.9
+//import net.minecraft.client.render.platform.GLX;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.FrameClock;
 import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
-//? if >1.21.5
+//? if >1.21.5 || =1.8.9
 import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
+//? if >1.8.9 {
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
+//?}
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,18 +37,28 @@ public class Mixin_ApplyPhosphorBlur {
     //? if >=26.2
     @Shadow @Final private RenderTarget mainRenderTarget;
 
+    //~ if =1.8.9 '"render"' -> '"render(FJ)V"'
     @Inject(method = "render", at = @At("HEAD"))
     //? if >=26.3 {
     private void polyblur$tickFrameClock(CallbackInfo ci) {
-    //?} else {
+    //?} elif >1.8.9 {
     /*private void polyblur$tickFrameClock(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    *///?} else {
+    /*private void polyblur$tickFrameClock(float tickDelta, long startTime, CallbackInfo ci) {
     *///?}
         FrameClock.tick();
     }
 
     @Inject(
+            //~ if =1.8.9 '"render"' -> '"render(FJ)V"'
             method = "render",
-            //? if =1.21.1 {
+            //? if =1.8.9 {
+            /*at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/render/GameRenderer;renderWorld(FJ)V",
+                    shift = At.Shift.AFTER
+            )
+            *///?} elif =1.21.1 {
             /*at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/renderer/GameRenderer;renderLevel(Lnet/minecraft/client/DeltaTracker;)V",
@@ -78,17 +93,28 @@ public class Mixin_ApplyPhosphorBlur {
     )
     //? if >=26.3 {
     private void polyblur$applyPhosphorBlur(CallbackInfo ci) {
-    //?} else {
+    //?} elif >1.8.9 {
     /*private void polyblur$applyPhosphorBlur(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    *///?} else {
+    /*private void polyblur$applyPhosphorBlur(float tickDelta, long startTime, CallbackInfo ci) {
     *///?}
         if (!PolyBlurConfig.INSTANCE.isEnabled() || this.minecraft.level == null || this.minecraft.getConnection() == null) {
             return;
         }
 
-        //? if <1.21.11
+        //? if >1.8.9 && <1.21.11
         //RenderSystem.resetTextureMatrix();
         boolean useMotion = PolyBlurConfig.INSTANCE.getBlurType() == 1;
-        //? if =1.21.1 {
+        //? if =1.8.9 {
+        /*if (!GLX.usePostProcess) return;
+        RenderTarget target = this.minecraft.getMainRenderTarget();
+        if (PolyBlurConfig.INSTANCE.getBlurType() == 2) {
+            HybridHandPhosphor.render(target);
+        } else if (PolyBlurConfig.INSTANCE.getBlurHand()) {
+            if (useMotion) MotionBlur.render(target);
+            else PhosphorBlur.render(target);
+        }
+        *///?} elif =1.21.1 {
         /*RenderTarget target = this.minecraft.getMainRenderTarget();
         // hybrid falls back to phosphor over the whole frame here, so it always covers the hand
         boolean blurHand = PolyBlurConfig.INSTANCE.getBlurType() == 2 || PolyBlurConfig.INSTANCE.getBlurHand();

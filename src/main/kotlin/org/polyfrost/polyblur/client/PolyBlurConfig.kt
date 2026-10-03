@@ -62,7 +62,11 @@ object PolyBlurConfig : KtConfig(
 
     init {
         hideIf(::phosphorMode) { blurType != 0 && blurType != 2 }
-        hideIf(::handBlurStrength) { blurType != 2 }
         hideIf(::blurHand) { blurType == 2 }
+        hideIf(::handBlurStrength) { blurType != 2 }
+        //? if =1.8.9 {
+        /*hideIf(::velocityBuffer) { true }
+        hideIf(::translationParallax) { true }
+        *///?}
     }
 }

@@ -1,6 +1,6 @@
 package org.polyfrost.polyblur.client.blur.phosphor
 
-//? if =1.21.1 {
+//? if =1.21.1 || =1.8.9 {
 /*import com.google.gson.JsonSyntaxException
 import com.mojang.blaze3d.pipeline.RenderTarget
 import net.minecraft.client.Minecraft
@@ -9,6 +9,12 @@ import org.apache.logging.log4j.LogManager
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.PhosphorFeedback
 import java.io.IOException
+//? if =1.8.9 {
+/^import com.mojang.blaze3d.platform.GlStateManager
+import net.minecraft.client.render.platform.GLX
+import org.lwjgl.opengl.GL11
+import org.polyfrost.polyblur.mixin.client.PostChainAccessor
+^///?}
 
 object PhosphorBlur {
     private val logger = LogManager.getLogger(PhosphorBlur::class.java)
@@ -31,6 +37,7 @@ object PhosphorBlur {
         val shader = getPostChain(renderTarget) ?: return
         shader.setUniform("BlendFactor", currentStrength)
         shader.setUniform("Mode", phosphorMode.toFloat())
+        //~ if =1.8.9 'process(0f)' -> 'processLegacy()'
         shader.process(0f)
     }
 
@@ -59,6 +66,36 @@ object PhosphorBlur {
         }
     }
 }
+
+//? if =1.8.9 {
+/^fun PostChain.setUniform(name: String, value: Float) {
+    for (pass in (this as PostChainAccessor).passes) {
+        pass.effect.getUniform(name)?.set(value)
+    }
+}
+
+private const val MAX_SAMPLER_UNIT = 2
+
+fun PostChain.processLegacy(passes: IntRange? = null) {
+    GlStateManager.matrixMode(GL11.GL_TEXTURE)
+    GlStateManager.pushMatrix()
+    GlStateManager.loadIdentity()
+    if (passes == null) process(0f) else (this as PostChainAccessor).passes.slice(passes).forEach { it.process(0f) }
+    GlStateManager.popMatrix()
+    GlStateManager.matrixMode(GL11.GL_MODELVIEW)
+    for (unit in MAX_SAMPLER_UNIT downTo 1) {
+        GlStateManager.activeTexture(GLX.GL_TEXTURE0 + unit)
+        GlStateManager.disableTexture()
+    }
+    GlStateManager.activeTexture(GLX.GL_TEXTURE0)
+    GlStateManager.enableTexture()
+    GlStateManager.color4f(1f, 1f, 1f, 1f)
+    GlStateManager.disableBlend()
+    GlStateManager.enableDepthTest()
+    GlStateManager.enableAlphaTest()
+    Minecraft.getInstance().mainRenderTarget.bindWrite(true)
+}
+^///?}
 *///?}
 
 //? if =1.21.4 {

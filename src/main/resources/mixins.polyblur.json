@@ -9,6 +9,7 @@
     },
     "client": [
         "client.Mixin_ApplyPhosphorBlur",
-        "client.Mixin_CaptureWorldMatrices"
+        "client.Mixin_CaptureWorldMatrices",
+        "client.PostChainAccessor"
     ]
 }

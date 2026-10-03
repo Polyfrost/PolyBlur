@@ -1,5 +1,6 @@
 package org.polyfrost.polyblur.client.blur.motion
 
+//? if >1.8.9 {
 import com.mojang.blaze3d.pipeline.RenderTarget
 import com.mojang.blaze3d.pipeline.TextureTarget
 
@@ -72,3 +73,4 @@ object VelocityTarget {
 
     val history: RenderTarget? get() = if (parity) targetB else targetA
 }
+//?}

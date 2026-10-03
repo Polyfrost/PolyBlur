@@ -18,6 +18,14 @@ stonecutter {
             string(eval(current.version, ">=1.21.10")) {
                 replace("#version 150", "#version 330")
             }
+            string(eval(current.version, "= 1.8.9")) {
+                replace("com.mojang.blaze3d.pipeline.RenderTarget", "net.minecraft.client.render.pipeline.RenderTarget")
+                replace("com.mojang.blaze3d.platform.GlStateManager", "net.minecraft.client.render.platform.GlStateManager")
+                replace("net.minecraft.client.renderer.GameRenderer", "net.minecraft.client.render.GameRenderer")
+                replace("net.minecraft.client.renderer.PostChain", "net.minecraft.client.render.PostChain")
+                replace("net.minecraft.server.Bootstrap", "net.minecraft.Bootstrap")
+                replace("import net.minecraft.util.Mth\n", "import net.minecraft.util.math.MathHelper as Mth\n")
+            }
             string(eval(current.version, ">= 26.3")) {
                 replace("com.mojang.blaze3d.GpuFormat", "com.mojang.renderpearl.api.GpuFormat")
                 replace("com.mojang.blaze3d.PrimitiveTopology", "com.mojang.renderpearl.api.pipeline.PrimitiveTopology")

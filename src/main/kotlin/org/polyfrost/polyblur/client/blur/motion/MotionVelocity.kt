@@ -34,15 +34,20 @@ object MotionVelocity {
         val mc = Minecraft.getInstance()
         //? if >=26.2 {
         val camera = mc.gameRenderer.mainCamera()
-        //?} else {
+        //?} elif >1.8.9 {
         /*val camera = mc.gameRenderer.mainCamera
+        *///?} else {
+        /*val camera = mc.camera
         *///?}
         //? if >=1.21.11 {
         val yaw = camera.yRot()
         val pitch = camera.xRot()
-        //?} else {
+        //?} elif >1.8.9 {
         /*val yaw = camera.yRot
         val pitch = camera.xRot
+        *///?} else {
+        /*val yaw = camera.yaw
+        val pitch = camera.pitch
         *///?}
 
         if (prevYaw.isNaN()) {
@@ -59,7 +64,10 @@ object MotionVelocity {
         prevYaw = yaw
         prevPitch = pitch
 
+        //? if >1.8.9 {
         val fovV = mc.options.fov().get().toInt().toFloat().coerceAtLeast(1f)
+        //?} else
+        //val fovV = mc.options.fov.coerceAtLeast(1f)
         val aspect = if (height > 0) width.toFloat() / height.toFloat() else 1f
         val fovH = fovV * aspect
 
