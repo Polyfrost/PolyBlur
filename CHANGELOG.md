@@ -1,2 +1,2 @@
 ## 2.2.4
-Fixed visual issues
+1.8.9: Fixed visual issues
