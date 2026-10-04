@@ -18,7 +18,7 @@ object PolyBlurConfig : KtConfig(
     )
     var phosphorMode by dropdown(
         options = arrayOf("Weighted Max", "Linear Mix", "Alpha Decay"),
-        def = 1,
+        def = 2,
         name = "Phosphor Mode",
         description = "How each frame blends with the last one. Changes how the trail looks and how long it sticks around."
     )
