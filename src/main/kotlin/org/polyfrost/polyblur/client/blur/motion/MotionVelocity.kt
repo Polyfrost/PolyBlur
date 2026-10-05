@@ -37,7 +37,7 @@ object MotionVelocity {
         //?} elif >1.8.9 {
         /*val camera = mc.gameRenderer.mainCamera
         *///?} else {
-        /*val camera = mc.camera
+        /*val camera = mc.entityRenderDispatcher
         *///?}
         //? if >=1.21.11 {
         val yaw = camera.yRot()
@@ -46,8 +46,8 @@ object MotionVelocity {
         /*val yaw = camera.yRot
         val pitch = camera.xRot
         *///?} else {
-        /*val yaw = camera.yaw
-        val pitch = camera.pitch
+        /*val yaw = camera.cameraYaw
+        val pitch = camera.cameraPitch
         *///?}
 
         if (prevYaw.isNaN()) {
