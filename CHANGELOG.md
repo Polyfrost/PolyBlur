@@ -1,2 +1,2 @@
-## 2.2.4
-1.8.9: Fixed visual issues
+## 2.2.5
+1.8.9: Fixed camera rotation tracking for motion blur
