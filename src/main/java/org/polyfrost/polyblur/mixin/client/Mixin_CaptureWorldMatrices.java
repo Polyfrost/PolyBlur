@@ -128,7 +128,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LevelRenderer.class)
 public class Mixin_CaptureWorldMatrices {
     //? if =1.8.9 {
-    /*@Inject(method = "render(IFJ)V", at = @At(value = "CONSTANT", args = "stringValue=hand"))
+    /*// after the profiler swap so mods drawing at the end of the world, like custom block highlight, still get world depth and land in the world snapshot
+    @Inject(method = "render(IFJ)V", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = "ldc=hand", shift = At.Shift.AFTER))
     private void polyblur$renderWorldBlur(int anaglyphRenderPass, float tickDelta, long renderTimeLimit, CallbackInfo ci) {
         if (!PolyBlurConfig.INSTANCE.isEnabled() || !GLX.usePostProcess) {
             return;
