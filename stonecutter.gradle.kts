@@ -49,4 +49,5 @@ stonecutter {
 
 stonecutter tasks {
     order("publishModrinth")
+    order("publishCurseforge")
 }
