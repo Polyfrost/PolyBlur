@@ -63,6 +63,7 @@ repositories {
     google()
     maven("https://repo.polyfrost.org/releases") { name = "Polyfrost Releases" }
     maven("https://repo.polyfrost.org/snapshots") { name = "Polyfrost Snapshots" }
+    maven("https://redirector.kotlinlang.org/maven/compose-dev") { name = "Compose Dev" }
     maven("https://central.sonatype.com/repository/maven-snapshots") {
         name = "Sonatype Snapshots"
         content { includeGroup("net.kyori") }
@@ -321,6 +322,7 @@ tasks {
             "mod_version" to modversion,
             "minecraft_version_range" to versionrange,
             "loader_version" to loaderversion,
+            "oneconfig_version" to oneconfigversion,
             "java_version" to "JAVA_${requiredJava.majorVersion}"
         )
 

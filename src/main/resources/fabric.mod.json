@@ -28,6 +28,6 @@
         "minecraft": "${minecraft_version_range}",
         "fabricloader": ">=${loader_version}",
         "fabric-language-kotlin": "*",
-        "oneconfigv1": "*"
+        "oneconfigv1": ">=${oneconfig_version}"
     }
 }
