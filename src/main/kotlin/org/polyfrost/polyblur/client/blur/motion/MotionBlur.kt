@@ -227,6 +227,7 @@ object MotionBlur {
     }
 
     @JvmStatic
+    // the pool is only used by the 1.21.4/1.21.5 variants, kept so the mixin call sites stay shared
     @Suppress("UNUSED_PARAMETER")
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) {
         if (!RenderTargetTracker.isAttachmentInSync(renderTarget)) return
@@ -243,6 +244,7 @@ object MotionBlur {
             MotionVelocity.JITTER
         )
 
+        // all targets here are allocated with a color attachment
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "PolyBlur/Motion" },
             tempTarget.getColorTextureView()!!,

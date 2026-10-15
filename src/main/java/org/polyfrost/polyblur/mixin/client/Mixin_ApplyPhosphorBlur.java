@@ -14,11 +14,15 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 //import net.minecraft.client.render.platform.GLX;
 import org.polyfrost.polyblur.client.PolyBlurConfig;
 import org.polyfrost.polyblur.client.blur.FrameClock;
+//? if >1.21.5
+import org.polyfrost.polyblur.client.blur.BlurPrewarm;
 import org.polyfrost.polyblur.client.blur.BlurSettings;
 import org.polyfrost.polyblur.client.blur.phosphor.PhosphorBlur;
 //? if >1.21.5 || =1.8.9
 import org.polyfrost.polyblur.client.blur.phosphor.HybridHandPhosphor;
 import org.polyfrost.polyblur.client.blur.motion.MotionBlur;
+//? if >1.21.1
+import org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder;
 //? if >1.8.9 {
 import org.polyfrost.polyblur.client.blur.motion.MotionBlurReproject;
 import org.polyfrost.polyblur.client.blur.motion.WorldCamera;
@@ -180,7 +184,7 @@ public class Mixin_ApplyPhosphorBlur {
         }
         //? if >1.21.5 {
         if (blurType == 2) {
-            HybridHandPhosphor.render(target, this.resourcePool);
+            HybridHandPhosphor.render(target);
             return;
         }
         //?}
@@ -207,12 +211,12 @@ public class Mixin_ApplyPhosphorBlur {
     /*private void polyblur$stashResourcePool(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
     *///?}
         //? if >1.21.5
-        if (PolyBlurConfig.INSTANCE.isEnabled()) org.polyfrost.polyblur.client.blur.BlurPrewarm.run();
-        org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setPool(this.resourcePool);
+        if (PolyBlurConfig.INSTANCE.isEnabled()) BlurPrewarm.run();
+        ResourcePoolHolder.INSTANCE.setPool(this.resourcePool);
         //? if >=26.2 {
-        org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setMainTarget(this.mainRenderTarget);
+        ResourcePoolHolder.INSTANCE.setMainTarget(this.mainRenderTarget);
         //?} else {
-        /*org.polyfrost.polyblur.client.blur.motion.ResourcePoolHolder.INSTANCE.setMainTarget(this.minecraft.getMainRenderTarget());
+        /*ResourcePoolHolder.INSTANCE.setMainTarget(this.minecraft.getMainRenderTarget());
         *///?}
     }
     //?}

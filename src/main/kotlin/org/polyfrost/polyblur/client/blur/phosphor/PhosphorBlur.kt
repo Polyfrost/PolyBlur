@@ -317,6 +317,7 @@ object PhosphorBlur {
     internal fun prewarm() = BlurPrewarm.compile(pipeline)
 
     @JvmStatic
+    // the pool is only used by the 1.21.4/1.21.5 variants, kept so the mixin call sites stay shared
     @Suppress("UNUSED_PARAMETER")
     fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) =
         // BlurProfiler.section("phosphor") { renderInner(renderTarget) }
@@ -341,6 +342,7 @@ object PhosphorBlur {
 
         val tempTarget = RenderTargetTracker.writeTarget ?: return
 
+        // all targets here are allocated with a color attachment
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "PolyBlur/Phosphor" },
             tempTarget.getColorTextureView()!!,

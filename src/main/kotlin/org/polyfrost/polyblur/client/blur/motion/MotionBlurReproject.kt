@@ -115,6 +115,7 @@ object MotionBlurReproject {
             renderTarget.height
         )
 
+        // all targets here are allocated with a color attachment
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "PolyBlur/MotionReproject" },
             tempTarget.getColorTextureView()!!,

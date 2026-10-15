@@ -65,6 +65,7 @@ object MotionVelocityPass {
         val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
         val vertexBuffer = FullscreenQuad.vertexBuffer
 
+        // the main target is always allocated with depth, and the velocity targets with color
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             velTarget.getColorTexture()!!,
             OptionalInt.empty()

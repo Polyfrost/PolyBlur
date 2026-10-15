@@ -66,6 +66,7 @@ object VelocityTarget {
             h = height
         }
         parity = !parity
+        // both are assigned together above
         return if (parity) targetA!! else targetB!!
     }
 

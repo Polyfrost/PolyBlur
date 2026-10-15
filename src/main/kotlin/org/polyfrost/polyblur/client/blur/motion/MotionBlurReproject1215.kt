@@ -57,6 +57,7 @@ object MotionBlurReproject {
         val indexBuffer = autoStorageIndexBuffer.getBuffer(6)
         val vertexBuffer = FullscreenQuad.vertexBuffer
 
+        // all targets here are allocated with a color attachment
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             tempTarget.getColorTexture()!!,
             OptionalInt.empty()

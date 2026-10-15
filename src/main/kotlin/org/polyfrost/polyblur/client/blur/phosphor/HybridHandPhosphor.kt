@@ -4,7 +4,6 @@ package org.polyfrost.polyblur.client.blur.phosphor
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.blaze3d.pipeline.RenderTarget
 
-import com.mojang.blaze3d.resource.CrossFrameResourcePool
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.pipeline.UniformType
 import org.polyfrost.polyblur.PolyBlurConstants
@@ -90,8 +89,7 @@ object HybridHandPhosphor {
     internal fun prewarm() = BlurPrewarm.compile(pipeline)
 
     @JvmStatic
-    @Suppress("UNUSED_PARAMETER")
-    fun render(renderTarget: RenderTarget, resourcePool: CrossFrameResourcePool) =
+    fun render(renderTarget: RenderTarget) =
         // BlurProfiler.section("hybrid.hand") { renderInner(renderTarget) }
         renderInner(renderTarget)
 
@@ -120,6 +118,7 @@ object HybridHandPhosphor {
 
         val tempTarget = RenderTargetTracker.writeTarget ?: return
 
+        // all targets here are allocated with a color attachment
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "PolyBlur/HybridHand" },
             tempTarget.getColorTextureView()!!,

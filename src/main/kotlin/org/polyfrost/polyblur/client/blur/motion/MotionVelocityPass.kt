@@ -10,6 +10,7 @@ import org.joml.Vector4f
 import org.polyfrost.polyblur.PolyBlurConstants
 import org.polyfrost.polyblur.client.PolyBlurConfig
 import org.polyfrost.polyblur.client.blur.BlurPrewarm
+import org.polyfrost.polyblur.client.blur.FrameClock
 // import org.polyfrost.polyblur.client.blur.BlurProfiler
 import org.polyfrost.polyblur.client.blur.phosphor.FullscreenPass
 import org.polyfrost.polyblur.client.blur.phosphor.location
@@ -120,10 +121,11 @@ object MotionVelocityPass {
         //? if <26.2 {
         /*val zZeroToOne = 0f
         *///?}
-        val timeScale = org.polyfrost.polyblur.client.blur.FrameClock.timeScale
+        val timeScale = FrameClock.timeScale
         val alpha = 1f - Math.pow((1f - VELOCITY_SMOOTHING).toDouble(), (1f / maxOf(timeScale, 1e-6f)).toDouble()).toFloat()
         MotionVelocityUniforms.upload(reproj, invRow3, dVec, MAX_VEL, timeScale, zZeroToOne, alpha)
 
+        // the main target is always allocated with depth, and the velocity targets with color
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "PolyBlur/MotionVelocity" },
             velTarget.getColorTextureView()!!,
