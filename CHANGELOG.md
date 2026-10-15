@@ -1,2 +1,2 @@
-## 2.2.6
-1.8.9: Fix compat with CustomBlockHighlight
+## Unreleased changes
+- Fixed GPU crashes with Polydium's Vulkan renderer on 26.1

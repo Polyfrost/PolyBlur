@@ -135,8 +135,6 @@ import java.util.OptionalInt
 
 //? if >=26.1 {
 import com.mojang.renderpearl.api.pipeline.ColorTargetState
-import com.mojang.renderpearl.api.pipeline.DepthStencilState
-import com.mojang.renderpearl.api.pipeline.CompareOp
 //?} else
 //import com.mojang.blaze3d.platform.DepthTestFunction
 
@@ -171,8 +169,7 @@ object RenderTargetTracker {
         /*.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
         *///?}
         //? if >=26.1 && <26.2 {
-        /*.withDepthStencilState(DepthStencilState(CompareOp.ALWAYS_PASS, false))
-        .withColorTargetState(ColorTargetState.DEFAULT)
+        /*.withColorTargetState(ColorTargetState.DEFAULT)
         *///?}
         //? if <26.1 {
         /*.withDepthWrite(false)
