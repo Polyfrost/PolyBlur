@@ -1,2 +1,3 @@
-## 2.2.7
-- Fixed GPU crashes with Polydium's Vulkan renderer on 26.1
+## 2.2.8
+- Simplified phosphor feedback
+- Raised phosphor strength max to 9.9
