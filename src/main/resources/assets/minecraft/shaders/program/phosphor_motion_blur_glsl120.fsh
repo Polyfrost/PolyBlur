@@ -17,7 +17,7 @@ void main() {
     vec4 curr = texture2D(DiffuseSampler, texCoord);
     vec4 prev = texture2D(PrevSampler, texCoord);
 
-    float feedback = clamp(BlendFactor, 0.0, 0.95);
+    float feedback = clamp(BlendFactor, 0.0, 0.99);
 
     vec3 blended;
     if (Mode < 0.5) {
@@ -32,7 +32,5 @@ void main() {
         blended = prev.rgb * a + curr.rgb * (1.0 - a);
     }
 
-    // shrink the residual by one 8-bit step so static pixels converge instead of sticking
-    vec3 delta = blended - curr.rgb;
-    gl_FragColor = vec4(curr.rgb + sign(delta) * max(abs(delta) - 1.0 / 255.0, 0.0), 1.0);
+    gl_FragColor = vec4(blended, 1.0);
 }

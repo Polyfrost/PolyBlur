@@ -12,7 +12,7 @@ import org.polyfrost.polyblur.client.blur.phosphor.LegacyScratchTarget
 
 // smears the frame along the velocity buffer, either before the hand or after it depending on Blur Hand
 object MotionBlurReproject {
-    private const val MAX_BLUR = 0.15f
+    const val MAX_BLUR = 0.15f
 
     @JvmStatic
     fun render(renderTarget: RenderTarget): Boolean {
@@ -31,9 +31,9 @@ object MotionBlurReproject {
         program.uniform("Intensity").set(intensity)
         program.uniform("MaxSamples").set(PolyBlurConfig.motionBlurSamples)
         program.uniform("Jitter").set(1f)
-        program.uniform("MaxVel").set(MotionVelocityPass.MAX_VEL)
+        program.uniform("MaxVel").set(MotionVelocityPass.maxVel)
         program.uniform("InvIntensity").set(1f / maxOf(intensity, 1e-6f))
-        program.uniform("MinLen").set(MotionVelocityPass.MAX_VEL * (4f / 255f))
+        program.uniform("MinLen").set(MotionVelocityPass.maxVel * (4f / 255f))
         program.uniform("ScreenW").set(renderTarget.width.toFloat())
         program.uniform("ScreenH").set(renderTarget.height.toFloat())
 

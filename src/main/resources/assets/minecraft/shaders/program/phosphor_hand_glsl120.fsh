@@ -17,7 +17,7 @@ void main() {
     float diff = length(curr.rgb - world.rgb);
     float mask = smoothstep(0.003, 0.02, diff);
 
-    float feedback = clamp(BlendFactor, 0.0, 0.95);
+    float feedback = clamp(BlendFactor, 0.0, 0.99);
 
     vec3 phosphor;
     if (Mode < 0.5) {
@@ -31,10 +31,6 @@ void main() {
         float a = max(0.0, min(prev.a - 0.325, prev.a * feedback * 0.95));
         phosphor = prev.rgb * a + curr.rgb * (1.0 - a);
     }
-
-    // shrink the residual by one 8-bit step so static pixels converge instead of sticking
-    vec3 delta = phosphor - curr.rgb;
-    phosphor = curr.rgb + sign(delta) * max(abs(delta) - 1.0 / 255.0, 0.0);
 
     gl_FragColor = vec4(mix(world.rgb, phosphor, mask), 1.0);
 }

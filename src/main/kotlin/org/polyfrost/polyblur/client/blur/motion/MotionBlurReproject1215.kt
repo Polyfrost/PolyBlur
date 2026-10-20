@@ -17,7 +17,7 @@ import org.polyfrost.polyblur.client.blur.phosphor.location
 import java.util.OptionalInt
 
 object MotionBlurReproject {
-    private const val MAX_BLUR = 0.15f
+    const val MAX_BLUR = 0.15f
 
     private val pipeline by lazy {
         RenderPipeline.builder()
@@ -70,9 +70,9 @@ object MotionBlurReproject {
             renderPass.setUniform("Intensity", intensity)
             renderPass.setUniform("MaxSamples", PolyBlurConfig.motionBlurSamples)
             renderPass.setUniform("Jitter", 1f)
-            renderPass.setUniform("MaxVel", MotionVelocityPass.MAX_VEL)
+            renderPass.setUniform("MaxVel", MotionVelocityPass.maxVel)
             renderPass.setUniform("InvIntensity", 1f / maxOf(intensity, 1e-6f))
-            renderPass.setUniform("MinLen", MotionVelocityPass.MAX_VEL * (4f / 255f))
+            renderPass.setUniform("MinLen", MotionVelocityPass.maxVel * (4f / 255f))
             renderPass.setUniform("ScreenW", renderTarget.width.toFloat())
             renderPass.setUniform("ScreenH", renderTarget.height.toFloat())
             renderPass.drawIndexed(0, 6)

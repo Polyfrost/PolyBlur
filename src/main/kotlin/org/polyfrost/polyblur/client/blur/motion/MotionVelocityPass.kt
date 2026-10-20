@@ -34,7 +34,8 @@ import com.mojang.renderpearl.api.pipeline.ColorTargetState
 import org.polyfrost.polyblur.client.blur.phosphor.BlurSampler
 
 object MotionVelocityPass {
-    const val MAX_VEL = 0.25f
+    // encoding up to the blur cap instead of a fixed range keeps slow turns above the 8-bit noise floor
+    val maxVel: Float get() = PolyBlurConfig.strength / 10f * MotionBlurReproject.MAX_BLUR
 
     private const val VELOCITY_SMOOTHING = 0.35f
 
@@ -123,7 +124,7 @@ object MotionVelocityPass {
         *///?}
         val timeScale = FrameClock.timeScale
         val alpha = 1f - Math.pow((1f - VELOCITY_SMOOTHING).toDouble(), (1f / maxOf(timeScale, 1e-6f)).toDouble()).toFloat()
-        MotionVelocityUniforms.upload(reproj, invRow3, dVec, MAX_VEL, timeScale, zZeroToOne, alpha)
+        MotionVelocityUniforms.upload(reproj, invRow3, dVec, maxVel, timeScale, zZeroToOne, alpha)
 
         // the main target is always allocated with depth, and the velocity targets with color
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(

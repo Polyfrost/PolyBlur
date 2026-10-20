@@ -34,7 +34,7 @@ import org.polyfrost.polyblur.client.blur.phosphor.BlurSampler
 
 /** pass 2 runs after the hand and before the GUI */
 object MotionBlurReproject {
-    private const val MAX_BLUR = 0.15f
+    const val MAX_BLUR = 0.15f
 
     private val pipeline by lazy {
         RenderPipeline.builder()
@@ -110,7 +110,7 @@ object MotionBlurReproject {
             intensity,
             PolyBlurConfig.motionBlurSamples,
             1f,
-            MotionVelocityPass.MAX_VEL,
+            MotionVelocityPass.maxVel,
             renderTarget.width,
             renderTarget.height
         )

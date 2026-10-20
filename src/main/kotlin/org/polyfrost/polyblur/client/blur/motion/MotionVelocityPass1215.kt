@@ -17,7 +17,8 @@ import org.polyfrost.polyblur.client.blur.phosphor.location
 import java.util.OptionalInt
 
 object MotionVelocityPass {
-    const val MAX_VEL = 0.25f
+    // encoding up to the blur cap instead of a fixed range keeps slow turns above the 8-bit noise floor
+    val maxVel: Float get() = PolyBlurConfig.strength / 10f * MotionBlurReproject.MAX_BLUR
 
     private val invCurVP = Matrix4f()
     private val prevVP = Matrix4f()
@@ -78,7 +79,7 @@ object MotionVelocityPass {
             renderPass.setUniform("Reproj", reproj)
             renderPass.setUniform("InvRow3", invRow3.x, invRow3.y, invRow3.z, invRow3.w)
             renderPass.setUniform("D", dVec.x, dVec.y, dVec.z, dVec.w)
-            renderPass.setUniform("MaxVel", MAX_VEL)
+            renderPass.setUniform("MaxVel", maxVel)
             renderPass.drawIndexed(0, 6)
         }
     }
