@@ -124,7 +124,7 @@ object MotionVelocityPass {
         *///?}
         val timeScale = FrameClock.timeScale
         val alpha = 1f - Math.pow((1f - VELOCITY_SMOOTHING).toDouble(), (1f / maxOf(timeScale, 1e-6f)).toDouble()).toFloat()
-        MotionVelocityUniforms.upload(reproj, invRow3, dVec, maxVel, timeScale, zZeroToOne, alpha)
+        MotionVelocityUniforms.upload(reproj, invRow3, dVec, maxVel, timeScale * MotionVelocity.strengthGain, zZeroToOne, alpha)
 
         // the main target is always allocated with depth, and the velocity targets with color
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(

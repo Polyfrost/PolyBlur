@@ -44,7 +44,7 @@ object MotionVelocityPass {
         program.uniform("Reproj").set(reproj)
         program.uniform("InvRow3").set(invRow3.x, invRow3.y, invRow3.z, invRow3.w)
         program.uniform("D").set(dVec.x, dVec.y, dVec.z, dVec.w)
-        program.uniform("MaxVel").set(maxVel)
+        program.uniform("MaxVel").set(maxVel / MotionVelocity.strengthGain)
 
         LegacyPassState.begin()
         velTarget.bindWrite(true)

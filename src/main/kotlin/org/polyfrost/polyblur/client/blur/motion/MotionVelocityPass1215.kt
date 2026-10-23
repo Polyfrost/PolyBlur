@@ -79,7 +79,7 @@ object MotionVelocityPass {
             renderPass.setUniform("Reproj", reproj)
             renderPass.setUniform("InvRow3", invRow3.x, invRow3.y, invRow3.z, invRow3.w)
             renderPass.setUniform("D", dVec.x, dVec.y, dVec.z, dVec.w)
-            renderPass.setUniform("MaxVel", maxVel)
+            renderPass.setUniform("MaxVel", maxVel / MotionVelocity.strengthGain)
             renderPass.drawIndexed(0, 6)
         }
     }

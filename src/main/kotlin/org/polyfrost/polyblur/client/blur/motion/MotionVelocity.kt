@@ -11,6 +11,12 @@ object MotionVelocity {
     /** max smear half length in UV units at full strength */
     private const val MAX_BLUR = 0.08f
     const val JITTER = 1.0f
+    private const val DEFAULT_STRENGTH = 3f
+    private const val MAX_STRENGTH = 10f
+    private const val MAX_STRENGTH_GAIN = 4f
+
+    val strengthGain: Float
+        get() = 1f + (PolyBlurConfig.strength - DEFAULT_STRENGTH).coerceAtLeast(0f) / (MAX_STRENGTH - DEFAULT_STRENGTH) * (MAX_STRENGTH_GAIN - 1f)
 
     private var prevYaw = Float.NaN
     private var prevPitch = Float.NaN
@@ -71,7 +77,7 @@ object MotionVelocity {
         val aspect = if (height > 0) width.toFloat() / height.toFloat() else 1f
         val fovH = fovV * aspect
 
-        val ts = FrameClock.timeScale
+        val ts = FrameClock.timeScale * strengthGain
         var vx = -(dYaw / fovH) * ts
         var vy = (dPitch / fovV) * ts
 
