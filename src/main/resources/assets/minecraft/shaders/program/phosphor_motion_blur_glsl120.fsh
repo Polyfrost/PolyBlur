@@ -28,7 +28,7 @@ void main() {
         blended = mix(curr.rgb, prev.rgb, feedback);
     } else {
         // alpha decay
-        float a = max(0.0, min(prev.a - 0.325, prev.a * feedback * 0.95));
+        float a = max(0.0, prev.a * feedback * 0.95);
         blended = prev.rgb * a + curr.rgb * (1.0 - a);
     }
 
