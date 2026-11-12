@@ -13,13 +13,14 @@ import java.io.IOException
 /^import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.render.platform.GLX
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL14
 import org.polyfrost.polyblur.client.blur.FrameClock
 import org.polyfrost.polyblur.mixin.client.PostChainAccessor
 ^///?}
 
 //? if =1.8.9 {
-object PhosphorBlur {
+/^object PhosphorBlur {
     private var previous: RenderTarget? = null
     private var lastFrame = -1L
 
@@ -45,18 +46,13 @@ object PhosphorBlur {
         lastFrame = FrameClock.frame
 
         renderTarget.bindWrite(true)
-        if (continuous) blendPrevious(prev)
-        // the shader writes alpha 1, and blendPrevious relies on the copied history having alpha 1
-        GlStateManager.colorMask(false, false, false, true)
-        GlStateManager.clearColor(0f, 0f, 0f, 1f)
-        GlStateManager.clear(GL11.GL_COLOR_BUFFER_BIT)
-        GlStateManager.colorMask(true, true, true, true)
+        blendPrevious(prev, if (continuous) currentStrength.coerceIn(0f, 0.99f) else 0f)
         GlStateManager.bindTexture(prev.colorTextureId)
         GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height)
     }
 
-    private fun blendPrevious(prev: RenderTarget) {
-        val feedback = currentStrength.coerceIn(0f, 0.99f)
+    // also runs on restart frames with no feedback, so main always ends up with alpha 1 like the post chain left it
+    private fun blendPrevious(prev: RenderTarget, feedback: Float) {
         for (unit in MAX_SAMPLER_UNIT downTo 1) {
             GlStateManager.activeTexture(GLX.GL_TEXTURE0 + unit)
             GlStateManager.disableTexture()
@@ -64,20 +60,29 @@ object PhosphorBlur {
         GlStateManager.activeTexture(GLX.GL_TEXTURE0)
         GlStateManager.enableTexture()
         GlStateManager.bindTexture(prev.colorTextureId)
-        GlStateManager.colorMask(true, true, true, false)
+        GlStateManager.colorMask(true, true, true, true)
         GlStateManager.disableDepthTest()
         GlStateManager.depthMask(false)
         GlStateManager.disableAlphaTest()
         GlStateManager.disableLighting()
         GlStateManager.enableBlend()
-        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL13.GL_COMBINE)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_COMBINE_RGB, GL11.GL_MODULATE)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_SOURCE0_RGB, GL11.GL_TEXTURE)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_SOURCE1_RGB, GL13.GL_PRIMARY_COLOR)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_OPERAND0_RGB, GL11.GL_SRC_COLOR)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_OPERAND1_RGB, GL11.GL_SRC_COLOR)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_COMBINE_ALPHA, GL11.GL_REPLACE)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_SOURCE0_ALPHA, GL13.GL_PRIMARY_COLOR)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_OPERAND0_ALPHA, GL11.GL_SRC_ALPHA)
         GL14.glBlendEquation(if (phosphorMode == 0) GL14.GL_MAX else GL14.GL_FUNC_ADD)
         if (phosphorMode == 0) {
             GlStateManager.color4f(feedback, feedback, feedback, 1f)
         } else {
-            GlStateManager.color4f(1f, 1f, 1f, if (phosphorMode == 2) feedback * 0.95f else feedback)
+            GlStateManager.color4f(1f, 1f, 1f, 1f)
+            GL14.glBlendColor(0f, 0f, 0f, if (phosphorMode == 2) feedback * 0.95f else feedback)
             GlStateManager.blendFuncSeparate(
-                GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA
+                GL14.GL_CONSTANT_ALPHA, GL14.GL_ONE_MINUS_CONSTANT_ALPHA, GL11.GL_ONE, GL11.GL_ZERO
             )
         }
         for (mode in MATRIX_MODES) {
@@ -99,6 +104,10 @@ object PhosphorBlur {
         }
         GlStateManager.matrixMode(GL11.GL_MODELVIEW)
         GL14.glBlendEquation(GL14.GL_FUNC_ADD)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_COMBINE_ALPHA, GL11.GL_MODULATE)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL13.GL_SOURCE0_ALPHA, GL11.GL_TEXTURE)
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE)
+        GlStateManager.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
         GlStateManager.color4f(1f, 1f, 1f, 1f)
         GlStateManager.disableBlend()
         GlStateManager.enableAlphaTest()
