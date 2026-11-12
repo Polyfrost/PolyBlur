@@ -13,10 +13,104 @@ import java.io.IOException
 /^import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.render.platform.GLX
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL14
+import org.polyfrost.polyblur.client.blur.FrameClock
 import org.polyfrost.polyblur.mixin.client.PostChainAccessor
 ^///?}
 
+//? if =1.8.9 {
 object PhosphorBlur {
+    private var previous: RenderTarget? = null
+    private var lastFrame = -1L
+
+    @JvmStatic
+    val phosphorMode: Int
+        get() = PolyBlurConfig.phosphorMode
+
+    @JvmStatic
+    val currentStrength: Float
+        get() = PhosphorFeedback.of(phosphorMode, PolyBlurConfig.strength)
+
+    @JvmStatic
+    fun render(renderTarget: RenderTarget) {
+        val width = renderTarget.viewWidth
+        val height = renderTarget.viewHeight
+        val resized = previous.let { it == null || it.viewWidth != width || it.viewHeight != height }
+        if (resized) {
+            previous?.destroyBuffers()
+            previous = RenderTarget(width, height, false)
+        }
+        val prev = previous!!
+        val continuous = !resized && FrameClock.frame - lastFrame in 0..1
+        lastFrame = FrameClock.frame
+
+        renderTarget.bindWrite(true)
+        if (continuous) blendPrevious(prev)
+        // the shader writes alpha 1, and blendPrevious relies on the copied history having alpha 1
+        GlStateManager.colorMask(false, false, false, true)
+        GlStateManager.clearColor(0f, 0f, 0f, 1f)
+        GlStateManager.clear(GL11.GL_COLOR_BUFFER_BIT)
+        GlStateManager.colorMask(true, true, true, true)
+        GlStateManager.bindTexture(prev.colorTextureId)
+        GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height)
+    }
+
+    private fun blendPrevious(prev: RenderTarget) {
+        val feedback = currentStrength.coerceIn(0f, 0.99f)
+        for (unit in MAX_SAMPLER_UNIT downTo 1) {
+            GlStateManager.activeTexture(GLX.GL_TEXTURE0 + unit)
+            GlStateManager.disableTexture()
+        }
+        GlStateManager.activeTexture(GLX.GL_TEXTURE0)
+        GlStateManager.enableTexture()
+        GlStateManager.bindTexture(prev.colorTextureId)
+        GlStateManager.colorMask(true, true, true, false)
+        GlStateManager.disableDepthTest()
+        GlStateManager.depthMask(false)
+        GlStateManager.disableAlphaTest()
+        GlStateManager.disableLighting()
+        GlStateManager.enableBlend()
+        GL11.glTexEnvi(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE)
+        GL14.glBlendEquation(if (phosphorMode == 0) GL14.GL_MAX else GL14.GL_FUNC_ADD)
+        if (phosphorMode == 0) {
+            GlStateManager.color4f(feedback, feedback, feedback, 1f)
+        } else {
+            GlStateManager.color4f(1f, 1f, 1f, if (phosphorMode == 2) feedback * 0.95f else feedback)
+            GlStateManager.blendFuncSeparate(
+                GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA
+            )
+        }
+        for (mode in MATRIX_MODES) {
+            GlStateManager.matrixMode(mode)
+            GlStateManager.pushMatrix()
+            GlStateManager.loadIdentity()
+        }
+
+        GL11.glBegin(GL11.GL_QUADS)
+        GL11.glTexCoord2f(0f, 0f); GL11.glVertex2f(-1f, -1f)
+        GL11.glTexCoord2f(1f, 0f); GL11.glVertex2f(1f, -1f)
+        GL11.glTexCoord2f(1f, 1f); GL11.glVertex2f(1f, 1f)
+        GL11.glTexCoord2f(0f, 1f); GL11.glVertex2f(-1f, 1f)
+        GL11.glEnd()
+
+        for (mode in MATRIX_MODES.reversedArray()) {
+            GlStateManager.matrixMode(mode)
+            GlStateManager.popMatrix()
+        }
+        GlStateManager.matrixMode(GL11.GL_MODELVIEW)
+        GL14.glBlendEquation(GL14.GL_FUNC_ADD)
+        GlStateManager.color4f(1f, 1f, 1f, 1f)
+        GlStateManager.disableBlend()
+        GlStateManager.enableAlphaTest()
+        GlStateManager.depthMask(true)
+        GlStateManager.enableDepthTest()
+        GlStateManager.colorMask(true, true, true, true)
+    }
+
+    private val MATRIX_MODES = intArrayOf(GL11.GL_TEXTURE, GL11.GL_PROJECTION, GL11.GL_MODELVIEW)
+}
+^///?} else {
+/^object PhosphorBlur {
     private val logger = LogManager.getLogger(PhosphorBlur::class.java)
     private val shaderLocation = location("minecraft", "shaders/post/phosphor_motion_blur.json")
 
@@ -37,7 +131,6 @@ object PhosphorBlur {
         val shader = getPostChain(renderTarget) ?: return
         shader.setUniform("BlendFactor", currentStrength)
         shader.setUniform("Mode", phosphorMode.toFloat())
-        //~ if =1.8.9 'process(0f)' -> 'processLegacy()'
         shader.process(0f)
     }
 
@@ -66,6 +159,7 @@ object PhosphorBlur {
         }
     }
 }
+^///?}
 
 //? if =1.8.9 {
 /^fun PostChain.setUniform(name: String, value: Float) {
