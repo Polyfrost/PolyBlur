@@ -1,2 +1,2 @@
 ## 2.2.9
-- Optimize phosphor blur with Direct Rendering
+- Fix parity with BLC blur
