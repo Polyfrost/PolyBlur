@@ -80,7 +80,7 @@ import org.polyfrost.polyblur.mixin.client.PostChainAccessor
             GlStateManager.color4f(feedback, feedback, feedback, 1f)
         } else {
             GlStateManager.color4f(1f, 1f, 1f, 1f)
-            GL14.glBlendColor(0f, 0f, 0f, if (phosphorMode == 2) feedback * 0.95f else feedback)
+            GL14.glBlendColor(0f, 0f, 0f, if (phosphorMode == 2) minOf(0.675f, feedback * 0.95f) else feedback)
             GlStateManager.blendFuncSeparate(
                 GL14.GL_CONSTANT_ALPHA, GL14.GL_ONE_MINUS_CONSTANT_ALPHA, GL11.GL_ONE, GL11.GL_ZERO
             )
