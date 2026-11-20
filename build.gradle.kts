@@ -102,9 +102,6 @@ dependencies {
         modImplementation("net.fabricmc.fabric-api:fabric-api:$fapiversion")
     }
     modImplementation("org.polyfrost.oneconfig:$mcversion-$loader:$oneconfigversion")
-    for (module in arrayOf("commands", "config", "config-impl", "events", "internal", "ui", "utils", "hud")) {
-        implementation("org.polyfrost.oneconfig:$module:$oneconfigversion")
-    }
 
     testImplementation("org.junit.jupiter:junit-jupiter:${sc.properties.get<String>("deps.junit")}")
     testImplementation("net.fabricmc:fabric-loader-junit:$loaderversion")
